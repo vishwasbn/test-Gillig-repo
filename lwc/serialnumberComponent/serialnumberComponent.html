@@ -1,0 +1,372 @@
+<template>
+     <!--Show spinner start-->
+     <div if:true={showSpinner}>
+        <div class="slds-spinner_container slds-is-fixed">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+     </div>
+     <!--Show spinner end-->
+
+    <section>
+        <section class="actionhead">
+            <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                <div class="slds-col">
+                    <div class="slds-float_none slds-p-around_x-small">
+                        <span class="slds-text-heading_small headstyle">All Department - SERIAL NO. LOGS</span>
+                        <template if:true={filterapplied}>
+                          <lightning-pill label={filterlabelfordisplay} onremove={clearfilter} class="slds-m-left_small filterstyle">
+                            <!--<lightning-icon icon-name="utility:filter" variant="circle"  alternative-text="filter"></lightning-icon>-->
+                        </lightning-pill>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-col">
+                  
+                </div>
+                <!--div class="slds-col alignbutton">
+                  <lightning-button label="Add Shortage" variant="brand-outline" title="Add Shortage" onclick={showReportShortageAdd} class="slds-m-right_xxx-small"></lightning-button> 
+                  <lightning-button label="Add Discrepancy" variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
+                  <lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button> 
+                  <lightning-button label="Help" variant="brand-outline" title="Help" onclick={gethelpdocuments} class="slds-m-right_xxx-small"></lightning-button>
+                </div-->
+              </div>
+            
+        </section>
+        <section class="actioncontent">
+          <div class="slds-tabs_default">
+            <ul class="slds-grid slds-gutters slds-tabs_default__nav tab-container" role="tablist">
+                <li class="slds-border_top slds-col slds-tabs_default__item slds-is-active activetab" data-id="Drive%20Train" title="DRIVE TRAIN" role="presentation" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">DRIVE TRAIN</a>
+                </li>
+                <li class="slds-border_top slds-col slds-tabs_default__item" title="TIRE" role="presentation" data-id="Tire" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">TIRE</a>
+                </li>
+                <li class="slds-border_top slds-col slds-tabs_default__item" title="CAMERA" role="presentation" data-id="Camera" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">CAMERA</a>
+                </li>
+                <li class="slds-border_top slds-col slds-tabs_default__item" title="OTHERS" role="presentation" data-id="Other" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-4" id="tab-default-4__item">OTHERS</a>
+                </li>
+            </ul>
+            <div id="tab-default-1" class="tab-default-1 slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+              <!--Drive Train Start-->
+              <div class="tblborder">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                   
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="PART NAME">PART NAME</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="SERIAL NO.">SERIAL NO.</div>
+                     </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="MODEL NO.">MODEL NO.</div>
+                   </th>
+                   
+                    <!--<th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="QC">QC</div>
+                    </th> -->
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="REMARKS">REMARKS</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ATTACHMENTS">ATTACHMENTS</div>
+                    </th>
+                   
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={modifiedserialnologdata} for:item='log'> 
+                        <tr key={log.buildstation_part_mapping_id}> 
+                          <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}  class="">{log.buspart_name}</div></td>
+                          <td><div class=""><lightning-input max-length="50" variant="label-hidden" type="text" name="serial_no" title={log.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={log.serial_no} placeholder=""></lightning-input></div></td> 
+                          <td><div class=""><lightning-input max-length="50" variant="label-hidden"   type="text" name="model_no" title={log.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={log.model_no} placeholder=""></lightning-input></div></td> 
+                          <!--<td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}  class=""><c-userlist-icon-component type='drive user' buildstationid={log.serial_no}  userlist={log.updatedby_id} ></c-userlist-icon-component></div></td> -->
+                          <td><div class=""><lightning-textarea maxlength="2000" variant="label-hidden" name="remarks" title={log.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={log.remarks}></lightning-textarea></div></td> 
+                          <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}  class="">
+                              <template if:false={log.hasattachments}>
+                                <lightning-button variant="base"  label="View/Upload" title="Upload" icon-name="utility:upload" icon-position="right" ></lightning-button>
+                              </template>
+                              <template if:true={log.hasattachments}>
+                                <lightning-icon icon-name="doctype:image" alternative-text="Image file" title="Image"></lightning-icon> + {log.attachmentcount}
+                              </template>
+                            </div>
+                            </td>
+                        </tr>
+                      </template> 
+                    </tbody>
+              </table>
+              
+              </div>
+              <!--Drive Train End-->
+            </div>
+            <div id="tab-default-2" class="tab-default-2 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+              <!--Tyre Start-->
+              <div class="tblborder">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                   
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="PART NAME">PART NAME</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="SERIAL NO.">SERIAL NO.</div>
+                   </th>
+                   <th class="tblheaderth" scope="col">
+                     <div class="slds-truncate" title="MANUFACTURER">MANUFACTURER</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="SIZE/PLY RATING">SIZE/PLY RATING</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="BRAND">BRAND</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="PSI">PSI</div>
+                    </th>
+                    <!--<th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="PROD">PROD</div>
+                    </th> -->
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="REMARKS">REMARKS</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ATTACHMENTS">ATTACHMENTS</div>
+                    </th>
+                   
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={modifiedserialnologdata} for:item='log'> 
+                        <tr key={log.buildstation_part_mapping_id}> 
+                          <td data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}><div   title="partname" class="">{log.buspart_name}</div></td> 
+                          <td><div class=""><lightning-input max-length="50" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="serial_no" value={log.serial_no} placeholder=""></lightning-input></div></td>
+                          <td><div class=""><lightning-input max-length="100" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="manufacture" value={log.manufacture} placeholder=""></lightning-input></div></td> 
+                          <td><div class=""><lightning-input max-length="50" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="tyre_size_ply" value={log.tyre_size_ply} placeholder=""></lightning-input></div></td>
+                          <td><div class=""><lightning-input max-length="100" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="brand" value={log.brand} placeholder=""></lightning-input></div></td>
+                          <td><div class=""><lightning-input max-length="50" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="tyre_psi" value={log.tyre_psi} placeholder=""></lightning-input></div></td> 
+                         <!-- <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}  class=""><c-userlist-icon-component type='drive user' buildstationid={log.buildstation_part_mapping_id}  userlist={log.updatedby_id} ></c-userlist-icon-component></div></td> -->
+                          <td><div class=""><lightning-textarea maxlength="2000" onblur={updateserialnumberlog} variant="label-hidden"  title={log.buildstation_part_mapping_id} name="remarks" value={log.remarks}></lightning-textarea></div></td> 
+                          <td data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}><div   class="">
+                            <template if:false={log.hasattachments}>
+                              <lightning-button variant="base"  label="View/Upload" title="Upload" icon-name="utility:upload" icon-position="right" ></lightning-button>
+                            </template>
+                            <template if:true={log.hasattachments}>
+                              <lightning-icon icon-name="doctype:image" alternative-text="Image file" title="Image"></lightning-icon> + {log.attachmentcount}
+                            </template>
+                          </div>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+              </table>
+              </div>
+              <!--Tyre End-->
+            </div>
+            <div id="tab-default-3" class="tab-default-3 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
+             <!--Camera Start-->
+              <div class="tblborder">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                   
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="PART NAME">PART NAME</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                     <div class="slds-truncate" title="SERIAL NO.">SERIAL NO.</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="LOCATION">LOCATION</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="REMARKS">REMARKS</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ATTACHMENTS">ATTACHMENTS</div>
+                    </th>
+                   
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={modifiedserialnologdata} for:item='log'> 
+                        <tr key={log.buildstation_part_mapping_id}> 
+                          <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail} title="buspart_name" class="">{log.buspart_name}</div></td>
+                          <td><div class=""><lightning-input max-length="50" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="serial_no" value={log.serial_no} placeholder=""></lightning-input></div></td>
+                          <td><div class=""><lightning-input max-length="100" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="bus_area" value={log.bus_area} placeholder=""></lightning-input></div></td> 
+                          <!--<td><div class=""><c-userlist-icon-component type='drive user' buildstationid="1"  userlist={emptylist} ></c-userlist-icon-component></div></td> -->
+                          <td><div class=""><lightning-textarea maxlength="2000" onblur={updateserialnumberlog} variant="label-hidden" title={log.buildstation_part_mapping_id} name="remarks" value={log.remarks}></lightning-textarea></div></td> 
+                          <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail} class="">
+                            <template if:false={log.hasattachments}>
+                              <lightning-button variant="base"  label="View/Upload" title="Upload" icon-name="utility:upload" icon-position="right" ></lightning-button>
+                            </template>
+                            <template if:true={log.hasattachments}>
+                              <lightning-icon icon-name="doctype:image" alternative-text="Image file" title="Image"></lightning-icon> + {log.attachmentcount}
+                            </template>
+                          </div>
+                          </td>
+                        </tr>
+                      </template>  
+                    </tbody>
+              </table>
+              </div>
+              <!--Camera End-->
+            </div>
+            <div id="tab-default-4" class="tab-default-4 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-4__item">
+              <!--General Start-->
+              <div class="tblborder">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                   
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="PART NAME">PART NAME</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                     <div class="slds-truncate" title="SERIAL NO.">SERIAL NO.</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="REMARKS">REMARKS</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ATTACHMENTS">ATTACHMENTS</div>
+                    </th>
+                   
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={modifiedserialnologdata} for:item='log'> 
+                        <tr key={log.buildstation_part_mapping_id}> 
+                          <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}  title="buspart_name" class="">{log.buspart_name}</div></td>
+                          <td><div class=""><lightning-input max-length="50" onblur={updateserialnumberlog} variant="label-hidden" type="text" title={log.buildstation_part_mapping_id} name="serial_no" value={log.serial_no} placeholder=""></lightning-input></div></td>
+                          <td><div class=""><lightning-textarea maxlength="2000" onblur={updateserialnumberlog} variant="label-hidden"  title={log.buildstation_part_mapping_id} name="remarks" value={log.remarks}></lightning-textarea></div></td> 
+                          <td><div data-id={log.buildstation_part_mapping_id} onclick={showserialnologdetail}  class="">
+                            <template if:false={log.hasattachments}>
+                              <lightning-button variant="base"  label="View/Upload" title="Upload" icon-name="utility:upload" icon-position="right" ></lightning-button>
+                            </template>
+                            <template if:true={log.hasattachments}>
+                              <lightning-icon icon-name="doctype:image" alternative-text="Image file" title="Image"></lightning-icon> + {log.attachmentcount}
+                            </template>
+                          </div>
+                          </td>
+                        </tr>
+                      </template> 
+                    </tbody>
+              </table>
+              </div>
+              <!--General End-->
+            </div>
+          </div>
+
+      </section>
+      <template if:true={serialloglistempty}>
+        <div class="slds-align_absolute-center">
+            <div class="empty-state-container slds-text-align_center">
+              <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+              <div class="emptymessage">
+                No data to display.
+              </div>
+            </div>
+        </div>
+      </template>
+    </section> 
+
+     <!-- Serial No Log Detail  modal start -->
+ <template if:true={serialnologdetail}>
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-18" aria-modal="true" aria-describedby="modal-content-id-18" class="slds-modal slds-fade-in-open slds-modal_medium">
+      <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelserialnodetail}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+              </button>
+              <h2 id="modal-heading-18" class="slds-text-heading_medium slds-hyphenate">
+               {selectedserialnolog.buspart_name}
+              </h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-18">
+            <!--<div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
+                <template if:true={isselecteddrive}>
+                   <div class="slds-col slds-size_1-of-2">
+                        <lightning-input label="Model Number" type="text" name="model_no" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.model_no} placeholder=""></lightning-input> 
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input label="Serial Number" type="text" name="serial_no" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.serial_no} placeholder=""></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <c-re-usable-multi-select-lookup disablecomponent={returnfalse}  limittoone={returntrue} selectedrecords={selectedserialnolog.updatedby_id} label="QC" -icon-name="standard:user" placeholdertext="Search for QC users" onitemselected={updateuserselection} listtosearch={selectedserialnolog.users}></c-re-usable-multi-select-lookup>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1">
+                        <lightning-textarea label="Remarks" name="remarks" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.remarks}></lightning-textarea>
+                    </div>
+                </template>
+                <template if:true={isselectedtyre}>
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input label="Serial Number" type="text" name="serial_no" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.serial_no} placeholder=""></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                         <lightning-input label="Manufacturer" type="text" name="manufacture" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.manufacture} placeholder=""></lightning-input> 
+                     </div>
+                     <div class="slds-col slds-size_1-of-2">
+                        <lightning-input label="Size/PLY Rating" type="text" name="tyre_size_ply" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.tyre_size_ply} placeholder=""></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                         <lightning-input label="Brand" type="text" name="brand" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.brand} placeholder=""></lightning-input> 
+                     </div>
+                     <div class="slds-col slds-size_1-of-2">
+                        <lightning-input label="PSI" type="text" name="tyre_psi" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.tyre_psi} placeholder=""></lightning-input> 
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                         <c-re-usable-multi-select-lookup disablecomponent={returnfalse}  limittoone={returntrue} selectedrecords={selectedserialnolog.updatedby_id} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users" onitemselected={updateuserselection} listtosearch={selectedserialnolog.users}></c-re-usable-multi-select-lookup>
+                     </div>
+                     <div class="slds-col slds-size_1-of-1">
+                         <lightning-textarea label="Remarks" name="remarks" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.remarks}></lightning-textarea>
+                     </div>
+                 </template>
+                 <template if:true={isselectedcamera}>
+                    
+                     <div class="slds-col slds-size_1-of-2">
+                         <lightning-input label="Serial Number" type="text" name="serial_no" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.serial_no} placeholder=""></lightning-input>
+                     </div>
+                     <div class="slds-col slds-size_1-of-2">
+                        <lightning-input label="Location" type="text" name="bus_area" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.bus_area} placeholder=""></lightning-input> 
+                    </div>
+                     <div class="slds-col slds-size_1-of-1">
+                         <lightning-textarea label="Remarks" name="remarks" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.remarks}></lightning-textarea>
+                     </div>
+                 </template>
+                 <template if:true={isselectedgeneral}>
+                    <div class="slds-col slds-size_1-of-1">
+                         <lightning-input label="Serial Number" type="text" name="serial_no" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.serial_no} placeholder=""></lightning-input>
+                     </div>
+                     <div class="slds-col slds-size_1-of-1">
+                         <lightning-textarea label="Remarks" name="remarks" title={selectedserialnolog.buildstation_part_mapping_id} onblur={updateserialnumberlog} value={selectedserialnolog.remarks}></lightning-textarea>
+                     </div>
+                 </template>
+
+
+            </div>
+            <div> -->
+             <!-- For Attachments section-->   
+             <c-attachments-section-component uniqueid={selectedserialnolog.serial_number_log_id} serialnumbertype={selectedserialnolog.dat_serial_number_type} type="serialnumber" ecardid={selectedserialnolog.ecard_id} buspartid={selectedserialnolog.buspart_id} onnewadded={loadSerialNologdata}></c-attachments-section-component>
+            </div>
+        </div>
+          
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+              <lightning-button label="Cancel" title="Cancel" onclick={cancelserialnodetail} class="slds-m-right_x-small"></lightning-button>
+          </footer>
+      </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- SerialNUmber list modal end -->  
+</template>

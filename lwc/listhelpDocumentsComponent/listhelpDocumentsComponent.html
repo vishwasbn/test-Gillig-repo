@@ -1,0 +1,149 @@
+<template>
+    
+   
+    <template if:true={showTable}>
+    <div class="slds-clearfix slds-p-bottom_x-small">
+        <div class="slds-float_left">
+         <div class="slds-m-left_x-small"> <span class="slds-page-header__title slds-truncate" title="Help Document"> <lightning-icon size="small" class="slds-m-right_x-small" icon-name="standard:file" alternative-text="Help Document" title="Help Document"></lightning-icon>Help Document ({helpdoclist.length})</span></div>
+        </div>
+        <div class="slds-float_right">
+            <lightning-button variant="brand" label="New Help Document" title="Add New Help Document" onclick={addnew} icon-name="utility:add" class="slds-m-right_x-small"></lightning-button> 
+        </div>
+      </div>
+ 
+
+   <c-paginator records={helpdoclist} 
+               total-records={helpdoclist.length} 
+               show-search-box="true" 
+               onpaginatorchange={handlePaginatorChange}>
+   </c-paginator>
+   <lightning-datatable
+     key-field="help_document_id"
+     columns={columns}
+     data={recordsToDisplay}
+     hide-checkbox-column="true"
+     show-row-number-column
+     row-number-offset={rowNumberOffset}
+     suppress-bottom-bar
+     default-sort-direction={defaultSortDirection}
+     sorted-direction={sortDirection}
+     sorted-by={sortedBy}
+     onrowaction={handleRowAction}
+     onsort={onHandleSort}>
+</lightning-datatable>
+ 
+</template>
+
+
+
+
+<div if:true={showSpinner}>
+<div class="slds-spinner_container">
+    <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-fixed" role="alert">
+        <span class="slds-assistive-text">Loading</span>
+        <div class="slds-spinner__dot-a"></div>
+        <div class="slds-spinner__dot-b"></div>
+    </div>
+</div>
+</div>
+
+<!-- Detail view modal start -->
+<template if:true={bShowModal}>
+ <section role="dialog" tabindex="-1"
+          aria-labelledby="modal-heading-01"
+          aria-modal="true"
+          aria-describedby="modal-content-id-1"
+         class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+       <!-- modal header start -->
+       <header class="slds-modal__header">
+          <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+             <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+          </button>
+          <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Help Document Details</h2>
+       </header>
+       <!-- modal body start -->
+       <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+         <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox disabled required class="updatevalidation" label="Fleet"  name="fleet_id"  value={record.fleet_id}  placeholder="Fleet" options={fleetlistoptions} ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox disabled required class="updatevalidation" label="Department"  name="department_id"  value={record.department_id}  placeholder="Departments" options={departmentlistoptions} ></lightning-combobox>
+             </div>
+             <div class="slds-col slds-size_1-of-1">
+                <!--lightning-input  required type="url" class="updatevalidation" name="help_document_url"  value={record.help_document_url} label="File URL" onchange={trackchangeonupdate}></lightning-input-->
+                <lightning-input  required type="text" class="updatevalidation" name="help_document_url"  value={record.help_document_url} label="File URL" onchange={trackchangeonupdate}></lightning-input>
+             </div>
+         </div>
+       </div>
+       <!-- modal footer start-->
+       <footer class="slds-modal__footer">
+        <lightning-button variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" onclick={deleterecord}></lightning-button>   
+        <lightning-button label="Cancel" title="Cancel" onclick={closeModal} class="slds-m-right_x-small"></lightning-button>
+        <lightning-button variant="brand" label="Update"  title="Update" icon-name="utility:record_update" onclick={updaterecord}></lightning-button>
+        </footer>
+    </div>
+ </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Detail view modal end -->
+
+
+<!-- Detail view modal start -->
+<template if:true={addmodal}>
+   <section role="dialog" tabindex="-1"
+            aria-labelledby="modal-heading-02"
+            aria-modal="true"
+            aria-describedby="modal-content-id-2"
+           class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+         <!-- modal header start -->
+         <header class="slds-modal__header">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAddModal}>
+               <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+            </button>
+            <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New Help Document</h2>
+         </header>
+         <!-- modal body start -->
+         <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+           <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-2">
+               <c-custom-search-component
+                isrequired={returntrue}
+                showicon={returntrue}
+                showlabel={returntrue}
+                placeholdertext="Search Fleet Name"
+                -icon-name="custom:custom76"
+                listto-search={fleetlisttosearch}
+                label="Select a Fleet"
+                onselect={onfleetselection}
+                onclear={onclearfleet}
+              ></c-custom-search-component>
+               <!--<lightning-combobox  required class="newrecordvalidation" label="Fleet"  name="fleet_id"  value={newhelpdoc.fleet_id}  placeholder="Fleet" options={fleetlistoptions}  onchange={tracknewvaluechange}></lightning-combobox> -->
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox  required class="newrecordvalidation" label="Department"  name="department_id"  value={newhelpdoc.department_id}  placeholder="Departments" options={departmentlistoptions}  onchange={tracknewvaluechange} ></lightning-combobox>
+             </div> 
+            <div class="slds-col slds-size_1-of-1">
+                <!--lightning-input class="newrecordvalidation" required type="url" name="help_document_url" value={newhelpdoc.help_document_url} label="File URL" onchange={tracknewvaluechange} ></lightning-input-->
+                <lightning-input class="newrecordvalidation" required type="text" name="help_document_url" value={newhelpdoc.help_document_url} label="File URL" onchange={tracknewvaluechange} ></lightning-input>
+             </div>
+             
+             
+             
+              
+           </div>
+         </div>
+         <!-- modal footer start-->
+         <footer class="slds-modal__footer">
+           <lightning-button label="Cancel" title="Cancel" onclick={closeAddModal} class="slds-m-right_x-small"></lightning-button>
+           <lightning-button variant="brand" label="Submit"  title="Submit" icon-position="right" onclick={addnewrecord} icon-name="utility:add"></lightning-button>
+         </footer>
+      </div>
+   </section>
+   <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Detail view modal end -->
+
+</template>

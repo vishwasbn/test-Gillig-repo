@@ -1,0 +1,222 @@
+<template>
+    <!--Show spinner start-->
+    <div if:true={showSpinner}>
+        <div class="slds-spinner_container">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+     </div>
+     <!--Show spinner end-->
+     
+    <section class="main">
+        <!--Show EcardList start-->
+        <section class="allecards" if:true={showTable} >
+         <section class="ecardhead slds-p-bottom_x-small">
+            <div class="slds-grid slds-gutters slds-m-top_small">
+                
+                <div class="slds-col slds-size_1-of-4">
+                  <c-custom-search-component showicon={returntrue} showlabel={returnfalse} placeholdertext="Search Customer, Chasis Number" -icon-name="custom:custom98" listto-search={itemstosearch} selectedcustomer={retaincustomer} label="Customer" onselect={handleSearch} onclear={onclearcustomer}></c-custom-search-component>
+                </div>
+                <div class="slds-col ">
+                   <lightning-combobox name="bustype" onfocus={loadpicklistvalues} variant="label-hidden" value={selectedBusType} placeholder="Bus Type" options={bustypelist} onchange={handlebustypechange}></lightning-combobox>
+                </div>
+                <div class="slds-col ">
+                  <lightning-combobox name="buspropulsions" onfocus={loadpicklistvalues} variant="label-hidden" value={selectedBusPropulsion} placeholder="Bus Propulsion" options={buspropulsionlist} onchange={handlebuspropulsionchange}></lightning-combobox>
+               </div>
+                <div class="slds-col ">
+                   <lightning-combobox name="busstatus" onfocus={loadpicklistvalues} variant="label-hidden" value={selectedBusStatus} placeholder="Bus Status" options={busstatuslist} onchange={handlebusstatuschange}></lightning-combobox>
+                </div>
+               <!-- <div class="slds-col">
+                   <lightning-input class="aligntoggle" type="toggle" label="Discrepancy" name="Discrepancy" onchange={onDiscrepancyselection} message-toggle-active="" message-toggle-inactive=""></lightning-input>
+                </div>
+                <div class="slds-col">
+                   <lightning-input class="aligntoggle" type="toggle" label="Part Shortage" name="Part Shortage" onchange={onPartShortageselection} message-toggle-active="" message-toggle-inactive=""></lightning-input>
+                </div> -->
+                
+              </div>
+         </section>
+         <section class="ecardcontent">
+          <div class="pageheader">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+              <thead>
+              <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="busstatus_name" label="STATUS" title="Status" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+                  <!--<a data-id="busstatus_name" onclick={}>
+                      <div class="slds-align_absolute-center slds-truncate" title="Status">Status</div>
+                  </a>-->
+              </th>
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="customer_name" label="CUSTOMER NAME" title="Customer Name" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+                 <!--<div class="slds-align_absolute-center slds-truncate" title="Customer Name">Customer Name</div>-->
+              </th>
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="chassis_no" label="CHASIS SERIAL No." title="Chasis Serial No." icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+              </th>
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="coach_no" label="COACH NUMBER" title="COACH NUMBER" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+              </th>
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="bustype_name" label="BUS TYPE" title="BUS TYPE" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+              </th>
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="buspropulsion_name" label="PROPULSION" title="PROPULSION" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+              </th>
+              <th class="tableheader" scope="col">
+                  <lightning-button variant="base" data-id="workcenter_name" label="DEPARTMENT" title="DEPARTMENT" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+              </th>
+              </tr>
+              </thead>
+              <tbody>
+                  <template for:each={filteredecards} for:item='ecard'>
+                      <tr  key={ecard.ecard_id} data-label={ecard.customer_name} data-id={ecard.chassis_no} data-value={ecard.ecard_id} data-sequence={ecard.bus_relative_seq} data-seqavailable={ecard.sequanceavailable} 
+                      class="slds-hint-parent" onclick={showOperations}>
+                          <td data-label="Status" style="width:170px;">
+                              <div class="slds-truncate" title={ecard.busstatus_name}><span class="slds-align_absolute-center  statuswidth statusbadge">{ecard.busstatus_name}</span></div>
+                          </td>
+                          <td title={ecard.ecard_id} data-label="Customer Name">
+                              <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_2-of-5">
+                                    <div class="busimage">
+                                        <img if:true={ecard.defaultimage} class="" src={busImage} />
+                                        <img if:false={ecard.defaultimage} class="" src={ecard.curb_side_image_url} />
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_3-of-5">
+                                    <div>
+                                        <div class="slds-truncate slds-text-heading_small" title={ecard.customer_name}>{ecard.customer_name}</div>
+                                      <!--  <div class="slds-truncate slds-p-top_x-small" title=""><p><lightning-formatted-date-time value={ecard.formattedscheduledate}></lightning-formatted-date-time></p></div> -->
+                                    </div>
+                                    <div if:true={ecard.sequanceavailable}>
+                                      <div class="slds-truncate slds-text-color_weak slds-text-body_regular" title={ecard.bus_relative_seq}>({ecard.bus_relative_seq})</div>
+                                     </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td data-label="Chasis Serial No.">
+                              <div class="slds-truncate" title={ecard.chassis_no}>{ecard.chassis_no}</div>
+                            </td>
+                            <td data-label="Coach Number">
+                              <div class="slds-truncate" title={ecard.coach_no}>{ecard.coach_no}</div>
+                            </td>
+                            <td data-label="Bus Type">
+                              <div class="slds-truncate" title={ecard.bustype_name}>{ecard.bustype_name}</div>
+                            </td>
+                            <td data-label="Propulsion">
+                              <div class="slds-truncate" title={ecard.buspropulsion_name}>{ecard.buspropulsion_name}</div>
+                            </td>
+                            <td data-label="Work Centre">
+                              <div class="slds-truncate" title={ecard.department_name}>{ecard.department_name}</div>
+                            </td>
+
+                          </tr>
+                  </template>
+              
+              </tbody>
+              </table>
+              
+              <template if:true={isecardlistempty}>
+                <div class="slds-align_absolute-center">
+                  <div class="empty-state-container slds-text-align_center">
+                    <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                    <div class="emptymessage">
+                      No data to display.
+                    </div>
+                  </div>
+                </div>
+              </template>
+          </div>
+         </section>
+          
+            
+         
+        </section>
+        <!--Show EcardList end-->
+        <section class="operations" if:true={showops} >
+           <section class="operattionsmain">
+            <div class="operationshead">
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_4-of-12 slds-p-top_x-small">
+                         <lightning-button onclick={showEcardList} label={selectedBusLabel} title={selectedBusLabel} icon-name="utility:left" class="slds-text-heading_small slds-m-left_x-small"></lightning-button>
+                         <label if:true={selectedEcardSequenceAvailable} class="slds-truncate slds-text-color_weak slds-text-heading_small" title={sequence}>({selectedEcardSequence})</label>
+                          <!--<c-busdetail-component selected-bus-label={selectedBusLabel} ecardid={selectedEcardId}></c-busdetail-component>
+                        <span onclick={showbusDetails} class="busdetail slds-text-heading_small slds-m-left_x-small"><a href="javascript:void(0);">{selectedBusLabel}</a></span> -->
+                         
+                    </div>
+                    <div class="slds-col slds-size_4-of-12 slds-p-top_x-small">
+                        <div class="slds-align_absolute-center">
+                            <lightning-input name="enter-search" placeholder="Search for Part Number" label="Search"  variant="label-hidden" onchange={onsearchchange} value={searchkeyword} type="search"></lightning-input>
+                            <lightning-button variant="brand" label="Search" title="Search" onclick={searchforpartnumber} class="slds-m-left_xx-small"></lightning-button>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_4-of-12 slds-p-top_x-small">
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="opcontentbody">
+                <div class="slds-m-top_x-small slds-border_top">
+                <div class="slds-m-top_x-small">    
+                <table class="bordertable slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                     <th class="" scope="col">
+                        <lightning-button variant="base" data-id="search_text" label="PART NUMBER" title="PART NUMBER" icon-position="right"  class="slds-truncate"></lightning-button>
+                    </th>    
+                    <th class="" scope="col">
+                        <lightning-button variant="base" data-id="buspart_name" label="BUS PART NAME" title="BUSPART NAME" icon-position="right"  class="slds-truncate"></lightning-button>
+                     </th>
+                    <th class="" scope="col">
+                        <lightning-button variant="base" data-id="created_date" label="SEARCHED ON" title="SEARCHED ON" icon-position="right"  class="slds-truncate"></lightning-button>
+                    </th>
+                    <th class="" scope="col">
+                        <lightning-button variant="base" data-id="validation_status" label="STATUS" title="STATUS" icon-position="right"  class="slds-truncate"></lightning-button>
+                    </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={partnumbersearchdata} for:item='partnumberdata'>
+                            <tr key={partnumberdata.part_no_validation_id} class="slds-hint-parent">
+                                <td data-label="Part Number">
+                                    <div class="slds-truncate" title={partnumberdata.chassis_no}>{partnumberdata.search_text}</div>
+                                  </td>
+                                  <td data-label="Bus Part Name">
+                                    <div class="slds-truncate" title={partnumberdata.buspart_name}>{partnumberdata.buspart_name}</div>
+                                  </td>
+                                  <td data-label="Created Date">
+                                    <div class="slds-truncate" title={partnumberdata.created_date}><lightning-formatted-date-time value={partnumberdata.created_date} year="numeric" month="short" day="numeric" hour="2-digit"
+                                        minute="2-digit" second="2-digit" hour12="false"></lightning-formatted-date-time></div>
+                                  </td>
+                                  <td data-label="Status">
+                                    <div class="slds-truncate" title={partnumberdata.validation_status}><span class={partnumberdata.validation_status}>{partnumberdata.validation_status}</span></div>
+                                  </td>
+                            </tr>
+                        </template>
+                    
+                    </tbody>
+                    </table>
+                </div>
+                <template if:true={ispartnumbersearchempty}>
+                    <div class="slds-align_absolute-center">
+                      <div class="empty-state-container slds-text-align_center">
+                        <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                        <div class="emptymessage">
+                          No data to display.
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+            </div>
+          </section>
+           
+        </section>
+    </section>
+    
+
+
+
+</template>

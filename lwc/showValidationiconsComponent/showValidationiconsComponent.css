@@ -1,0 +1,105 @@
+.beforepreview {
+    border: 5px dotted blue;
+    width:100%;
+    height:200px;
+    
+  }
+
+  .imagepreview{
+      display: block;
+  }
+  .preview{
+      margin-top: 80px;
+      text-transform: uppercase;
+      opacity: 0.3;
+  }
+
+  .cardborder{
+    border-radius: 0px;
+    border: 1px solid rgb(193, 193, 193);
+  }
+
+  .mediumfont{
+    font-size: 1rem;
+  }
+
+  .emptymessage{
+    margin : -55px 0px 55px 0px;
+}
+
+  .picvalidationreq{
+    border-color: #fb002f;
+    background: #ffb6b6;
+  }
+
+  .cardfooter{
+    background: #16325c;
+    height: 30px;
+    padding: 3px 0px 0px 0px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  .tblheader{
+    height:3rem;
+  }
+
+  .tblheaderth{
+    color: #005fb2 !important;
+  }
+  .side_bar{
+    overflow : scroll;
+  }
+
+  .side_bar > img{
+    max-width: max-content;
+    height: auto;
+  }
+
+  .side_bar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+/* Track */
+.side_bar::-webkit-scrollbar-track {
+  box-shadow: inset -8px -6px 2px #16325c33;
+  border-radius: 10px;
+  opacity: 0.5;
+}
+
+/* Handle */
+.side_bar::-webkit-scrollbar-thumb {
+  background: #7773739e;
+  border-radius: 6px;
+  opacity: 0.6;
+}
+
+/* Handle on hover */
+.side_bar::-webkit-scrollbar-thumb:hover {
+    background: #7773739e;
+    
+}
+
+/* rotate image 90 degrees */
+.rotate90{
+  transform: rotate(90deg);
+}
+.rotate180{
+  transform: rotate(180deg);
+}
+.rotate270{
+  transform: rotate(270deg);
+}
+/* Table auto serial number */
+.auto-index
+{
+    counter-reset: Serial;           /* Set the Serial counter to 0 */
+}
+
+.auto-index td:first-child:before
+{
+  counter-increment: Serial;      /* Increment the Serial counter */
+  content: counter(Serial); /* Display the counter */
+}

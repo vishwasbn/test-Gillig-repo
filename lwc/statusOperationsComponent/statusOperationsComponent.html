@@ -1,0 +1,46 @@
+<template>
+    <template if:true={isDiscOpen}>
+        <lightning-button variant="brand-outline" label="Mark as done" title="Mark as done" onclick={handlestatuschange} class={setwidthclass} disabled={markasdonepermissions}></lightning-button> 
+    </template>
+    <template if:true={isresolved}>
+        <template if:true={isoperation}>
+            <lightning-button-group class={buttongroupwidth}>
+                <lightning-button class={setwidthclass} label="Verify" title="Verify" onclick={handlestatuschange} disabled={resolvepermissions}></lightning-button>
+                <!--<lightning-button class={setwidthclass} label="Reject" title="Reject" variant="destructive-text" onclick={handlestatuschange} disabled={isqclistblank}></lightning-button>-->
+                <!--lightning-button-icon icon-name="utility:close" title="Cancel" variant="border-filled" alternative-text="Cancel" onclick={handlestatuschange} disabled={markasdonepermissions}></lightning-button-icon-->
+            </lightning-button-group>
+        </template>
+        <template if:false={isoperation}>
+            <lightning-button-group class={buttongroupwidth}>
+                <lightning-button class={setwidthclass} label="Verify" title="Verify" onclick={handlestatuschange} disabled={resolvepermissions}></lightning-button>
+                <lightning-button class={setwidthclass} label="Reject" title="Reject" variant="destructive-text" onclick={handlestatuschange} disabled={resolvepermissions}></lightning-button>
+                <lightning-button-icon icon-name="utility:close" title="Cancel" variant="border-filled" alternative-text="Cancel" onclick={handlestatuschange} disabled={markasdonepermissions} if:false={markasdonepermissions}></lightning-button-icon>
+            </lightning-button-group>
+        </template>
+        
+    </template> 
+    <template if:true={isverified}>
+        <lightning-button-group class={buttongroupwidth}>
+            <lightning-button class={setwidthclass} variant="success" label="Verified" title="Verified" ></lightning-button>
+            <lightning-button-icon icon-name="utility:close" title="Cancel Verified" variant="border-filled" alternative-text="Cancel Verified" onclick={handlestatuschange} disabled={resolvepermissions} if:false={resolvepermissions}></lightning-button-icon>
+        </lightning-button-group>
+    </template> 
+    <template if:true={isrejected}> <!-- {hasdiscrepancy}-->
+        <template if:true={isoperation}>
+            <template if:true={buildstationdatalocal.has_discrepancy_logged}>
+                <lightning-button variant="destructive" label="Discrepancy" title="Discrepancy"  class={setwidthclass} ></lightning-button>
+            </template>
+            <template if:false={buildstationdatalocal.has_discrepancy_logged}>
+                <lightning-button if:true={buildstationdatalocal.has_shortage_logged} variant="destructive" label="Shortage" title="Shortage"  class={setwidthclass} ></lightning-button>
+            </template>
+        </template>
+        <template if:false={isoperation}>
+            <lightning-button-group class={buttongroupwidth}>
+                <lightning-button class={setwidthclass} label="Rejected" title="Rejected" variant="destructive" ></lightning-button>
+                <lightning-button-icon icon-name="utility:close" title="Cancel Rejected" variant="border-filled" alternative-text="Cancel Verified" onclick={handlestatuschange}></lightning-button-icon>
+            </lightning-button-group>
+        </template>
+    </template>
+
+    
+</template>

@@ -1,0 +1,17 @@
+.commentmain{
+    background-color: white;
+    padding: 0px 5px 0px 5px;
+}
+.commentdescription{
+    float: right;
+}
+.emptymessage{
+    margin-top:-55px;
+}
+.aligncommentsavebutton{
+    margin:-45px 10px 0px 0px;
+}
+.headstyle{
+    font-weight: bolder;
+
+}

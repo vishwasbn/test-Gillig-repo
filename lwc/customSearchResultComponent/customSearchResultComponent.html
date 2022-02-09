@@ -1,0 +1,15 @@
+<template>
+    <li role="presentation" class="slds-listbox__item" onclick={selectRecord}>
+        <span id="listbox-option-unique-id-01" class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+              <span if:true={showicon} class="slds-media__figure">
+                  <span class="slds-icon_container" title="Icon">
+                     <lightning-icon icon-name={IconName} alternative-text="icon" class="slds-icon slds-icon_small" size="small" ></lightning-icon>
+                        <span class="slds-assistive-text">Description of icon</span>
+                    </span>
+                </span>    
+              <span class="slds-media__body">  
+                  <span class="slds-listbox__option-text slds-listbox__option-text_entity">{searchItem}</span>
+              </span>
+        </span>
+    </li>
+</template>

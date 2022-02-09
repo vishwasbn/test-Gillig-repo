@@ -1,0 +1,449 @@
+<template>
+    <div if:true={showSpinner}>
+        <div class="slds-spinner_container slds-is-fixed">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+     </div>
+        <section class="actionhead">
+            <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                <div class="slds-col">
+                    <div class="slds-float_none slds-p-around_x-small">
+                        <span class="slds-text-heading_small headstyle">All Department - Acceptance Test Procedure</span>
+                        <template if:true={filterapplied}>
+                           <lightning-pill label={filterlabellocal} onremove={clearfilter} class="slds-m-left_small filterstyle">
+                             <!--<lightning-icon icon-name="utility:filter" variant="circle"  alternative-text="filter"></lightning-icon>-->
+                           </lightning-pill>
+                        </template> 
+                    </div>
+                </div>
+                <div class="slds-col">
+                </div>
+                <div if:true={buttonenabled}>
+                    <div class="slds-col alignbutton">
+                     <lightning-button disabled={disablenewattchmentitem} label={buttonLabel} variant="brand-outline" title="New List Item" onclick={addnewlistitem} class="slds-m-right_xxx-small"></lightning-button> 
+                    </div>
+                </div>
+              </div>
+        </section>
+     <section class="actioncontent">
+        <div class="slds-tabs_default">
+            <ul class="slds-grid slds-gutters slds-tabs_default__nav tab-container" role="tablist">
+                <li class="slds-border_top slds-col slds-tabs_default__item slds-is-active activetab" data-id="attachment" title="ATTACHMENT CHECKLIST" role="presentation" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">ATTACHMENTS</a>
+                </li>
+                <li class="slds-border_top slds-col slds-tabs_default__item" title="ANTI-LOCK BREAK SYSTEM" role="presentation" data-id="antilock" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">ABS & AIR CHECK</a>
+                </li>
+                <li class="slds-border_top slds-col slds-tabs_default__item" title="ATP WORKSHEET" role="presentation" data-id="atpworksheet" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">MFD</a>
+                </li>
+                <li class="slds-border_top slds-col slds-tabs_default__item" title="FINAL ACCEPTANCE" role="presentation" data-id="finalacceptance" onclick={tabClick}>
+                    <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-4" id="tab-default-4__item">FINAL ACCEPTANCE</a>
+                </li>
+            </ul>
+            <div id="tab-default-1" class="tab-default-1 slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div class="slds-card">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                       <thead>
+                          <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                           <th class="tblheaderth" scope="col">
+                              <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                           </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="ATTACHMENT CHECK LIST">ATTACHMENT CHECK LIST</div>
+                             </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="QC">QC</div>
+                             </th>
+                             <th class="tblheaderth setapplicablewidth" scope="col">
+                              <div class="slds-truncate" title="ACTION">REQUIRED</div>
+                             </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="ACTION">ACTION</div>
+                             </th>
+                          </tr>
+                       </thead>
+                       <tbody>
+                          <template if:false={isattachmentchecklistpresent}>
+
+                          
+                          <template for:each={attachmentchecklist} for:item='attachment'>
+                             <tr key={attachment.attachment_check_list_id}>
+                              <td>
+                                 <div class="">{attachment.attachment_check_list_id}</div>
+                              </td>
+                                <td>
+                                   <div if:false={attachment.is_applicable} class="greytitle">{attachment.attachment_check_list_name}</div>
+                                   <div if:true={attachment.is_applicable} class="">{attachment.attachment_check_list_name}</div>
+                                </td>
+                                <td><div if:true={attachment.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={attachment.attachment_check_list_id} onmodify={usermodification} onaddnew={usermodification} userlist={attachment.modifiedqc}></c-userlist-icon-component></div>  
+                                 </td>
+                                 <td>
+                                    <lightning-input disabled={disablerequired} name="applicable" class="slds-p-left_x-large zoomcheckbox" type="checkbox" data-id={attachment.attachment_check_list_id} checked={attachment.is_applicable} title={attachment.requiredtitle} onchange={existingrowstatuschange}></lightning-input>
+                                 </td>
+                                <td>
+                                   <div class="">
+                                    <c-atp-actions disabled={attachment.is_applicable} name="component" onstatuschange={existingrowstatuschange} permitteduser={permissionset.atp.write} uniqueid={attachment.attachment_check_list_id} isok={attachment.verified_status} qcuserlist={attachment.modifiedqc}></c-atp-actions>
+                                   </div>
+                                </td>
+                             </tr>
+                          </template>
+                        </template>
+                       </tbody>
+                    </table>
+                 </div>
+            </div>
+            <div id="tab-default-2" class="tab-default-2 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">    
+                <template for:each={rockwelabchecklists} for:item='rockewell'>
+                    <div class="slds-border_bottom slds-m-bottom_small" key={rockewell.anti_lock_brake_test_group_id}>
+                       <span class="headstyle">{rockewell.anti_lock_brake_test_group_name}</span>
+                       <div class="instructions slds-m-around_xx-small">
+                          <template for:each={rockewell.instructions} for:item='instructions'>
+                             <div key={instructions.step_index}> {instructions.step_index}. {instructions.instruction} </div>
+                          </template>
+                       </div>
+                       <div class="checks">
+                          <div class="slds-card">
+                             <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                                <thead>
+                                   <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                                       <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                                        </th>
+                                       <th class="tblheaderth" scope="col">
+                                         <div class="slds-truncate" title={rockewell.anti_lock_brake_test_group_name}>{rockewell.anti_lock_brake_test_group_name}</div>
+                                      </th>
+                                      <th class="tblheaderth" scope="col">
+                                         <div class="slds-truncate" title="QC">QC</div>
+                                      </th>
+                                      <th class="tblheaderth setapplicablewidth" scope="col">
+                                       <div class="slds-truncate" title="ACTION">REQUIRED</div>
+                                      </th>
+                                      <th class="tblheaderth" scope="col">
+                                         <div class="slds-truncate" title="ACTION">ACTION</div>
+                                      </th>
+                                   </tr>
+                                </thead>
+                                <tbody>
+                                   <template for:each={rockewell.anti_lock_brake_test} for:item='checks'>
+                                      
+                                    <tr key={checks.anti_lock_brake_test_id}>
+                                       <td>
+                                          <div class="">{checks.slno}</div>
+                                       </td>
+                                         <td>
+                                          <div if:false={checks.is_applicable} class="rockwellnamecol greytitle">{checks.anti_lock_brake_test_name}</div>
+                                          <div if:true={checks.is_applicable} class="rockwellnamecol">{checks.anti_lock_brake_test_name}</div>  
+                                         </td>
+                                         <td><div if:true={checks.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={checks.anti_lock_brake_test_id} onmodify={absusermodification} onaddnew={absusermodification} userlist={checks.modifiedqc}></c-userlist-icon-component></div>  
+                                         </td>
+                                         <td>
+                                          <lightning-input disabled={disablerequired} name="applicable" class="slds-p-left_x-large zoomcheckbox" type="checkbox" data-id={checks.anti_lock_brake_test_id} checked={checks.is_applicable} title={checks.requiredtitle} onchange={existingabsrowstatuschange}></lightning-input>
+                                       </td>
+                                        <td>
+                                           <div class="">
+                                            <c-atp-actions disabled={checks.is_applicable} name="component" onstatuschange={existingabsrowstatuschange} permitteduser={permissionset.atp.write} uniqueid={checks.anti_lock_brake_test_id} isok={checks.verified_status} qcuserlist={checks.modifiedqc}></c-atp-actions>
+                                           </div>
+                                        </td>
+                                      </tr>
+                                   </template>
+                                </tbody>
+                             </table>
+                          </div>
+                       </div>
+                    </div>
+                 </template>
+            </div>
+            <div id="tab-default-3" class="tab-default-3 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">    
+                <div class="slds-card">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                       <thead>
+                          <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                           <th class="tblheaderth" scope="col">
+                              <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                           </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
+                             </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="QC">QC</div>
+                             </th>
+                             <th class="tblheaderth setapplicablewidth" scope="col">
+                              <div class="slds-truncate" title="ACTION">REQUIRED</div>
+                             </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="ACTION">ACTION</div>
+                             </th>
+                          </tr>
+                       </thead>
+                       <tbody>
+                          <template for:each={atpchecklists} for:item='atp'>
+                             <tr key={atp.acceptance_test_group_id} class="headstyle">
+                                <td colspan="5" class="sectiontitle atpsectiontitlebg">{atp.acceptance_test_group_name}</td>
+                             </tr>
+                             <template for:each={atp.acceptance_test} for:item='atpchecks'>
+                                <tr key={atpchecks.acceptance_test_id}>
+                                 <td>
+                                    <div class="">{atpchecks.slno}</div>
+                                 </td>
+                                   <td>
+                                      <div if:false={atpchecks.is_applicable} class="slds-truncate greytitle" style="white-space:pre-line;">{atpchecks.acceptance_test_name}</div>
+                                      <div if:true={atpchecks.is_applicable} class="slds-truncate" style="white-space:pre-line;">{atpchecks.acceptance_test_name}</div>
+                                   </td>
+                                   <td><div if:true={atpchecks.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={atpchecks.acceptance_test_id} onmodify={atusermodification} onaddnew={atusermodification} userlist={atpchecks.modifiedqc}></c-userlist-icon-component></div>  
+                                   </td>
+                                   <td>
+                                    <lightning-input disabled={disablerequired} name="applicable" class="slds-p-left_x-large zoomcheckbox" type="checkbox" data-id={atpchecks.acceptance_test_id} checked={atpchecks.is_applicable} title={atpchecks.requiredtitle} onchange={existingatrowstatuschange}></lightning-input>
+                                 </td>
+                                  <td>
+                                     <div class="bgcell">
+                                      <c-atp-actions disabled={atpchecks.is_applicable} name="component" onstatuschange={existingatrowstatuschange} permitteduser={permissionset.atp.write} uniqueid={atpchecks.acceptance_test_id} isok={atpchecks.verified_status} qcuserlist={atpchecks.modifiedqc}></c-atp-actions>
+                                     </div>
+                                  </td>
+                                </tr>
+                             </template>
+                          </template>
+                       </tbody>
+                    </table>
+                 </div>
+            </div>
+            <div id="tab-default-4" class="tab-default-4 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-4__item">
+                <div class="slds-card">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                       <thead>
+                          <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                           <th class="tblheaderth" scope="col">
+                              <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                           </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="ATTACHMENT CHECK LIST">FINAL ACCEPTANCE</div>
+                             </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="QC">QC</div>
+                             </th>
+                             <th class="tblheaderth setapplicablewidth" scope="col">
+                              <div class="slds-truncate" title="ACTION">REQUIRED</div>
+                             </th>
+                             <th class="tblheaderth" scope="col">
+                                <div class="slds-truncate" title="ACTION">ACTION</div>
+                             </th>
+                          </tr>
+                       </thead>
+                       <tbody>
+                          <template for:each={falist} for:item='final'>
+                             <tr key={final.final_acceptance_id}>
+                              <td>
+                                 <div class="">{final.final_acceptance_id}</div>
+                              </td>
+                                <td>
+                                   <div if:false={final.is_applicable} class="greytitle">{final.final_acceptance_name}</div>
+                                   <div if:true={final.is_applicable} class="">{final.final_acceptance_name}</div>
+                                </td>
+                                 <td><div if:true={final.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={final.final_acceptance_id} onmodify={fausermodification} onaddnew={fausermodification} userlist={final.modifiedqc}></c-userlist-icon-component></div>  
+                                 </td>
+                                 <td>
+                                    <lightning-input disabled={disablerequired} name="applicable" class="slds-p-left_x-large zoomcheckbox" type="checkbox" data-id={final.final_acceptance_id} checked={final.is_applicable} title={final.requiredtitle} onchange={farowstatuschange}></lightning-input>
+                                 </td>
+                                 <td>
+                                    <div class="">
+                                     <c-atp-actions disabled={final.is_applicable} name="component" onstatuschange={farowstatuschange} permitteduser={permissionset.atp.write} uniqueid={final.final_acceptance_id} isok={final.verified_status} qcuserlist={final.modifiedqc}></c-atp-actions>
+                                    </div>
+                                 </td>
+                             </tr>
+                          </template>
+                       </tbody>
+                    </table>
+                 </div>
+            </div>
+        </div>
+     </section>
+     <!--New Attachment checklist item Modal start-->
+      <template if:true={newattchmentmodal}>
+               <section role="dialog" tabindex="-1"
+                  aria-labelledby="modal-heading-02"
+                  aria-modal="true"
+                  aria-describedby="modal-content-id-2"
+                  class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                  <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidenewattachmentlist}>
+                     <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                  </button>
+                  <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Add New Attachment Checklist Item</h2>
+               </header>
+               <!-- modal body start -->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                  <div class="slds-grid slds-wrap slds-gutters">
+                     <div class="slds-col slds-size_1-of-1">
+                        <lightning-textarea name="custom_attachment_check_list_info" label="Description" placeholder="Enter your attachment list item here..." value={newattachmentlistitem.custom_attachment_check_list_info} onchange={updatenewattachmentitemname}></lightning-textarea>
+                     </div>
+                     <!--div class="slds-col slds-size_1-of-1">
+                        <c-re-usable-multi-select-lookup limittoone={setuserlimit} onitemselected={updateselecteduser} selectedrecords={newattachmentlistitem.selectedqcuserlist} label="SELECT USERS" -icon-name="standard:user" placeholdertext="Search for QC users"  listtosearch={availabeqcforattachment}></c-re-usable-multi-select-lookup>
+                     </div-->
+                     <!--div class="slds-col slds-size_1-of-1 slds-p-around_medium">
+                        <c-atp-actions permitteduser={permissionset.atp.write} uniqueid={newattachmentlistitem.attachment_check_list_id} isok={newattachmentlistitem.verified_status} onstatuschange={attachmentstatusupdate} qcuserlist={newattachmentlistitem.selectedqcuserlist}></c-atp-actions>
+                     </div-->
+                  </div>
+                  
+               </div>
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                  <lightning-button label="Cancel" title="Cancel" onclick={hidenewattachmentlist} class="slds-m-right_x-small"></lightning-button>
+                  <lightning-button variant="brand" label="Add" onclick={addnewattachmentchecklist} title="Add" icon-position="right" icon-name="utility:edit"></lightning-button>
+               </footer>
+            </div>
+               </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>    
+     <!--New Attachment checklist item Modal End-->
+     <!--Attachment List QC User Select Modal Start-->
+      <template if:true={showuserlist}>
+        <section role="dialog" tabindex="-1"
+             aria-labelledby="modal-heading-03"
+             aria-modal="true"
+             aria-describedby="modal-content-id-3"
+            class="slds-modal slds-fade-in-open slds-modal_small">
+       <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+             <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideuserlist}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+             </button>
+             <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">Select Users</h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1">
+                    <c-re-usable-multi-select-lookup disablecomponent={disableuserselection} limittoone={setuserlimit} onitemselected={updatetablerowqcuserlist} selectedrecords={selectedattachment.modifiedqc} label="SELECT USERS" -icon-name="standard:user" placeholdertext="Search for QC users"  listtosearch={availabeqcforattachment}></c-re-usable-multi-select-lookup>
+                </div>
+                <div class="slds-col slds-size_1-of-1" style="height:200px;">
+                    
+                </div>
+            </div>
+             
+          </div>
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+            <lightning-button label="Cancel" title="Cancel" onclick={hideuserlist} class="slds-m-right_x-small"></lightning-button>
+            <lightning-button disabled={disableuserselection} variant="brand" label="Update" onclick={updateqcuserstoserver} title="Update" icon-position="right" icon-name="utility:edit"></lightning-button>
+          </footer>
+       </div>
+        </section>
+     <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+     <!--Attachment List QC User Select Modal End-->
+     <!--Fianl Acceptance List QC User Select Modal Start-->
+      <template if:true={showfauserlist}>
+      <section role="dialog" tabindex="-1"
+           aria-labelledby="modal-heading-04"
+           aria-modal="true"
+           aria-describedby="modal-content-id-4"
+          class="slds-modal slds-fade-in-open slds-modal_small">
+     <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+           <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidefauserlist}>
+              <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+           </button>
+           <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">Select QC User</h2>
+        </header>
+        <!-- modal body start -->
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+          <div class="slds-grid slds-wrap slds-gutters">
+              <div class="slds-col slds-size_1-of-1">
+                  <c-re-usable-multi-select-lookup disablecomponent={disablefauserselection} limittoone={setuserlimit} onitemselected={updatefatablerowqcuserlist} selectedrecords={selectedfa.modifiedqc} label="SELECT QC USER" -icon-name="standard:user" placeholdertext="Search for QC user"  listtosearch={availabeqcforfa}></c-re-usable-multi-select-lookup>
+              </div>
+              <div class="slds-col slds-size_1-of-1" style="height:200px;">   
+              </div>
+          </div>
+           
+        </div>
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+          <lightning-button label="Cancel" title="Cancel" onclick={hidefauserlist} class="slds-m-right_x-small"></lightning-button>
+          <lightning-button disabled={disablefauserselection} variant="brand" label="Update" onclick={updatefaqcuserstoserver} title="Update" icon-position="right" icon-name="utility:edit"></lightning-button>
+        </footer>
+     </div>
+      </section>
+   <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+   <!--Fianl Acceptance List QC User Select Modal End-->
+   <!--RockWell ABS QC User Select Modal Start-->
+      <template if:true={showabsuserlist}>
+      <section role="dialog" tabindex="-1"
+           aria-labelledby="modal-heading-05"
+           aria-modal="true"
+           aria-describedby="modal-content-id-5"
+          class="slds-modal slds-fade-in-open slds-modal_small">
+     <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+           <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideabsuserlist}>
+              <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+           </button>
+           <h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate">Select QC User</h2>
+        </header>
+        <!-- modal body start -->
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
+          <div class="slds-grid slds-wrap slds-gutters">
+              <div class="slds-col slds-size_1-of-1">
+                  <c-re-usable-multi-select-lookup disablecomponent={disableabsuserselection} limittoone={setuserlimit} onitemselected={updateabstablerowqcuserlist} selectedrecords={selectedabs.modifiedqc} label="SELECT QC USER" -icon-name="standard:user" placeholdertext="Search for QC user"  listtosearch={availabeqcforabs}></c-re-usable-multi-select-lookup>
+              </div>
+              <div class="slds-col slds-size_1-of-1" style="height:200px;">   
+              </div>
+          </div>
+           
+        </div>
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+          <lightning-button label="Cancel" title="Cancel" onclick={hideabsuserlist} class="slds-m-right_x-small"></lightning-button>
+          <lightning-button disabled={disableabsuserselection} variant="brand" label="Update" onclick={updateabsqcuserstoserver} title="Update" icon-position="right" icon-name="utility:edit"></lightning-button>
+        </footer>
+     </div>
+      </section>
+   <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+   <!--RockWell ABS QC User Select Modal End-->
+   <!--Acceptance Test QC User Select Modal Start-->
+   <template if:true={showatuserlist}>
+      <section role="dialog" tabindex="-1"
+           aria-labelledby="modal-heading-06"
+           aria-modal="true"
+           aria-describedby="modal-content-id-6"
+          class="slds-modal slds-fade-in-open slds-modal_small">
+     <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+           <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideatuserlist}>
+              <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+           </button>
+           <h2 id="modal-heading-06" class="slds-text-heading_medium slds-hyphenate">Select QC User</h2>
+        </header>
+        <!-- modal body start -->
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-6">
+          <div class="slds-grid slds-wrap slds-gutters">
+              <div class="slds-col slds-size_1-of-1">
+                  <c-re-usable-multi-select-lookup disablecomponent={disableatuserselection} limittoone={setuserlimit} onitemselected={updateattablerowqcuserlist} selectedrecords={selectedat.modifiedqc} label="SELECT QC USER" -icon-name="standard:user" placeholdertext="Search for QC user"  listtosearch={availabeqcforat}></c-re-usable-multi-select-lookup>
+              </div>
+              <div class="slds-col slds-size_1-of-1" style="height:200px;">   
+              </div>
+          </div>
+           
+        </div>
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+          <lightning-button label="Cancel" title="Cancel" onclick={hideatuserlist} class="slds-m-right_x-small"></lightning-button>
+          <lightning-button disabled={disableatuserselection} variant="brand" label="Update" onclick={updateatqcuserstoserver} title="Update" icon-position="right" icon-name="utility:edit"></lightning-button>
+        </footer>
+     </div>
+      </section>
+   <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+   <!--Acceptance Test QC User Select Modal End-->
+</template>

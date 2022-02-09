@@ -1,0 +1,43 @@
+<template>
+
+    <div onmouseleave={onblur} data-id="searchRes" class="slds-form-element slds-lookup slds-is-close">
+        <label class="slds-form-element__label">{label}</label>
+        <!--This part is for display search bar for lookup-->  
+        <div class="slds-form-element__control">
+            <div class="slds-input-has-icon slds-input-has-icon--right">
+                <!-- This markup is for when an record is selected -->
+                <div data-id="lookup-pill">  <!-- class="slds-pill-container"-->
+                   <!-- <div data-id="lookupField">
+                        class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"  style="width: 100%;"-->
+                        <lightning-input disabled={disableselection} onkeyup={keyPressController} onclick={onfocus} class="hidelabel setwidth" type="search" value={SearchKeyWord} placeholder={placeholdertext}  ></lightning-input>
+
+                        <!--<span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
+                            <lightning-icon icon-name="utility:search" size="x-small" alternative-text="Search" title="Search"></lightning-icon>
+                        </span>  </div>-->
+                     
+                <!--Selected Records Pills Section-->
+                    <template if:true={showselected}>
+                        <template for:each={lstSelectedRecords} for:item="singleRec"> 
+                            <lightning-pill key={singleRec.Id} class={pillstate} label={singleRec.displayname} name={singleRec.Id} variant="plain" onremove={clear}>
+                             <lightning-icon class="slds-m-right_xx-small" icon-name={IconName} variant="circle" size="x-small" alternative-text="icon"></lightning-icon>
+                            </lightning-pill>
+                        </template>
+                    </template>
+                  </div>
+            </div>
+        </div>
+ 
+        <!--This part is for Display typehead lookup result List-->  
+        <ul style="min-height:40px;margin-top:0px !important" class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid slds-lookup__menu slds" role="listbox">
+            <lightning-spinner class="slds-hide" variant="brand" size="small" data-id="mySpinner" alternative-text="Loading"></lightning-spinner>
+            <center> {Message}</center>
+            <template if:true={showsearchresults}>
+            <template for:each={listOfSearchRecords} for:item="singleRec">
+                <c-re-usable-multi-select-lookup-result key={singleRec.Id} -icon-name={IconName} o-record={singleRec} onselect={handleComponentEvent}></c-re-usable-multi-select-lookup-result>
+            </template>
+            </template>
+            
+        </ul>
+    </div>
+    
+</template>

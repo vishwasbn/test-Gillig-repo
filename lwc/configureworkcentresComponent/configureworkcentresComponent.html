@@ -1,0 +1,30 @@
+<template>
+    <section>
+        <!--Show spinner start-->
+   <div if:true={showSpinner}>
+       <div class="slds-spinner_container slds-is-fixed">
+           <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+               <span class="slds-assistive-text">Loading</span>
+               <div class="slds-spinner__dot-a"></div>
+               <div class="slds-spinner__dot-b"></div>
+           </div>
+       </div>
+    </div>
+    <!--Show spinner end-->
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+                <lightning-button variant="brand" label="Add New Work Centre" title="Add New WorkCentre"  class="slds-m-left_x-small"></lightning-button>
+            </div>
+          </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <div class="factorylayout" style="max-width:2197.5px;max-height:1014px;"> <!--style={parentdivdimensions}-->
+                <img src={factorylayoutimage} style={parentdivdimensions} alt="Factory Layout"/>
+            </div>
+        </div>
+      </article>
+    </section>
+    
+</template>

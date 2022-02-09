@@ -1,0 +1,94 @@
+.main {
+    background: rgb(255, 255, 255);
+    padding: 0px 10px 0px 10px;
+    border: 1px solid rgb(221, 219, 218);
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);
+     }
+  
+  .aligntoggle{
+      padding-top:23px;
+      white-space:nowrap;
+    }
+  .tblheader{
+      height:3rem;
+  }
+  .busimage img{
+    width:100px;
+  }
+  .tab-container {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .busdetail{
+    text-decoration: underline;
+  }
+  .tab-container li{
+  align-self: center;
+  }
+  
+  .emptyContentInner {
+      padding-top:25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      position: absolute;
+      text-align: center;
+  }
+  
+  .ecardcontent{
+    margin: 0px 0px 15px 0px;
+    background: rgb(255, 255, 255);
+    border: 1px solid rgb(221, 219, 218);
+  }
+  
+  .operations{
+    margin: 0px 0px 10px 0px;
+  }
+  
+  .emptymessage{
+    margin : -55px 0px 55px 0px;
+  }
+  
+  .statuswidth{
+    width:120px;
+  }
+  
+  .statusbadge {
+    color: rgb(12, 11, 11);
+    /*background-color: rgb(225, 230, 225);*/
+    border : 1px solid rgb(231, 237, 245); 
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: normal;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+  }
+
+  .bordertable{
+    border-left: 1px solid rgb(221, 219, 218);
+    border-right: 1px solid rgb(221, 219, 218);
+  }
+
+  .Available{
+    color: green;
+    text-transform: uppercase;
+  }
+
+  .Mismatch{
+    color: red;
+    text-transform: uppercase;
+  }
+  .pageheader{
+    height:550px;
+    overflow-y:auto;
+  }
+  .tableheader{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }

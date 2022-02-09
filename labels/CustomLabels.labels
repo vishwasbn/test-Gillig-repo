@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>EcardAppendpoint</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EcardAppendpoint</shortDescription>
+        <value>https://gillig-dw-prod.herokuapp.com/</value>
+    </labels>
+    <labels>
+        <fullName>EcardDocraptorkey</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EcardDocraptorkey</shortDescription>
+        <value>EpXT7CZoif55g1igYsn</value>
+    </labels>
+</CustomLabels>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Allison B400-5</fullName>
+        <default>false</default>
+        <label>Allison B400-5</label>
+    </customValue>
+    <customValue>
+        <fullName>Allison B400R-5</fullName>
+        <default>false</default>
+        <label>Allison B400R-5</label>
+    </customValue>
+    <customValue>
+        <fullName>Allison B400R-6</fullName>
+        <default>false</default>
+        <label>Allison B400R-6</label>
+    </customValue>
+    <customValue>
+        <fullName>Allison B500R-6</fullName>
+        <default>false</default>
+        <label>Allison B500R-6</label>
+    </customValue>
+    <customValue>
+        <fullName>Allison B3400R xFE</fullName>
+        <default>false</default>
+        <label>Allison B3400R xFE</label>
+    </customValue>
+    <customValue>
+        <fullName>Allison H40EP</fullName>
+        <default>false</default>
+        <label>Allison H40EP</label>
+    </customValue>
+    <customValue>
+        <fullName>Allison H50EP</fullName>
+        <default>false</default>
+        <label>Allison H50EP</label>
+    </customValue>
+    <customValue>
+        <fullName>BAE HDS200</fullName>
+        <default>false</default>
+        <label>BAE HDS200</label>
+    </customValue>
+    <customValue>
+        <fullName>Voith D864.6</fullName>
+        <default>false</default>
+        <label>Voith D864.6</label>
+    </customValue>
+    <customValue>
+        <fullName>Voith D867.8</fullName>
+        <default>false</default>
+        <label>Voith D867.8</label>
+    </customValue>
+    <customValue>
+        <fullName>ZF 6AP1400B</fullName>
+        <default>false</default>
+        <label>ZF 6AP1400B</label>
+    </customValue>
+    <customValue>
+        <fullName>ZF 6AP1420B</fullName>
+        <default>false</default>
+        <label>ZF 6AP1420B</label>
+    </customValue>
+    <customValue>
+        <fullName>None</fullName>
+        <default>false</default>
+        <label>None</label>
+    </customValue>
+    <masterLabel>Transmission</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

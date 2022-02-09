@@ -1,0 +1,31 @@
+<template>
+    <div onclick={selectuser}>
+        <template if:true={hasuser}>
+            <template if:true={listcountgreater}> 
+                <lightning-avatar src="" initials={singleuser.intials} fallback-icon-name="action:user"  alternative-text={singleuser.fullname} class="slds-m-right_xx-small"></lightning-avatar>
+                <span class="slds-avatar slds-avatar_circle" onmouseover={showuserlist} onmouseout={hideuserlist}>
+                    <abbr class="slds-avatar__initials slds-icon-standard-user" title={count}> + {count}</abbr>
+                </span>
+                <div class="slds-is-absolute">
+                    <section if:true={showlist} class="slds-popover slds-popover_small slds-nubbin_top-left" role="dialog">
+                        <div class="slds-popover__body">
+                            <template for:each={usernames} for:item='user'>
+                            <li key={user}>{user}</li>
+                        </template>
+                        </div>
+                    </section>
+                </div>
+               
+            </template>
+            <template if:false={listcountgreater}>
+                <lightning-avatar size={sizeforsingleusericon} src="" initials={singleuser.intials} fallback-icon-name="action:user"  alternative-text={singleuser.fullname} class="slds-m-right_xx-small"></lightning-avatar> {singleuser.name}
+            </template>
+        </template>
+    </div>
+    <template if:false={hasuser}>
+        <lightning-button-icon onclick={addnewuser} icon-name="utility:adduser" alternative-text="Add user" class="slds-m-left_xx-small" title="Add user"></lightning-button-icon> 
+    </template>
+    
+    
+    
+</template>

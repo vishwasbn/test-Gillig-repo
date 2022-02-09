@@ -1,0 +1,69 @@
+<template>
+    <lightning-tabset variant="scoped">
+        <lightning-tab label="Departments">
+           <c-listdepartments-component></c-listdepartments-component>
+        </lightning-tab>
+        <lightning-tab label="Work Centers">
+            <c-listworkcentres-component></c-listworkcentres-component>
+        </lightning-tab>
+        <lightning-tab label="Fleets">
+            <c-listfleets-component></c-listfleets-component>
+        </lightning-tab>
+        <lightning-tab label="Build Stations">
+           <c-listbuild-stations-component></c-listbuild-stations-component>
+        </lightning-tab>
+        <lightning-tab label="Bus Status">
+           <c-listbus-status-component></c-listbus-status-component>
+        </lightning-tab>
+        <lightning-tab label="Bus Types">
+            <c-listbus-type-component></c-listbus-type-component>
+        </lightning-tab>
+        <lightning-tab label="Bus Propulsions">
+            <c-listbus-propulsion-component></c-listbus-propulsion-component>
+        </lightning-tab>
+        <lightning-tab label="Defect Codes">
+            <c-listdefects-component></c-listdefects-component>
+        </lightning-tab>
+        <lightning-tab label="Work Centre Configuration">
+           <h1>Instructions to Configure Work Centre.</h1>
+           <div class="slds-col slds-size_1-of-4">
+            <div class="slds-file slds-file_card slds-has-title">
+               <figure>
+                  <a target="_blank" href={configpdf} class="slds-file__crop">
+                     <span class="slds-assistive-text">Preview:</span>
+                     <span class="slds-file__icon slds-icon_container" title="pdf">
+                        <lightning-icon icon-name="doctype:pdf" size="large" alternative-text="PDF file" title="PDF"></lightning-icon>
+                        <span class="slds-assistive-text">Work Center Configuration</span>
+                     </span>
+                  </a>
+                  <figcaption class="slds-file__title slds-file__title_card">
+                     <div class="slds-media slds-media_small slds-media_center">
+                        <div class="slds-media__figure slds-line-height_reset">
+                           <span class="slds-icon_container" title="pdf">
+                              <lightning-icon icon-name="doctype:pdf" size="x-small" alternative-text="PDF file" title="PDF"></lightning-icon>
+                              <span class="slds-assistive-text">pdf</span>
+                           </span>
+                        </div>
+                        <div class="slds-media__body">
+                           <span class="slds-file__text slds-truncate" title="Work Center Configuration">Work Center Configuration</span>
+                        </div>
+                     </div>
+                  </figcaption>
+               </figure>
+            </div>
+           </div>
+        </lightning-tab>
+        <lightning-tab label="Help Documents">
+            <c-listhelp-documents-component></c-listhelp-documents-component>
+        </lightning-tab>
+        <lightning-tab label="QC Checklists">
+            <c-listqc-checklist-component></c-listqc-checklist-component>
+        </lightning-tab>
+        <lightning-tab label="Meeting Notes">
+            <c-listmeeting-notes-component></c-listmeeting-notes-component>
+        </lightning-tab>
+        <lightning-tab label="E Card Images">
+         <c-listbusimage-component></c-listbusimage-component>
+        </lightning-tab>
+    </lightning-tabset>
+</template>
