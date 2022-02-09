@@ -1,2 +1,3 @@
-- this is the BKP of the all Gillig Ecard app code from Stagging Org before the Gillig 1.1 Enhancement changes
-- Backedup on 31-10-2021
+- BKP of the entire Gillig 1.0 changes and post Support fixes
+- it includes Purchasing app bkp
+- Prior to the ist release of Gillig 1.1 Enhancement changes

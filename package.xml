@@ -26,6 +26,7 @@
     </types>
     <types>
         <members>E_Card_App</members>
+        <members>Purchasing</members>
         <name>CustomApplication</name>
     </types>
     <types>
