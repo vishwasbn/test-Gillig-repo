@@ -11,6 +11,7 @@ import getDepartmentdata from "@salesforce/apex/masterDataController.getDepartme
 import pubsub from 'c/pubsub' ;
 
 export default class NewDiscrepancyComponent extends LightningElement {  
+    // @api disablebutton;
     @api buttonlabel;
     @api modalheading;
     @api ecardid;
@@ -71,16 +72,26 @@ export default class NewDiscrepancyComponent extends LightningElement {
           return true;
     }
 
-    //Dicrepancy Types
-    get disctype(){
-        var discrepancytypes = [{'label':'Normal Discrepancy', 'value':'buildstation'}, 
-                                {'label':'Department Discrepancy', 'value':'department'}
-                               ];
-                               return discrepancytypes;
-                }
+    // //Dicrepancy Types
+    // get disctype(){
+    //     var discrepancytypes = [{'label':'Normal Discrepancy', 'value':'buildstation'}, 
+    //                             {'label':'Department Discrepancy', 'value':'department'}
+    //                            ];
+    //                            return discrepancytypes;
+    //             }
     get allPRODlist(){
         return this.newdiscrepancy.allPRODlist;
-    }                
+    }
+    
+    //used to enable disable the discrepancy button
+    get disablebutton() {
+        if (this.permissionset != undefined) {
+            return !this.permissionset.discrepancy_new.write;
+        } else
+            return false;
+    }
+
+    @track disctype = [];
     // To show Add new discrepancy modal and set the default values.
     async addnewdiscrepancymodal(event){
         if(this.type=='department'){
@@ -89,8 +100,13 @@ export default class NewDiscrepancyComponent extends LightningElement {
         }else{
             this.type=='buildstation';
             this.buildstationrequired = true;
+            this.disctype = [{ 'label': 'Normal Discrepancy', 'value': 'buildstation' },
+            { 'label': 'Department Discrepancy', 'value': 'department' },
+            { 'label': "Downstream Discrepancy", 'value': "downstream" }];
             if (!this.enableDeptDiscrepancy) {
-                this.showtypeselection = false;
+                // this.showtypeselection = false;commented 
+                this.disctype.splice(1, 1);
+
             }
         }
         if (this.page == 'discrepancyDB') {
@@ -135,7 +151,7 @@ export default class NewDiscrepancyComponent extends LightningElement {
             this.moddifydefectpickvalues(departmentid);
             var selectedbus = `${this.busname}, ${this.buschasisnumber}`;
             var ecardiddeptid = { ecard_id: ecard_id, dept_id: departmentid };
-            var bs = { label: "Unknown", value: "Unknown", workcentreId: 0, workcentreName: "0000" };//Vishwas
+            var bs = { label: "Unknown", value: "Unknown", workcentreId: 0, workcentreName: "0000" };//
             await getDepartmentOperations({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
                 .then(data => {
                     var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
@@ -180,7 +196,7 @@ export default class NewDiscrepancyComponent extends LightningElement {
                 qclist: [],
                 prodlist: [],
                 allQClist: [],
-                allPRODlist: this.deptsupervisorforselecteddept//Vishwas
+                allPRODlist: this.deptsupervisorforselecteddept//
             };
             if (buildstationId != undefined && selectedbuildstation.PRODlist != null && selectedbuildstation.PRODlist.length != 0) {
                 newdiscrepancy.allPRODlist = selectedbuildstation.PRODlist;
@@ -444,14 +460,14 @@ export default class NewDiscrepancyComponent extends LightningElement {
                 var ecardid = this.newdiscrepancy.ecardid;
                 var departmentId = targetvalue;
                 var ecardiddeptid = {ecard_id:ecardid ,dept_id:departmentId};
-                var bs = { label: "Unknown", value: "Unknown", workcentreId: 0, workcentreName: "0000" };//Vishwas
+                var bs = { label: "Unknown", value: "Unknown", workcentreId: 0, workcentreName: "0000" };//
                 await getDepartmentOperations({ecardiddeptid:JSON.stringify(ecardiddeptid)})
                     .then(data => {
                     var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
                     this.deptsupervisorforselecteddept = prod_supervisor;
                     this.newdiscrepancy.allPRODlist = prod_supervisor;
                     this.buildstationoptions =  data.buildstationList;
-                    this.buildstationoptions.push(bs);//Vishwas
+                    this.buildstationoptions.push(bs);//
                     this.selecteddeptbsdetails = this.getcompleteBuilstationlist(data);
                     this.newdiscrepancy.buildstation_id = undefined;          
                     }).catch(error => {
@@ -559,14 +575,14 @@ export default class NewDiscrepancyComponent extends LightningElement {
             }, true);
         if (allValid) {
             //Submit information on Server
-            event.target.disabled = true;
+            // event.target.disabled = true;//
             var newdiscrepancyvalues = this.newdiscrepancy;
             /*if (newdiscrepancyvalues.type=='department' && newdiscrepancyvalues.buildstation_id==undefined){
                 newdiscrepancyvalues.buildstation_id=null;
-            }*///Vishwas
+            }*///
             if (newdiscrepancyvalues.buildstation_id == undefined || newdiscrepancyvalues.buildstation_id == 'Unknown') {
                 newdiscrepancyvalues.buildstation_id = null;
-            }//Vishwas
+            }//
             var newdiscrequestbody = {
                 "discrepancy_type": newdiscrepancyvalues.type,
                 "discrepancy_priority": newdiscrepancyvalues.priority,
@@ -591,7 +607,7 @@ export default class NewDiscrepancyComponent extends LightningElement {
             raisenewDiscrepancy({requestbody:JSON.stringify(withforemans), discrepancytype: disctype})
                   .then(data => {
                     if(data.isError){
-                        event.target.disabled = false;
+                        // event.target.disabled = false;//
                         this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
                     }
                     else{
@@ -605,7 +621,7 @@ export default class NewDiscrepancyComponent extends LightningElement {
                         
             }).catch(error => {
                 this.error = error;
-                event.target.disabled = false;
+                // event.target.disabled = false;//
                 this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
             });
         }

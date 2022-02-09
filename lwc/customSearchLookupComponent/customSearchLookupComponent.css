@@ -1,0 +1,33 @@
+.leftPaddingClass {
+    padding-left: 2rem;
+}
+ 
+.pillSize{
+ width:100%;
+}
+
+.pillSize .slds-pill__action{
+    padding-left:.5rem !important;
+}
+
+.inputsize{
+    width:90%;
+    /* margin-right:2%;  */
+    float: left;
+}
+
+.inputiconsize{
+    width:10%;
+    float: left;
+}
+
+.clearfix{
+    clear:both
+}
+
+.disablepill{
+    background: rgb(236, 235, 234);
+    border-color : rgb(201, 199, 197);
+    pointer-events: none;
+    cursor: not-allowed !important;
+}

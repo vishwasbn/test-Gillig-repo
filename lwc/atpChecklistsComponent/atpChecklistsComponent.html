@@ -46,23 +46,23 @@
                 </li>
             </ul>
             <div id="tab-default-1" class="tab-default-1 slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
-                <div class="slds-card">
+                <div class="slds-card pageheader">
                     <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                        <thead>
                           <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                           <th class="tblheaderth" scope="col">
+                           <th class="tblheaderth tableheader" scope="col">
                               <div class="slds-truncate" title="SL NO.">SL NO.</div>
                            </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="ATTACHMENT CHECK LIST">ATTACHMENT CHECK LIST</div>
                              </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="QC">QC</div>
                              </th>
-                             <th class="tblheaderth setapplicablewidth" scope="col">
+                             <th class="tblheaderth setapplicablewidth tableheader" scope="col">
                               <div class="slds-truncate" title="ACTION">REQUIRED</div>
                              </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="ACTION">ACTION</div>
                              </th>
                           </tr>
@@ -98,84 +98,86 @@
                  </div>
             </div>
             <div id="tab-default-2" class="tab-default-2 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">    
-                <template for:each={rockwelabchecklists} for:item='rockewell'>
-                    <div class="slds-border_bottom slds-m-bottom_small" key={rockewell.anti_lock_brake_test_group_id}>
-                       <span class="headstyle">{rockewell.anti_lock_brake_test_group_name}</span>
-                       <div class="instructions slds-m-around_xx-small">
-                          <template for:each={rockewell.instructions} for:item='instructions'>
-                             <div key={instructions.step_index}> {instructions.step_index}. {instructions.instruction} </div>
-                          </template>
-                       </div>
-                       <div class="checks">
-                          <div class="slds-card">
-                             <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
-                                <thead>
-                                   <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                <div class="pageheader">
+                  <template for:each={rockwelabchecklists} for:item='rockewell'>
+                     <div class="slds-border_bottom slds-m-bottom_small" key={rockewell.anti_lock_brake_test_group_id}>
+                        <span class="headstyle">{rockewell.anti_lock_brake_test_group_name}</span>
+                        <div class="instructions slds-m-around_xx-small">
+                           <template for:each={rockewell.instructions} for:item='instructions'>
+                              <div key={instructions.step_index}> {instructions.step_index}. {instructions.instruction} </div>
+                           </template>
+                        </div>
+                        <div class="checks">
+                           <div class="slds-card">
+                              <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                                 <thead>
+                                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                                        <th class="tblheaderth" scope="col">
+                                        <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                                         </th>
+                                        <th class="tblheaderth" scope="col">
+                                          <div class="slds-truncate" title={rockewell.anti_lock_brake_test_group_name}>{rockewell.anti_lock_brake_test_group_name}</div>
+                                       </th>
                                        <th class="tblheaderth" scope="col">
-                                       <div class="slds-truncate" title="SL NO.">SL NO.</div>
-                                        </th>
+                                          <div class="slds-truncate" title="QC">QC</div>
+                                       </th>
+                                       <th class="tblheaderth setapplicablewidth" scope="col">
+                                        <div class="slds-truncate" title="ACTION">REQUIRED</div>
+                                       </th>
                                        <th class="tblheaderth" scope="col">
-                                         <div class="slds-truncate" title={rockewell.anti_lock_brake_test_group_name}>{rockewell.anti_lock_brake_test_group_name}</div>
-                                      </th>
-                                      <th class="tblheaderth" scope="col">
-                                         <div class="slds-truncate" title="QC">QC</div>
-                                      </th>
-                                      <th class="tblheaderth setapplicablewidth" scope="col">
-                                       <div class="slds-truncate" title="ACTION">REQUIRED</div>
-                                      </th>
-                                      <th class="tblheaderth" scope="col">
-                                         <div class="slds-truncate" title="ACTION">ACTION</div>
-                                      </th>
-                                   </tr>
-                                </thead>
-                                <tbody>
-                                   <template for:each={rockewell.anti_lock_brake_test} for:item='checks'>
-                                      
-                                    <tr key={checks.anti_lock_brake_test_id}>
-                                       <td>
-                                          <div class="">{checks.slno}</div>
-                                       </td>
-                                         <td>
-                                          <div if:false={checks.is_applicable} class="rockwellnamecol greytitle">{checks.anti_lock_brake_test_name}</div>
-                                          <div if:true={checks.is_applicable} class="rockwellnamecol">{checks.anti_lock_brake_test_name}</div>  
-                                         </td>
-                                         <td><div if:true={checks.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={checks.anti_lock_brake_test_id} onmodify={absusermodification} onaddnew={absusermodification} userlist={checks.modifiedqc}></c-userlist-icon-component></div>  
-                                         </td>
-                                         <td>
-                                          <lightning-input disabled={disablerequired} name="applicable" class="slds-p-left_x-large zoomcheckbox" type="checkbox" data-id={checks.anti_lock_brake_test_id} checked={checks.is_applicable} title={checks.requiredtitle} onchange={existingabsrowstatuschange}></lightning-input>
-                                       </td>
+                                          <div class="slds-truncate" title="ACTION">ACTION</div>
+                                       </th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    <template for:each={rockewell.anti_lock_brake_test} for:item='checks'>
+                                       
+                                     <tr key={checks.anti_lock_brake_test_id}>
                                         <td>
-                                           <div class="">
-                                            <c-atp-actions disabled={checks.is_applicable} name="component" onstatuschange={existingabsrowstatuschange} permitteduser={permissionset.atp.write} uniqueid={checks.anti_lock_brake_test_id} isok={checks.verified_status} qcuserlist={checks.modifiedqc}></c-atp-actions>
-                                           </div>
+                                           <div class="">{checks.slno}</div>
                                         </td>
-                                      </tr>
-                                   </template>
-                                </tbody>
-                             </table>
-                          </div>
-                       </div>
-                    </div>
-                 </template>
+                                          <td>
+                                           <div if:false={checks.is_applicable} class="rockwellnamecol greytitle">{checks.anti_lock_brake_test_name}</div>
+                                           <div if:true={checks.is_applicable} class="rockwellnamecol">{checks.anti_lock_brake_test_name}</div>  
+                                          </td>
+                                          <td><div if:true={checks.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={checks.anti_lock_brake_test_id} onmodify={absusermodification} onaddnew={absusermodification} userlist={checks.modifiedqc}></c-userlist-icon-component></div>  
+                                          </td>
+                                          <td>
+                                           <lightning-input disabled={disablerequired} name="applicable" class="slds-p-left_x-large zoomcheckbox" type="checkbox" data-id={checks.anti_lock_brake_test_id} checked={checks.is_applicable} title={checks.requiredtitle} onchange={existingabsrowstatuschange}></lightning-input>
+                                        </td>
+                                         <td>
+                                            <div class="">
+                                             <c-atp-actions disabled={checks.is_applicable} name="component" onstatuschange={existingabsrowstatuschange} permitteduser={permissionset.atp.write} uniqueid={checks.anti_lock_brake_test_id} isok={checks.verified_status} qcuserlist={checks.modifiedqc}></c-atp-actions>
+                                            </div>
+                                         </td>
+                                       </tr>
+                                    </template>
+                                 </tbody>
+                              </table>
+                           </div>
+                        </div>
+                     </div>
+                  </template>
+                </div>
             </div>
             <div id="tab-default-3" class="tab-default-3 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">    
-                <div class="slds-card">
+                <div class="slds-card pageheader">
                     <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                        <thead>
                           <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                           <th class="tblheaderth" scope="col">
+                           <th class="tblheaderth tableheader" scope="col">
                               <div class="slds-truncate" title="SL NO.">SL NO.</div>
                            </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
                              </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="QC">QC</div>
                              </th>
-                             <th class="tblheaderth setapplicablewidth" scope="col">
+                             <th class="tblheaderth setapplicablewidth tableheader" scope="col">
                               <div class="slds-truncate" title="ACTION">REQUIRED</div>
                              </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="ACTION">ACTION</div>
                              </th>
                           </tr>
@@ -212,23 +214,23 @@
                  </div>
             </div>
             <div id="tab-default-4" class="tab-default-4 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-4__item">
-                <div class="slds-card">
+                <div class="slds-card pageheader">
                     <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                        <thead>
                           <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                           <th class="tblheaderth" scope="col">
+                           <th class="tblheaderth tableheader" scope="col">
                               <div class="slds-truncate" title="SL NO.">SL NO.</div>
                            </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="ATTACHMENT CHECK LIST">FINAL ACCEPTANCE</div>
                              </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="QC">QC</div>
                              </th>
-                             <th class="tblheaderth setapplicablewidth" scope="col">
+                             <th class="tblheaderth setapplicablewidth tableheader" scope="col">
                               <div class="slds-truncate" title="ACTION">REQUIRED</div>
                              </th>
-                             <th class="tblheaderth" scope="col">
+                             <th class="tblheaderth tableheader" scope="col">
                                 <div class="slds-truncate" title="ACTION">ACTION</div>
                              </th>
                           </tr>

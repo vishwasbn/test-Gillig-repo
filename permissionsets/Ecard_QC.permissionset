@@ -132,6 +132,10 @@
         <tab>Selected_Discrepancies</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <tabSettings>
+        <tab>Shortage_DB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <userPermissions>
         <enabled>true</enabled>
         <name>LightningExperienceUser</name>

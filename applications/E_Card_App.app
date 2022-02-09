@@ -2,6 +2,7 @@
 <CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
     <brand>
         <headerColor>#184B9B</headerColor>
+        <logo>logo_for_web</logo>
         <logoVersion>1</logoVersion>
         <shouldOverrideOrgTheme>true</shouldOverrideOrgTheme>
     </brand>
@@ -15,6 +16,7 @@
     <tabs>User_Management</tabs>
     <tabs>E_Cards</tabs>
     <tabs>Discrepancy</tabs>
+    <tabs>Shortage_DB</tabs>
     <tabs>Schedules_Board</tabs>
     <tabs>Part_Number_Validation</tabs>
     <tabs>Master_Data</tabs>

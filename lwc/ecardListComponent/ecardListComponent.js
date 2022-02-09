@@ -461,6 +461,8 @@ export default class EcardListComponent extends NavigationMixin(LightningElement
     // To show the operations/details tab of a Selected Ecard.
     @track sequence;
     @track sequanceavailable;
+    @track currentDepartment ; //Phase 1.1: To set the current Department 
+
     showOperations(event){
       this.showops = true;
       this.showTable = false;
@@ -473,6 +475,7 @@ export default class EcardListComponent extends NavigationMixin(LightningElement
       this.selectedBusChasis = chasis;
       this.selectedBusName = customer;
       this.selectedBusLabel = `${customer}, ${chasis}`;
+      this.currentDepartment = event.currentTarget.dataset.department ; //Phase 1.1: Getting the Department Name
     }
 
     // To show the Ecard list when redirecting back from a detail of an Ecard.

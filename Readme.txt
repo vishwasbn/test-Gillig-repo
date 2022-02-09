@@ -1,3 +1,2 @@
-- BKP of the entire Gillig 1.0 changes and post Support fixes
-- it includes Purchasing app bkp
-- Prior to the ist release of Gillig 1.1 Enhancement changes
+- bKP of Gillig project till Sprint 29 changes
+- before prod deployment of Sprint 30 tp Sprint 33(Till day QA changes)

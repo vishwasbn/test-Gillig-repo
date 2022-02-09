@@ -68,13 +68,14 @@ export default class DiscrepancyDbComponent extends LightningElement {
   @track departmentlist = [
     { label: "All Departments", value: "All Departments" }
   ];
-  @track selecteddefect = "All Defects";
-  @track defectlist = [{ label: "All Defects", value: "All Defects" }];
+  @track selecteddefect = "All Defect Code";
+  @track defectlist = [{ label: "All Defect Code", value: "All Defect Code" }];
   @track selecteddisctype = "All Discrepancies";
   @track discrepancytypelist = [
     { label: "All Discrepancies", value: "All Discrepancies" },
     { label: "Normal Discrepancy", value: "buildstation" },
-    { label: "Department Discrepancy", value: "department" }
+    { label: "Department Discrepancy", value: "department" },
+    { label: "Downstream Discrepancy", value: "downstream" }
   ];
   @track selectedcreatedbyuser;
   @track selectedassignedtouser;
@@ -104,6 +105,9 @@ export default class DiscrepancyDbComponent extends LightningElement {
     "approve": "Status changed to Verified",
     "open": "Status changed to Open"
   };
+
+  @track statuslistfiltervalue = [{ label: "All Defect Status", value: "All Defect Status" }, { label: "Open", value: "open" }, { label: "Resolved", value: "resolve" }, { label: "Verified", value: "approve" }];
+  @track selectedstatus = "All Defect Status";
   
 
   // Use whenever a false attribute is required in Component.html
@@ -146,11 +150,12 @@ export default class DiscrepancyDbComponent extends LightningElement {
     else{
       updatepermission=this.permissionset.discrepancy_update_prod.write;
     }
-    if (this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" && updatepermission ) {
-      return true;
-    } else {
-      return false;
-    }
+    // if (this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" && updatepermission ) {
+    //   return true;
+    // } else {
+    //   return false;
+    // }
+    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !updatepermission;
   }
 
   get disableqcforupdate() {
@@ -188,6 +193,14 @@ export default class DiscrepancyDbComponent extends LightningElement {
     }
     return isdepartmentpaintortrim;
 }
+
+  // //used to display/hide the shortage button
+  // get disablediscbtn() {
+  //   if (this.permissionset != undefined) {
+  //     return !this.permissionset.discrepancy_new.write;
+  //   }
+  //   else return false;
+  // }
 
     wiredPermissions;
     permissionset;
@@ -281,6 +294,10 @@ export default class DiscrepancyDbComponent extends LightningElement {
             var isdepartmentdiscrepancy = false;
             if (discrepancy.discrepancy_type == "department") {
               isdepartmentdiscrepancy = true;
+            }
+            var isdownstreamdiscrepancy = false;
+            if (discrepancy.discrepancy_type == "downstream") {
+              isdownstreamdiscrepancy = true;
             }
             // alert(isdepartmentdiscrepancy);
             var selectedprodlist = this.getselectedformandetails(discrepancy);
@@ -381,6 +398,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
               discrepancy_status: discrepancy.discrepancy_status.toLowerCase(),
               discrepancy_type: this.capitalize(discrepancytype),
               isdepartmentdiscrepancy: isdepartmentdiscrepancy,
+              isdownstreamdiscrepancy: isdownstreamdiscrepancy,
               isdeletable:is_deletable,
               ecard_discrepancy_log_id: discrepancy.ecard_discrepancy_log_id,
               ecard_discrepancy_log_number:discrepancy.discrepancy_log_number,
@@ -689,6 +707,11 @@ export default class DiscrepancyDbComponent extends LightningElement {
     this.selecteddefect = event.detail.value;
     this.applyfilterchanges(event);
   }
+  // Handle Discrepancy status Change
+  handlediscrepancystatuschange(event) {
+    this.selectedstatus = event.detail.value;
+    this.applyfilterchanges(event);
+  }
 
   // Handle Defect Change
   handledisctypechange(event) {
@@ -697,10 +720,11 @@ export default class DiscrepancyDbComponent extends LightningElement {
   }
 
   handlecreateddatechange(event) {
-    this.selectedcreatedddate = this.getformatedsearchformat(
-      event.target.value
-    );
-    //alert(this.selectedcreatedddate);
+    // this.selectedcreatedddate = this.getformatedsearchformat(
+    //   event.target.value
+    // );
+    this.selectedcreatedddate = event.target.value;//
+    // alert(this.selectedcreatedddate);
     this.applyfilterchanges(event);
   }
 
@@ -721,16 +745,16 @@ export default class DiscrepancyDbComponent extends LightningElement {
   // On selecting created by user filter
   oncreatedbyselect(event) {
     if (event.detail.labelvalue == "Created By") {
-      this.selectedassignedtouser= event.detail.selectedRecord;
-      //this.selectedcreatedbyuser = event.detail.selectedRecord;
+      //this.selectedassignedtouser= event.detail.selectedRecord;
+      this.selectedcreatedbyuser = event.detail.selectedRecord;
     }
     this.applyfilterchanges(event);
   }
 
   // On clearing the created by user selection.
   onclearcreatedby(event) {
-    //this.selectedcreatedbyuser = undefined;
-    this.selectedassignedtouser = undefined;
+    this.selectedcreatedbyuser = undefined;
+    //this.selectedassignedtouser = undefined;
     this.applyfilterchanges(event);
   }
 
@@ -744,6 +768,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
     var selectedcreatedby = this.selectedcreatedbyuser;
     var selectedassignedto = this.selectedassignedtouser;
     this.showSpinner = true;
+    var selectedstatus = this.selectedstatus
     var filtereddiscrepancies = [];
     var completedata = JSON.parse(JSON.stringify(this.alldiscrepancy));
     for (var discr in completedata) {
@@ -776,12 +801,18 @@ export default class DiscrepancyDbComponent extends LightningElement {
           discrepancy.filtered = discfilter + " invisible";
         }
       }
-      if (selecteddefect != undefined && selecteddefect != "All Defects") {
+      if (selecteddefect != undefined && selecteddefect != "All Defect Code") {
         if (discrepancy.dat_defect_code_id == selecteddefect) {
         } else {
           discrepancy.filtered = discfilter + " invisible";
         }
       }
+    if (selectedstatus != undefined && selectedstatus != "All Defect Status") {
+        if (discrepancy.discrepancy_status.toLowerCase() == selectedstatus.toLowerCase()) {
+        } else {
+          discrepancy.filtered = discfilter + " invisible";
+        }
+      } 
       if (selectedcreateddate != undefined && selectedcreateddate != "") {
         if (discrepancy.formatteddatetosearch == selectedcreateddate) {
         } else {
@@ -1224,7 +1255,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
       }
       else{
         var alldefects = JSON.parse(data.responsebody).data.defects;
-        var alldefectcodes = [{ label: "All Defects", value: "All Defects" }];
+        var alldefectcodes = [{ label: "All Defect Code", value: "All Defect Code" }];
         for (var defect in alldefects) {
           if(alldefects[defect].is_active){
             var option = {
@@ -1341,6 +1372,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
                getcrewingsuserslist({deptid:departmentId})
                .then((result) => {
                userdetails = JSON.parse(result.responsebody).data.user;
+               userdetails = this.removeDuplicates(userdetails);//todo
                this.selecteddiscrepancy.allprodlist = userdetails.length>0?modifieduserlist(userdetails):userdetails;
                })
                .catch((error) => {
@@ -1506,7 +1538,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
   }
 
   get disablecomponentdates() {
-    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open";
+    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !this.permissionset.dept_discrepancy_update.write;
   }
 
   // Handle Discrepancy Actions
@@ -1645,7 +1677,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
           }
         } else {
           const alertmessage = new ShowToastEvent({
-            title: "Record Update Successfull.",
+            title: "Record Update Successful.",
             message: "The Record was updated Successfully",
             variant: "success"
           });
@@ -1926,5 +1958,26 @@ export default class DiscrepancyDbComponent extends LightningElement {
   handlebusstatuschange(event) {
     this.selectedBusStatus = event.detail.value;
     this.loaddataforview();
+  }
+  //removeduplicate user
+  removeDuplicates(objectArray) {
+    // Declare a new array
+    let newArray = [];
+    // Declare an empty object
+    let uniqueObject = {};
+    var objTitle;
+    // Loop for the array elements
+    for (let item in objectArray) {
+      // Extract the title
+      objTitle = objectArray[item]['appuser_name'];
+      // Use the title as the index
+      uniqueObject[objTitle] = objectArray[item];
+    }
+    // Loop to push unique object into array
+    for (let item in uniqueObject) {
+      newArray.push(uniqueObject[item]);
+    }
+    // Display the unique objects
+    return newArray;
   }
 }

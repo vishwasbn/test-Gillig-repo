@@ -38,6 +38,7 @@
     <tabs>Supplier_Quote__c</tabs>
     <tabs>Warranty_Agreement__c</tabs>
     <tabs>Bid_Information_Request__c</tabs>
+    <tabs>Shortage</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Purchasing_UtilityBar</utilityBar>
 </CustomApplication>

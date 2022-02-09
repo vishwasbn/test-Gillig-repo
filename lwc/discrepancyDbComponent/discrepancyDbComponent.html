@@ -34,8 +34,8 @@
                   onchange={handlecreateddatechange}></lightning-input>
               </div>
               <div class="slds-col slds-size_3-of-12 slds-p-horizontal_small">
-                <c-custom-search-component showicon={returntrue} showlabel={returnfalse} placeholdertext="Search Assigned User"
-                  -icon-name="standard:user" listto-search={assigneduserslist} label="Created By" onselect={oncreatedbyselect}
+                <c-custom-search-component showicon={returntrue} showlabel={returnfalse} placeholdertext="Search Created User"
+                  -icon-name="standard:user" listto-search={createdbyuserslist} label="Created By" onselect={oncreatedbyselect}
                   onclear={onclearcreatedby}></c-custom-search-component>
               </div>
               <div class="slds-col slds-size_5-of-24 slds-p-horizontal_small">
@@ -84,10 +84,20 @@
               variant="label-hidden"
               name="defectstatus"
               value={selecteddefect}
-              placeholder="Defect Options"
+              placeholder="All Defect Code"
               options={defectlist}
               onchange={handledefectchange}
             ></lightning-combobox>
+          </div>
+        <div class="slds-col slds-size_2-of-12">
+            <lightning-combobox 
+              variant="label-hidden" 
+              name="defectstatus"
+              value={selectedstatus} 
+              placeholder="Discrepancy Status" 
+              options={statuslistfiltervalue}
+              onchange={handlediscrepancystatuschange}
+              ></lightning-combobox>
           </div>
           <div class="slds-col slds-size_2-of-12">
             <lightning-combobox
@@ -104,6 +114,12 @@
               placeholder="Bus Status" options={busstatuslist} onchange={handlebusstatuschange}></lightning-combobox>
           </div>
         </div>
+        <div class="slds-grid slds-gutters slds-m-top_x-small">
+          <div class="slds-col slds-size_1-of-1">
+            <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh"
+              class="slds-m-left_xx-small slds-float_right" title="Refresh" onclick={loaddataforview}></lightning-button-icon>
+          </div>
+        </div>
       </div>
     </div>
   
@@ -111,22 +127,12 @@
         <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered tableouterborder">
           <thead>
             <tr class="slds-line-height_reset slds-text-title_caps">
-              <th class="fixedheader" scope="col" if:true={isdepartmentPaint}>
-                <lightning-button
-                  variant="base"
-                  data-id="ecard_discrepancy_log_id"
-                  label="VIEW IMAGE"
-                  title="VIEW IMAGE"
-                  icon-position="right"
-                  class="slds-truncate"
-                ></lightning-button>
-              </th>
               <th class="fixedheader" scope="col">
                 <lightning-button
                   variant="base"
-                  data-id="ecard_discrepancy_log_id"
-                  label="DEFECT ID"
-                  title="NO."
+                  data-id="chassis_no"
+                  label="BUS"
+                  title="BUS"
                   icon-position="right"
                   onclick={sortdiscrepancytable}
                   class="slds-truncate"
@@ -157,17 +163,6 @@
               <th class="fixedheader" scope="col">
                 <lightning-button
                   variant="base"
-                  data-id="chassis_no"
-                  label="BUS"
-                  title="BUS"
-                  icon-position="right"
-                  onclick={sortdiscrepancytable}
-                  class="slds-truncate"
-                ></lightning-button>
-              </th>
-              <th class="fixedheader" scope="col">
-                <lightning-button
-                  variant="base"
                   data-id="department_name"
                   label="DEPARTMENT"
                   title="DEPARTMENT"
@@ -176,6 +171,28 @@
                   class="slds-truncate"
                 ></lightning-button>
               </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="createdby"
+                  label="CREATED BY"
+                  title="CREATED BY"
+                  icon-position="right"
+                  class="slds-truncate"
+                  onclick={sortdiscrepancytable}
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="defect_type"
+                  label="DEFECT TYPE"
+                  title="DEFECT TYPE"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                   ></lightning-button>
+                </th>
               <th class="fixedheader" scope="col">
                 <lightning-button
                   variant="base"
@@ -190,33 +207,37 @@
               <th class="fixedheader" scope="col">
                 <lightning-button
                   variant="base"
-                  data-id="assignedto"
-                  label="ASSIGNED TO"
-                  title="ASSIGNED TO"
+                  data-id="ecard_discrepancy_log_id"
+                  label="DEFECT ID"
+                  title="NO."
                   icon-position="right"
+                  onclick={sortdiscrepancytable}
                   class="slds-truncate"
                 ></lightning-button>
               </th>
+              <th class="fixedheader" scope="col" if:true={isdepartmentPaint}>
+                <lightning-button
+                  variant="base"
+                  data-id="ecard_discrepancy_log_id"
+                  label="VIEW IMAGE"
+                  title="VIEW IMAGE"
+                  icon-position="right"
+                  class="slds-truncate"
+                ></lightning-button>
+              </th> 
             </tr>
           </thead>
           <tbody>
             <!-- <template if:false={disclistempty}> -->
             <template for:each={filtereddiscrepancy} for:item="disc">
               <tr
-                key={disc.ecard_discrepancy_log_id}
-                
-              >
-              <td if:true={isdepartmentPaint}><div class="">
-                <lightning-button if:true={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} onclick={previewimage} label="Preview" title="Preview" icon-name="utility:preview" icon-position="right" ></lightning-button>
-                <lightning-button if:false={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} disabled label="No Preview" title="No Preview" icon-name="utility:hide" icon-position="right" ></lightning-button>
-              </div></td>
+                key={disc.ecard_discrepancy_log_id}>
                 <td  data-id={disc.ecard_discrepancy_log_id}
                 onclick={showdetails}>
-                  <div style="width: 86px;">
-                    <!--{disc.ecard_discrepancy_log_id}-->
-                    {disc.ecard_discrepancy_log_number}
-                  </div>
+                  <div>{disc.customername},</div>
+                  <div>{disc.chassis_no}</div>
                 </td>
+               
                 <td  data-id={disc.ecard_discrepancy_log_id}
                 onclick={showdetails} title={disc.description} class="slds-truncate">
                   <!--setdescriptionwidth-->
@@ -227,11 +248,19 @@
                         class="deptbadge"
                         >DEPT</span
                       >
-                      <span
+                      <!-- <span
                         if:false={disc.isdepartmentdiscrepancy}
                         class="normalbadge"
                         >NOR</span
-                      >
+                      > -->
+                      <template if:false={disc.isdepartmentdiscrepancy}>
+                        <span if:true={disc.isdownstreamdiscrepancy} class="normalbadge">
+                          DOW
+                        </span>
+                        <span if:false={disc.isdownstreamdiscrepancy} class="normalbadge">
+                          NOR
+                        </span>
+                      </template>
                     </div>
                     <div class="slds-col">
                       <div
@@ -266,25 +295,38 @@
                     <span class="statusbadge">{disc.discrepancy_statusdisplay}</span>
                   </div>
                 </td>
-                <td  data-id={disc.ecard_discrepancy_log_id}
-                onclick={showdetails}>
-                  <div>{disc.customername},</div>
-                  <div>{disc.chassis_no}</div>
-                </td>
+               
                 <td  data-id={disc.ecard_discrepancy_log_id}
                 onclick={showdetails}><div>{disc.department_name}</div></td>
-                <td  data-id={disc.ecard_discrepancy_log_id}
-                onclick={showdetails}><div>{disc.defect_code}, {disc.defect_name}</div></td>
                 <td  data-id={disc.ecard_discrepancy_log_id}
                 onclick={showdetails}>
                   <div class="">
                     <c-userlist-icon-component
-                      type="Assigned User"
-                      buildstationid={disc.ecard_discrepancy_log_id}
-                      userlist={disc.assigneduser}
+                    type="Created User"
+                    buildstationid={disc.ecard_discrepancy_log_id}
+                    userlist={disc.created_by}
                     ></c-userlist-icon-component>
                   </div>
                 </td>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                <!-- <div>{disc.defect_type}</div> -->
+                <div>{disc.discrepancy_type}</div> 
+                </td>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}><div>{disc.defect_code}, {disc.defect_name}</div></td>
+                
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                  <div style="width: 86px;">
+                    <!--{disc.ecard_discrepancy_log_id}-->
+                    {disc.ecard_discrepancy_log_number}
+                  </div>
+                </td>
+                <td if:true={isdepartmentPaint}><div class="">
+                  <lightning-button if:true={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} onclick={previewimage} label="Preview" title="Preview" icon-name="utility:preview" icon-position="right" ></lightning-button>
+                  <lightning-button if:false={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} disabled label="No Preview" title="No Preview" icon-name="utility:hide" icon-position="right" ></lightning-button>
+                </div></td>
               </tr>
             </template>
             <!-- </template> -->
@@ -409,7 +451,7 @@
               ></lightning-combobox>
             </div>
             <div class="slds-col slds-size_1-of-2">
-              <div if:true={buildstationrequired}>
+              <div if:true={buildstationrequired}>  
                 <lightning-combobox
                   required
                   disabled={departmentnotselected}
@@ -472,6 +514,7 @@
             </div-->
             <div class="slds-col slds-size_1-of-2">
               <c-re-usable-multi-select-lookup
+                disablecomponent={disableprodforupdate}
                 onitemselected={updateuserselectonnewdesc}
                 limittoone={returnfalse}
                 selectedrecords={newdiscrepancy.prodlist}
@@ -814,7 +857,7 @@
           </div>
           <div class="slds-grid slds-wrap slds-gutters">
             <div class="slds-col slds-size_1-of-1">
-              <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" ></c-attachments-section-component>
+              <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" permissionset={permissionset}></c-attachments-section-component>
             </div>
             <div class="slds-col slds-size_1-of-1">
                 <c-comments-section-component unique-id={selecteddiscrepancy.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
@@ -892,6 +935,9 @@
           <div class="referenceimage" style="max-height:380px;max-width:1200px;"> <!--style={parentdivdimensions}-->
             <img src={discrepancyimage} style={parentdivdimensions} alt="Discrepancy Image"/>
             <!--take care of historical Discrepancy point as object - can be removed from next release START-->
+            <!-- <span if:false={isbusareaarray} style={setdiscrepancypoint} class="discrepancypoint">
+              {selecteddiscrepancy.ecard_discrepancy_log_number}
+            </span> -->
             <span if:false={isbusareaarray} style={setdiscrepancypoint} class="discrepancypoint">
               {selecteddiscrepancy.ecard_discrepancy_log_number}
             </span>

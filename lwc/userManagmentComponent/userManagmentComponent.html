@@ -64,13 +64,14 @@
              <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">User Detail</h2>
           </header>
           <!-- modal body start -->
-          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+          <!-- <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1"> -->
+          <div class="slds-modal__content slds-p-vertical_xx-large slds-p-horizontal_medium" id="modal-content-id-1">
             <div class="slds-grid slds-wrap slds-gutters">
                 <div class="slds-col slds-size_1-of-2">
                  <lightning-input class="updateuservalidation" disabled type="text"  label="Employee ID"  name="employee_number" value={record.employee_number} onchange={updateuservalue} ></lightning-input>
                 </div>
                 <div class="slds-col slds-size_1-of-2">
-                  <lightning-combobox class="updateuservalidation" required name="approle_id" label="User Role" value={record.approle_id} placeholder="Select User Role" options={userroleslist} onchange={updateuservalue}></lightning-combobox>
+                  <lightning-combobox class="updateuservalidation" required name="approle_id" label="User Role" value={record.approle_id} placeholder="Select User Role" options={userroleslist} onchange={updateuservalue} field-level-help={userroleinfo} disabled={disablerolechange}></lightning-combobox>
                 </div>
                 <div class="slds-col slds-size_1-of-2">
                   <lightning-input  class="updateuservalidation" type="text" label="First Name" name="first_name" value={record.first_name} onchange={updateuservalue}></lightning-input>
@@ -82,8 +83,18 @@
                 <div if:true={isdepartmentrequired} class="slds-col slds-size_1-of-2">
                   <lightning-combobox class="updateuservalidation"  label="Department"  name="department_id"  value={record.department_id}  placeholder="Departments" options={departmentlistoptions} onchange={updateuservalue} ></lightning-combobox>
                 </div>
-                <div if:true={isselectedcustomer} class="slds-col slds-size_1-of-2">
+                <!-- <div if:true={isselectedcustomer} class="slds-col slds-size_1-of-2">
                   <lightning-combobox class="updateuservalidation" required={isselectedcustomer} label="Customer"  name="customer_id"  value={record.customer_id}  placeholder="Customer Name" options={customerlist} onchange={updateuservalue}></lightning-combobox>
+                </div> -->
+                <div if:true={isselectedcustomer} class="slds-col slds-size_1-of-2">
+                  <c-customer-search-component isrequired={isselectedcustomer} showicon=false showlabel=true placeholdertext="Select Customer"
+                  -icon-name="custom:custom98" listto-search={customernamelist} onselect={oncustomerselect} label="Customer Name" selectedcustomer={record.customer_name}
+                  onclear={onclearcustomer}></c-customer-search-component>
+                </div>
+                <div if:true={iscustomerinspector} class="slds-col slds-size_1-of-2">
+                  <c-custom-multi-select-customers isrequired={returntrue} limittoone={returnfalse} selectedrecords={record.customer_name}
+                    onitemselected={updatecustomerselect} label="Customer Name" -icon-name="standard:user"
+                    placeholdertext="Select Customer" listtosearch={customerlist}></c-custom-multi-select-customers>
                 </div>
                 <div class="slds-col slds-size_1-of-2">
                   <lightning-input class="updateuservalidation" max-length="4" field-level-help="Please enter a 4 digit PIN.(1234)." pattern={pattern} required type="text" name="pin" value={record.pin} label="PIN" onchange={updateuservalue} ></lightning-input>
@@ -94,7 +105,7 @@
           <!-- modal footer start-->
           <footer class="slds-modal__footer">
             <!--<lightning-button variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left"></lightning-button>   -->
-            <lightning-input class="slds-float_left slds-m-left_x-small" type="toggle" label="Is Active" name="is_active" checked={record.is_active} onclick={togglebutton} message-toggle-active="" message-toggle-inactive="" required></lightning-input>
+            <lightning-input class="slds-float_left slds-m-left_x-small" type="toggle" label="Is Active" name="is_active" checked={record.is_active} onchange={togglebutton} message-toggle-active="" message-toggle-inactive="" required></lightning-input>
             <lightning-button label="Cancel" title="Cancel" onclick={closeModal} class="slds-m-right_x-small"></lightning-button>
             <lightning-button variant="brand" label="Update"  title="Update" onclick={updateuserbutton} icon-name="utility:record_update"></lightning-button>
                
@@ -123,7 +134,8 @@
                 <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New User</h2>
               </header>
               <!-- modal body start -->
-              <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+              <!-- <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2"> -->
+              <div class="slds-modal__content slds-p-vertical_xx-large slds-p-horizontal_medium" id="modal-content-id-2">
                 <div class="slds-grid slds-wrap slds-gutters">
                 <div class="slds-col slds-size_1-of-2">
                     <lightning-input class="newuservalidation" type="text" required name="first_name" value={newuser.first_name}  label="First name" onchange={updateuserfields} ></lightning-input>
@@ -159,15 +171,24 @@
                       <lightning-combobox class="newuservalidation" label="Department"  name="department"  value={newuser.department}  placeholder="Departments" options={departmentlistoptions} onchange={updateuserfields}></lightning-combobox>
                   </div>
                   
-                  <template if:true={isselectedcustomer}>
+                  <!-- <template if:true={isselectedcustomer}>
                     <div class="slds-col slds-size_1-of-2">
                       <lightning-combobox class="newuservalidation" required={isselectedcustomer} label="Select a Customer"  name="customername"  value={user.customername}  placeholder="Customer Name" options={customerlist} onchange={updateuserfields}></lightning-combobox>
                   </div>
-                  </template>
-                  
-                  
-                  
-                  
+                  </template> -->
+                  <div if:true={isselectedcustomer} class="slds-col slds-size_1-of-2">
+                      <c-customer-search-component isrequired={isselectedcustomer} showicon=false showlabel=true placeholdertext="Select Customer"
+                      -icon-name="custom:custom98" listto-search={customernamelist} label="Select a Customer" onselect={oncustomerselect}
+                      onclear={onclearcustomer}></c-customer-search-component>
+                  </div>
+                  <div if:true={iscustomerinspector} class="slds-col slds-size_1-of-2">
+                    <!-- <c-re-usable-multi-select-lookup limittoone=false onitemselected={updatenewcustomerselect}
+                      label="Select a Customer" -icon-name="standard:user" placeholdertext="Select Customer"
+                      listtosearch={customerlist}></c-re-usable-multi-select-lookup> -->
+                      <c-custom-multi-select-customers isrequired={returntrue} limittoone={returnfalse} onitemselected={updatenewcustomerselect}
+                      label="Select a Customer" -icon-name="standard:user" placeholdertext="Select Customer"
+                      listtosearch={customerlist}></c-custom-multi-select-customers>
+                  </div>
                 </div>
               </div>
               <!-- modal footer start-->

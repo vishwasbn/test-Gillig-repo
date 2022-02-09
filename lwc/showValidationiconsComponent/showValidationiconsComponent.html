@@ -1,554 +1,556 @@
 <template>
- <div class="slds-p-around_xxx-small"> <!--slds-p-around_xx-small-->
-        <template if:true={has8410}>
-            <lightning-button onclick={handlevalidation} variant="border-filled" label={buildstationcode} title="BuildStation"  class="slds-m-left_xx-small"></lightning-button>
-        </template>
-        <template if:true={has_pco}> <!--onclick={handlevalidation}-->
-            <lightning-button  onclick={handlevalidation} variant="border-filled" label="PCO" title="PCO"  class="slds-m-left_xx-small"></lightning-button>
-        </template>
-        <template if:true={has_bm35}>
-            <lightning-button onclick={handlevalidation} variant="border-filled" label="BM35" title="BM35"  class="slds-m-left_xx-small"></lightning-button>
-        </template>
-        <template if:true={has_op_check}>	
-            <lightning-button if:true={has_operation_check} onclick={handlevalidation} variant="destructive-text" label="OP-CK" title="OP-CK"  class="slds-m-left_xx-small"></lightning-button>	
-            <lightning-button if:false={has_operation_check} onclick={handlevalidation} variant="border-filled" label="OP-CK" title="OP-CK"  class="slds-m-left_xx-small"></lightning-button>	
-        </template>
-        <template if:true={hasdiscrepancy}>
-            <lightning-button onclick={handlevalidation} variant="border-filled" label="DISC" title="Discrepancy"  class="slds-m-left_xx-small"></lightning-button>
-        </template>
-        <template if:true={haspicvalidation}>
-            <!--<lightning-button-icon class="slds-m-left_xx-small" onclick={handlevalidation} icon-name="utility:image"   variant="border-filled" alternative-text="Picture Validation"  title="Picture Validation"></lightning-button-icon> -->
-            <!-- Variants of button style to be shown for validations see tooltip for details -->
-            <lightning-button-icon if:true={picvalidationoptional} onclick={handlevalidation} class="slds-m-left_xx-small" icon-name="utility:image" variant="border-filled" title="Picture Validation" alternative-text="Picture Validation" tooltip="Upload an Image" > </lightning-button-icon>
-            <lightning-button-icon if:true={picvalidationrequired} onclick={handlevalidation} class="slds-m-left_xx-small" icon-name="utility:image" variant="border-filled" title="Picture Validation" alternative-text="Picture Validation" tooltip="Picture Validation Required." icon-class="slds-button_icon-error" > </lightning-button-icon>
-            <lightning-button-icon if:true={imageuploaded} onclick={handlevalidation} class="slds-m-left_xx-small" icon-name="utility:image" variant="brand" title="Picture Validation" alternative-text="Picture Validation" tooltip="View Uploaded Image" > </lightning-button-icon>
-            
-        </template>
-        
-<!-- Picture Validation  modal start -->
-<template if:true={showpicvalmodal}>
-	<section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
-		<div class="slds-modal__container">
-			<!-- modal header start -->
-			<header class="slds-modal__header">
-				<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelpicturevalidation}>
-					<lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
-				</button>
-				<h2 title={buildstationdata.buildstation_id} id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
-					Picture Validation - {buildstationdata.buildstation_code}
-				</h2>
-			</header>
-			<!-- modal header end -->
-			<!-- modal body start -->
-			<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-				<!-- spinner start -->
-				<div if:true={showSpinner}>
-					<div class="slds-align_absolute-center">
-						<div role="status" class="slds-spinner slds-spinner_medium slds-spinner_inverse">
-							<span class="slds-assistive-text">Loading</span>
-							<div class="slds-spinner__dot-a"></div>
-							<div class="slds-spinner__dot-b"></div>
-						</div>
-					</div> 
-				</div>
-                <!-- spinner end -->
-                <!--template if:true={stepone}-->
-					<div class="slds-grid">
-						<div class="slds-col slds-size_1-of-2">
-							<article class="slds-card cardborder">
-								<div class="">
-									<div if:false={istargetimagepresent} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
-										<div if:true={permissionset.picvalidation_applytofleet.write}>
-                                            <lightning-input type="file"
-                                                label="Upload Target Image"
-                                                name="targetimage"
-                                                accept={acceptedFormats}
-                                                onchange={handletargetchange}
-                                                >
-                                            </lightning-input>
-                                        </div>
-									</div>
-									<div if:true={istargetimagepresent} style="height:385px; " class="side_bar">
-										<img src={uploadedtargetimage} alt="This is the refrence image." class="targetImage"/>
-									</div>
-								</div>
-                                <div class="cardfooter">Target Image
-                                        <lightning-button-icon if:true={istargetdelete} data-id={buildstationdata.buildstation_id} data-name={buildstationdata.fleet_id} variant="bare-inverse" size="small" onclick={deletetargetimage} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete"></lightning-button-icon>
-                                        <lightning-button-icon if:true={istargetimagepresent} variant="bare-inverse" size="small" onclick={rotate} icon-name="utility:rotate"  alternative-text="Rotate" class="slds-float_right slds-m-right_x-small" title="Rotate"></lightning-button-icon>
-                                </div>    
-                            </article>
-						</div>
-						<div class="slds-col slds-size_1-of-2">
-							<article class="slds-card cardborder">
-								<div class="">
-									<div if:false={isactualimagepresent} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
-										<lightning-input type="file"
-											label="Upload Actual Image"
-											name="actualimage"
-											accept={acceptedFormats}
-											onchange={handleFilesChange}
-											>
-										</lightning-input>
-									</div>
-									<div if:true={isactualimagepresent} style="height:385px; " class="side_bar">
-										<img src={uploadedimage} alt="This is the refrence image." />
-									</div>
-								</div>
-                                <div class="cardfooter">Actual Image
-                                    <lightning-button-icon if:true={enabledeletebutton} variant="bare-inverse" size="small" onclick={goback} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete"></lightning-button-icon>
-                               </div>
-							</article>
-						</div>
-					</div>
-				<!--/template-->
-			</div>
-			<!-- modal footer start-->
-			<footer class="slds-modal__footer">
-				<lightning-button label="Cancel" title="Cancel" onclick={cancelpicturevalidation} class="slds-m-right_x-small"></lightning-button>
-				<lightning-button variant="brand" disabled={enableuploadbutton} label="Save" title="Save Image" onclick={uploadImage} icon-name="utility:upload" icon-position="right" class="slds-m-right_x-small"></lightning-button>
-			</footer>
-		</div>
-	</section>
-	<div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!-- Picture validation modal end -->
-
- <!-- buildstationmodal Validation  modal start -->
- <template if:true={showBuildStationmodal}>
-    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-02" aria-modal="true" aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open slds-modal_medium">
-        <div class="slds-modal__container">
-            <!-- modal header start -->
-            <header class="slds-modal__header">
-                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelbuildstationmodal}>
-                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
-                </button>
-                <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">
-                    {buildstationdetails.operation} - {buildstationdetails.buildstation_code}
-                </h2>
-            </header>
-            <!-- modal body start -->
-            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
-                <!--<div class="slds-grid slds-wrap slds-gutters">
-                <div class="slds-col slds-size_1-of-2">
-                    <lightning-input type="text" name="action"   label="Operation"  value={buildstationdetails.operation} disabled></lightning-input>
-                 </div>
-                 <div class="slds-col slds-size_1-of-2">
-                    <lightning-input type="text" name="action"   label="Build Station Code"  value={buildstationdetails.buildstation_code} disabled></lightning-input>
-                 </div>
-                 <div class="slds-col slds-size_1-of-1">
-                    Fleet Id :{buildstationdata.fleet_id}
+    <div class="slds-p-around_xxx-small"> <!--slds-p-around_xx-small-->
+           <template if:true={has8410}>
+               <lightning-button onclick={handlevalidation} variant="border-filled" label={buildstationcode} title="BuildStation"  class="slds-m-left_xx-small"></lightning-button>
+           </template>
+           <template if:true={has_pco}> <!--onclick={handlevalidation}-->
+               <lightning-button  onclick={handlevalidation} variant="border-filled" label="PCO" title="PCO"  class="slds-m-left_xx-small"></lightning-button>
+           </template>
+           <template if:true={has_bm35}>
+               <lightning-button onclick={handlevalidation} variant="border-filled" label="BM35" title="BM35"  class="slds-m-left_xx-small"></lightning-button>
+           </template>
+           <template if:true={has_op_check}>	
+               <lightning-button if:true={has_operation_check} onclick={handlevalidation} variant="destructive-text" label="OP-CK" title="OP-CK"  class="slds-m-left_xx-small"></lightning-button>	
+               <lightning-button if:false={has_operation_check} onclick={handlevalidation} variant="border-filled" label="OP-CK" title="OP-CK"  class="slds-m-left_xx-small"></lightning-button>	
+           </template>
+           <template if:true={hasdiscrepancy}>
+               <lightning-button onclick={handlevalidation} variant="border-filled" label="DISC" title="Discrepancy"  class="slds-m-left_xx-small"></lightning-button>
+           </template>
+           <template if:true={haspicvalidation}>
+               <!--<lightning-button-icon class="slds-m-left_xx-small" onclick={handlevalidation} icon-name="utility:image"   variant="border-filled" alternative-text="Picture Validation"  title="Picture Validation"></lightning-button-icon> -->
+               <!-- Variants of button style to be shown for validations see tooltip for details -->
+               <lightning-button-icon if:true={picvalidationoptional} onclick={handlevalidation} class="slds-m-left_xx-small" icon-name="utility:image" variant="border-filled" title="Picture Validation" alternative-text="Picture Validation" tooltip="Upload an Image" > </lightning-button-icon>
+               <lightning-button-icon if:true={picvalidationrequired} onclick={handlevalidation} class="slds-m-left_xx-small" icon-name="utility:image" variant="border-filled" title="Picture Validation" alternative-text="Picture Validation" tooltip="Picture Validation Required." icon-class="slds-button_icon-error" > </lightning-button-icon>
+               <lightning-button-icon if:true={imageuploaded} onclick={handlevalidation} class="slds-m-left_xx-small" icon-name="utility:image" variant="brand" title="Picture Validation" alternative-text="Picture Validation" tooltip="View Uploaded Image" > </lightning-button-icon>
+               
+           </template>
+           
+   <!-- Picture Validation  modal start -->
+   <template if:true={showpicvalmodal}>
+       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+           <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                   <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelpicturevalidation}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                   </button>
+                   <h2 title={buildstationdata.buildstation_id} id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                       Picture Validation - {buildstationdata.buildstation_code}
+                   </h2>
+               </header>
+               <!-- modal header end -->
+               <!-- modal body start -->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                   <!-- spinner start -->
+                   <div if:true={showSpinner}>
+                       <div class="slds-align_absolute-center">
+                           <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_inverse">
+                               <span class="slds-assistive-text">Loading</span>
+                               <div class="slds-spinner__dot-a"></div>
+                               <div class="slds-spinner__dot-b"></div>
+                           </div>
+                       </div> 
                    </div>
-                   <div class="slds-col slds-size_1-of-1">
-                    Picture Actual Id :{buildstationdata.picture_validation_id}
-                   </div>
-                 <div class="slds-col slds-size_1-of-1">
-                   Picture Target Id :{buildstationdata.picture_validation_target_image_id}
-                  </div>
-                 <div class="slds-col slds-size_1-of-1">
-                    Operation Log ID : {buildstationdata.ecard_operation_log_id}
-                 </div>
-                 <div class="slds-col slds-size_1-of-1">
-                    Buildstation ID : {buildstationdata.buildstation_id}
-                 </div>
-                </div> -->
-
-                <div if:true={showSpinnerforbuildstation}>
-                    <!--  <div class="slds-align_absolute-center">
-                        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
-                    </div>-->
-                    <div class="slds-align_absolute-center">
-                        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
-                         <span class="slds-assistive-text">Loading</span>
-                         <div class="slds-spinner__dot-a"></div>
-                        <div class="slds-spinner__dot-b"></div>
+                   <!-- spinner end -->
+                   <!--template if:true={stepone}-->
+                       <div class="slds-grid">
+                           <div class="slds-col slds-size_1-of-2">
+                               <article class="slds-card cardborder">
+                                   <div class="">
+                                       <div if:false={istargetimagepresent} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
+                                           <div if:true={permissionset.picvalidation_applytofleet.write}>
+                                               <lightning-input type="file"
+                                                   label="Upload Target Image"
+                                                   name="targetimage"
+                                                   accept={acceptedFormats}
+                                                   onchange={handletargetchange}
+                                                   >
+                                               </lightning-input>
+                                           </div>
+                                       </div>
+                                       <div if:true={istargetimagepresent} style="height:385px; " class="side_bar">
+                                           <img src={uploadedtargetimage} alt="This is the refrence image." class="targetImage"/>
+                                       </div>
+                                   </div>
+                                   <div class="cardfooter">Target Image
+                                           <lightning-button-icon if:true={istargetdelete} data-id={buildstationdata.buildstation_id} data-name={buildstationdata.fleet_id} variant="bare-inverse" size="small" onclick={deletetargetimage} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete"></lightning-button-icon>
+                                           <lightning-button-icon if:true={istargetimagepresent} variant="bare-inverse" size="small" onclick={rotate} icon-name="utility:rotate"  alternative-text="Rotate" class="slds-float_right slds-m-right_x-small" title="Rotate"></lightning-button-icon>
+                                   </div>    
+                               </article>
+                           </div>
+                           <div class="slds-col slds-size_1-of-2">
+                               <article class="slds-card cardborder">
+                                   <div class="">
+                                       <div if:false={isactualimagepresent} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
+                                           <div if:true={permissionset.picvalidation_actual_add.write}><!--Vishwas added condition-->
+                                               <lightning-input type="file"
+                                                   label="Upload Actual Image"
+                                                   name="actualimage"
+                                                   accept={acceptedFormats}
+                                                   onchange={handleFilesChange}
+                                                   >
+                                               </lightning-input>
+                                           </div>                                        
+                                       </div>
+                                       <div if:true={isactualimagepresent} style="height:385px; " class="side_bar">
+                                           <img src={uploadedimage} alt="This is the refrence image." />
+                                       </div>
+                                   </div>
+                                   <div class="cardfooter">Actual Image
+                                       <lightning-button-icon if:true={enabledeletebutton} variant="bare-inverse" size="small" onclick={goback} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete"></lightning-button-icon>
+                                  </div>
+                               </article>
+                           </div>
+                       </div>
+                   <!--/template-->
+               </div>
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                   <lightning-button label="Cancel" title="Cancel" onclick={cancelpicturevalidation} class="slds-m-right_x-small"></lightning-button>
+                   <lightning-button variant="brand" disabled={enableuploadbutton} label="Save" title="Save Image" onclick={uploadImage} icon-name="utility:upload" icon-position="right" class="slds-m-right_x-small"></lightning-button>
+               </footer>
+           </div>
+       </section>
+       <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- Picture validation modal end -->
+   
+    <!-- buildstationmodal Validation  modal start -->
+    <template if:true={showBuildStationmodal}>
+       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-02" aria-modal="true" aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open slds-modal_medium">
+           <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                   <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelbuildstationmodal}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                   </button>
+                   <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">
+                       {buildstationdetails.operation} - {buildstationdetails.buildstation_code}
+                   </h2>
+               </header>
+               <!-- modal body start -->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                   <!--<div class="slds-grid slds-wrap slds-gutters">
+                   <div class="slds-col slds-size_1-of-2">
+                       <lightning-input type="text" name="action"   label="Operation"  value={buildstationdetails.operation} disabled></lightning-input>
                     </div>
-                    </div> 
+                    <div class="slds-col slds-size_1-of-2">
+                       <lightning-input type="text" name="action"   label="Build Station Code"  value={buildstationdetails.buildstation_code} disabled></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1">
+                       Fleet Id :{buildstationdata.fleet_id}
+                      </div>
+                      <div class="slds-col slds-size_1-of-1">
+                       Picture Actual Id :{buildstationdata.picture_validation_id}
+                      </div>
+                    <div class="slds-col slds-size_1-of-1">
+                      Picture Target Id :{buildstationdata.picture_validation_target_image_id}
+                     </div>
+                    <div class="slds-col slds-size_1-of-1">
+                       Operation Log ID : {buildstationdata.ecard_operation_log_id}
+                    </div>
+                    <div class="slds-col slds-size_1-of-1">
+                       Buildstation ID : {buildstationdata.buildstation_id}
+                    </div>
+                   </div> -->
+   
+                   <div if:true={showSpinnerforbuildstation}>
+                       <!--  <div class="slds-align_absolute-center">
+                           <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+                       </div>-->
+                       <div class="slds-align_absolute-center">
+                           <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                           <div class="slds-spinner__dot-b"></div>
+                       </div>
+                       </div> 
+                    </div>
+                   <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
+                       <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                           <thead>
+                           <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                           <th class="tblheaderth" scope="col">
+                               <div class="slds-truncate" title="ITEM NUMBER">ITEM NUMBER</div>
+                           </th>
+                           <th class="tblheaderth" scope="col">
+                               <div class="slds-truncate" title="ITEM DESCRIPTION">ITEM DESCRIPTION</div>
+                           </th>
+                           <th class="tblheaderth" scope="col">
+                             <div class="slds-truncate" title="UNIT OF MEASURE">PRODUCT CODE</div>
+                          </th>
+                           <th class="tblheaderth" scope="col">
+                               <div class="slds-truncate" title="QUANTITY">QUANTITY</div>
+                           </th>
+                           <th class="tblheaderth" scope="col">
+                               <div class="slds-truncate" title="ACTION">ACTION</div>
+                           </th>
+                           </tr>
+                           </thead>
+                           <tbody>
+                               <template for:each={buildstationpartslist} for:item='buspart'>
+                                   <tr key={buspart.buspart_id}>
+                                       <td><div class="slds-truncate">{buspart.displyitemnumber}</div></td>
+                                       <td><div class="slds-truncate" >{buspart.buspart_name}</div></td>
+                                       <td><div class="slds-truncate" >{buspart.product_code}</div></td>
+                                       <td><div class="slds-truncate" >{buspart.quantity}</div></td>
+                                       <td>
+                                           <!--lightning-button  data-id={buspart.buspart_no} name={buildstationdata.buildstation_code} value={buspart.buspart_name} onclick={createshortage} variant="border-filled" label="Add Shortage" title={buspart.buspart_id}  class="slds-m-left_xx-small"></lightning-button-->
+                                           <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset} partnumber={buspart.buspart_no} bstationcode={buildstationdata.buildstation_code} partname={buspart.buspart_name} partid={buspart.buspart_id} bstationid={buildstationdata.buildstation_id}></c-new-shortage-component>
+                                       </td>
+                                   </tr>
+                               </template>
+                          </tbody>
+                       </table>
+                       <template if:true={isbuildstationpartlistempty}>
+                           <div class="slds-align_absolute-center">
+                               <div class="empty-state-container slds-text-align_center">
+                                 <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                                 <div class="emptymessage">
+                                   No data to display.
+                                 </div>
+                               </div>
+                           </div>
+                       </template>
+                   </div>
+   
                  </div>
-                <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
-                        <thead>
-                        <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                        <th class="tblheaderth" scope="col">
-                            <div class="slds-truncate" title="ITEM NUMBER">ITEM NUMBER</div>
-                        </th>
-                        <th class="tblheaderth" scope="col">
-                            <div class="slds-truncate" title="ITEM DESCRIPTION">ITEM DESCRIPTION</div>
-                        </th>
-                        <th class="tblheaderth" scope="col">
-                          <div class="slds-truncate" title="UNIT OF MEASURE">PRODUCT CODE</div>
+               
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                   <lightning-button label="Cancel" title="Cancel" onclick={cancelbuildstationmodal} class="slds-m-right_x-small"></lightning-button>
+                   <!--<lightning-button variant="brand" label="Update" title="Update" icon-position="right" class="slds-m-right_x-small"></lightning-button> -->
+               </footer>
+           </div>
+       </section>
+       <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- 8410 validation modal end -->
+   
+    <!-- PCO Validation  modal start -->
+    <template if:true={showPCOmodal}>
+       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-03" aria-modal="true" aria-describedby="modal-content-id-3" class="slds-modal slds-fade-in-open slds-modal_medium">
+           <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                   <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelPCOmodal}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                   </button>
+                   <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">
+                    PCO
+                   </h2>
+               </header>
+               <!-- modal body start -->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+                   <div if:true={showSpinner}>
+                       <div class="slds-align_absolute-center">
+                           <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                               <span class="slds-assistive-text">Loading</span>
+                               <div class="slds-spinner__dot-a"></div>
+                               <div class="slds-spinner__dot-b"></div>
+                           </div>
+                       </div> 
+                   </div>
+                   <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
+                       <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                           <thead>
+                               <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ITEM NUMBER">ITEM NUMBER</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ITEM DESCRIPTION">ITEM DESCRIPTION</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="UNIT OF MEASURE">PRODUCT CODE</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="QUANTITY">QUANTITY</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ACTION">ACTION</div>
+                                   </th>
+                               </tr>
+                           </thead>
+                           <tbody>
+                               <template for:each={buildstationpcodetails} for:item='pco'>
+                                   <tr key={pco.buspart_no}>
+                                       <td><div class="slds-truncate">{pco.displyitemnumber}</div></td>
+                                       <td><div class="slds-truncate" >{pco.buspart_name}</div></td>
+                                       <td><div class="slds-truncate" >{pco.product_code}</div></td>
+                                       <td><div class="slds-truncate" >{pco.quantity}</div></td>
+                                       <td>
+                                           <!--lightning-button  data-id={pco.buspart_no} name={pco.buildstation_code} value={pco.buspart_name} onclick={createshortage} variant="border-filled" label="Add Shortage" title={pco.buspart_id}  class="slds-m-left_xx-small"></lightning-button-->
+                                           <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset} partnumber={pco.buspart_no} bstationcode={pco.buildstation_code} partname={pco.buspart_name} partid={pco.buspart_id} bstationid={buildstationdata.buildstation_id}></c-new-shortage-component>
+                                       </td>
+                                   </tr>
+                               </template>
+                           </tbody>
+                       </table>
+                       <template if:true={isbuildstationpcolistempty}>
+                           <div class="slds-align_absolute-center">
+                               <div class="empty-state-container slds-text-align_center">
+                                   <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                                   <div class="emptymessage">
+                                       No data to display.
+                                   </div>
+                               </div>
+                           </div>
+                       </template>
+                   </div>
+               </div>
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                   <lightning-button label="Cancel" title="Cancel" onclick={cancelPCOmodal} class="slds-m-right_x-small"></lightning-button>
+                   <!--lightning-button variant="brand" label="Update" title="Update" icon-position="right" class="slds-m-right_x-small"></lightning-button-->
+               </footer>
+           </div>
+       </section>
+       <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- PCO validation modal end -->
+   
+    <!-- BM35 Validation  modal start -->
+    <template if:true={showBM35modal}>
+       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-04" aria-modal="true" aria-describedby="modal-content-id-4" class="slds-modal slds-fade-in-open slds-modal_medium">
+           <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                   <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelBM35modal}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                   </button>
+                   <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">
+                    BM35
+                   </h2>
+               </header>
+               <!-- modal body start -->
+               <!--div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+                   <div class="slds-text-heading_medium slds-hyphenate">BM35</div>
+                 </div-->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+                   <div if:true={showSpinner}>
+                       <div class="slds-align_absolute-center">
+                           <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                               <span class="slds-assistive-text">Loading</span>
+                               <div class="slds-spinner__dot-a"></div>
+                               <div class="slds-spinner__dot-b"></div>
+                           </div>
+                       </div> 
+                   </div>
+                   
+                   <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
+                       <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                           <thead>
+                               <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ITEM NUMBER">ITEM NUMBER</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ITEM DESCRIPTION">ITEM DESCRIPTION</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="UNIT OF MEASURE">PRODUCT CODE</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="QUANTITY">QUANTITY</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="QUANTITY">BUILD STATION</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ACTION">ACTION</div>
+                                   </th>
+                               </tr>
+                           </thead>
+                           <tbody>
+                               <template for:each={buildstationbm35details} for:item='bm35'>
+                                   <tr key={bm35.buspart_no}>
+                                       <td><div class="slds-truncate">{bm35.displyitemnumber}</div></td>
+                                       <td><div class="slds-truncate" >{bm35.buspart_name}</div></td>
+                                       <td><div class="slds-truncate" >{bm35.product_code}</div></td>
+                                       <td><div class="slds-truncate" >{bm35.quantity}</div></td>
+                                       <td><div class="slds-truncate" >{bm35.buildstation_code}</div></td>
+                                       <td>
+                                           <!--lightning-button  data-id={bm35.buspart_no} name={bm35.buildstation_code} value={bm35.buspart_name} onclick={createshortage} variant="border-filled" label="Add Shortage" title={bm35.buspart_id}  class="slds-m-left_xx-small"></lightning-button-->
+                                           <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset} partnumber={bm35.buspart_no} bstationcode={bm35.buildstation_code} partname={bm35.buspart_name} partid={bm35.buspart_id} bstationid={buildstationdata.buildstation_id}></c-new-shortage-component>
+                                       </td>
+                                   </tr>
+                               </template>
+                           </tbody>
+                       </table>
+                       <template if:true={isbuildstationbm35listempty}>
+                           <div class="slds-align_absolute-center">
+                               <div class="empty-state-container slds-text-align_center">
+                                   <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                                   <div class="emptymessage">
+                                       No data to display.
+                                   </div>
+                               </div>
+                           </div>
+                       </template>
+                   </div>
+               </div>  
+               
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                   <lightning-button label="Cancel" title="Cancel" onclick={cancelBM35modal} class="slds-m-right_x-small"></lightning-button>
+                   <!--lightning-button variant="brand" label="Update" title="Update" icon-position="right" class="slds-m-right_x-small"></lightning-button-->
+               </footer>
+           </div>
+       </section>
+       <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- BM35 validation modal end -->
+   
+   <!-- Operation Checks modal start -->
+   <template if:true={showopckmodal}>
+       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-06" aria-modal="true" aria-describedby="modal-content-id-6" class="slds-modal slds-fade-in-open slds-modal_medium">
+           <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                   <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelopckmodal}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                   </button>
+                   <h2 id="modal-heading-06" class="slds-text-heading_medium slds-hyphenate">
+                    OPERATION CHECKS
+                   </h2>
+               </header>
+               <!-- modal body start -->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-6">
+                   <div if:true={showSpinner}>
+                       <div class="slds-align_absolute-center">
+                           <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                               <span class="slds-assistive-text">Loading</span>
+                               <div class="slds-spinner__dot-a"></div>
+                               <div class="slds-spinner__dot-b"></div>
+                           </div>
+                       </div> 
+                   </div>
+                   
+                   <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
+                       <table class="auto-index slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                           <thead>
+                               <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ID">SL NO.</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="VALUE">VALUE</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ACTION">ACTION</div>
+                                   </th>
+                                   <th class="tblheaderth" scope="col">
+                                       <div class="slds-truncate" title="ACTION">DISCREPANCY</div>
+                                   </th>
+                               </tr>
+                           </thead>
+                           <tbody>
+                               <template for:each={opckdetails} for:item='opck'>
+                                   <tr key={opck.operation_check_id}>
+                                       <td></td>
+                                       <td><div class="slds-truncate" >{opck.operation_check_description}</div></td>
+                                       <td><div if:false={opck.value_required} class=""><lightning-input max-length="30" variant="label-hidden" type="text" title={opck.operation_check_id} name="op_check_value" placeholder="Not Required" readonly="true"></lightning-input></div>
+                                           <div if:true={opck.value_required} class=""><lightning-input disabled={opck.op_check_status} max-length="30" onblur={updateopckitem} variant="label-hidden" type="text" title={opck.operation_check_id} name="op_check_value" value={opck.op_check_value} placeholder=""></lightning-input></div></td>
+                                       <td>
+                                           <div class="">
+                                               <c-atp-actions disabled="false" onstatuschange={existingrowstatuschange} permitteduser={permissionset.operation_check.write} uniqueid={opck.operation_check_id} isok={opck.op_check_status}></c-atp-actions>
+                                           </div>
+                                       </td>
+                                       <td>
+                                           <!--lightning-button  data-id={opck.operation_check_id} name={opck.operation_check_description} value={opck.operation_check_description} onclick={creatediscrepancy} variant="border-filled" label="Add Discrepancy" title={opck.operation_check_id}  class="slds-m-left_xx-small"></lightning-button-->
+                                           <c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} buildstationid={buildstationdata.buildstation_id} permissionset={permissionset}></c-new-discrepancy-component>
+                                       </td>
+                                   </tr>
+                               </template>
+                           </tbody>
+                       </table>
+                       <template if:true={isbuildstationopcklistempty}>
+                           <div class="slds-align_absolute-center">
+                               <div class="empty-state-container slds-text-align_center">
+                                   <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                                   <div class="emptymessage">
+                                       No data to display.
+                                   </div>
+                               </div>
+                           </div>
+                       </template>
+                   </div>
+               </div>  
+               
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                   <lightning-button label="Cancel" title="Cancel" onclick={cancelopckmodal} class="slds-m-right_x-small"></lightning-button>
+               </footer>
+           </div>
+       </section>
+       <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- Operation Checks modal end -->
+           
+    <!-- Discrepancy Validation  modal start -->
+    <template if:true={showdiscrepancymodal}>
+       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-05" aria-modal="true" aria-describedby="modal-content-id-5" class="slds-modal slds-fade-in-open slds-modal_medium">
+           <div class="slds-modal__container">
+               <!-- modal header start -->
+               <header class="slds-modal__header">
+                   <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={canceldiscrepancymodal}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                   </button>
+                   <h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate">
+                    Discrepancy
+                   </h2>
+               </header>
+               <!-- modal body start -->
+               <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
+                   <div class="slds-card">
+                   <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                       <thead>
+                       <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                       <th class="" scope="col">
+                            <div class="slds-align_absolute-center slds-truncate" title="STATUS">STATUS</div>
                        </th>
-                        <th class="tblheaderth" scope="col">
-                            <div class="slds-truncate" title="QUANTITY">QUANTITY</div>
-                        </th>
-                        <th class="tblheaderth" scope="col">
-                            <div class="slds-truncate" title="ACTION">ACTION</div>
-                        </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={buildstationpartslist} for:item='buspart'>
-                                <tr key={buspart.buspart_id}>
-                                    <td><div class="slds-truncate">{buspart.displyitemnumber}</div></td>
-                                    <td><div class="slds-truncate" >{buspart.buspart_name}</div></td>
-                                    <td><div class="slds-truncate" >{buspart.product_code}</div></td>
-                                    <td><div class="slds-truncate" >{buspart.quantity}</div></td>
-                                    <td>
-                                        <!--lightning-button  data-id={buspart.buspart_no} name={buildstationdata.buildstation_code} value={buspart.buspart_name} onclick={createshortage} variant="border-filled" label="Add Shortage" title={buspart.buspart_id}  class="slds-m-left_xx-small"></lightning-button-->
-                                        <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset} partnumber={buspart.buspart_no} bstationcode={buildstationdata.buildstation_code} partname={buspart.buspart_name} partid={buspart.buspart_id} bstationid={buildstationdata.buildstation_id}></c-new-shortage-component>
-                                    </td>
-                                </tr>
-                            </template>
-                       </tbody>
-                    </table>
-                    <template if:true={isbuildstationpartlistempty}>
-                        <div class="slds-align_absolute-center">
-                            <div class="empty-state-container slds-text-align_center">
-                              <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
-                              <div class="emptymessage">
-                                No data to display.
-                              </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-              </div>
-            
-            <!-- modal footer start-->
-            <footer class="slds-modal__footer">
-                <lightning-button label="Cancel" title="Cancel" onclick={cancelbuildstationmodal} class="slds-m-right_x-small"></lightning-button>
-                <!--<lightning-button variant="brand" label="Update" title="Update" icon-position="right" class="slds-m-right_x-small"></lightning-button> -->
-            </footer>
-        </div>
-    </section>
-    <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!-- 8410 validation modal end -->
-
- <!-- PCO Validation  modal start -->
- <template if:true={showPCOmodal}>
-    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-03" aria-modal="true" aria-describedby="modal-content-id-3" class="slds-modal slds-fade-in-open slds-modal_medium">
-        <div class="slds-modal__container">
-            <!-- modal header start -->
-            <header class="slds-modal__header">
-                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelPCOmodal}>
-                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
-                </button>
-                <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">
-                 PCO
-                </h2>
-            </header>
-            <!-- modal body start -->
-            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
-                <div if:true={showSpinner}>
-                    <div class="slds-align_absolute-center">
-                        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
-                            <span class="slds-assistive-text">Loading</span>
-                            <div class="slds-spinner__dot-a"></div>
-                            <div class="slds-spinner__dot-b"></div>
-                        </div>
-                    </div> 
-                </div>
-                <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
-                        <thead>
-                            <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ITEM NUMBER">ITEM NUMBER</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ITEM DESCRIPTION">ITEM DESCRIPTION</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="UNIT OF MEASURE">PRODUCT CODE</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="QUANTITY">QUANTITY</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ACTION">ACTION</div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={buildstationpcodetails} for:item='pco'>
-                                <tr key={pco.buspart_no}>
-                                    <td><div class="slds-truncate">{pco.displyitemnumber}</div></td>
-                                    <td><div class="slds-truncate" >{pco.buspart_name}</div></td>
-                                    <td><div class="slds-truncate" >{pco.product_code}</div></td>
-                                    <td><div class="slds-truncate" >{pco.quantity}</div></td>
-                                    <td>
-                                        <!--lightning-button  data-id={pco.buspart_no} name={pco.buildstation_code} value={pco.buspart_name} onclick={createshortage} variant="border-filled" label="Add Shortage" title={pco.buspart_id}  class="slds-m-left_xx-small"></lightning-button-->
-                                        <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset} partnumber={pco.buspart_no} bstationcode={pco.buildstation_code} partname={pco.buspart_name} partid={pco.buspart_id} bstationid={buildstationdata.buildstation_id}></c-new-shortage-component>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                    <template if:true={isbuildstationpcolistempty}>
-                        <div class="slds-align_absolute-center">
-                            <div class="empty-state-container slds-text-align_center">
-                                <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
-                                <div class="emptymessage">
-                                    No data to display.
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-            <!-- modal footer start-->
-            <footer class="slds-modal__footer">
-                <lightning-button label="Cancel" title="Cancel" onclick={cancelPCOmodal} class="slds-m-right_x-small"></lightning-button>
-                <!--lightning-button variant="brand" label="Update" title="Update" icon-position="right" class="slds-m-right_x-small"></lightning-button-->
-            </footer>
-        </div>
-    </section>
-    <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!-- PCO validation modal end -->
-
- <!-- BM35 Validation  modal start -->
- <template if:true={showBM35modal}>
-    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-04" aria-modal="true" aria-describedby="modal-content-id-4" class="slds-modal slds-fade-in-open slds-modal_medium">
-        <div class="slds-modal__container">
-            <!-- modal header start -->
-            <header class="slds-modal__header">
-                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelBM35modal}>
-                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
-                </button>
-                <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">
-                 BM35
-                </h2>
-            </header>
-            <!-- modal body start -->
-            <!--div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
-                <div class="slds-text-heading_medium slds-hyphenate">BM35</div>
-              </div-->
-            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
-                <div if:true={showSpinner}>
-                    <div class="slds-align_absolute-center">
-                        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
-                            <span class="slds-assistive-text">Loading</span>
-                            <div class="slds-spinner__dot-a"></div>
-                            <div class="slds-spinner__dot-b"></div>
-                        </div>
-                    </div> 
-                </div>
-                
-                <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
-                        <thead>
-                            <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ITEM NUMBER">ITEM NUMBER</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ITEM DESCRIPTION">ITEM DESCRIPTION</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="UNIT OF MEASURE">PRODUCT CODE</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="QUANTITY">QUANTITY</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="QUANTITY">BUILD STATION</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ACTION">ACTION</div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={buildstationbm35details} for:item='bm35'>
-                                <tr key={bm35.buspart_no}>
-                                    <td><div class="slds-truncate">{bm35.displyitemnumber}</div></td>
-                                    <td><div class="slds-truncate" >{bm35.buspart_name}</div></td>
-                                    <td><div class="slds-truncate" >{bm35.product_code}</div></td>
-                                    <td><div class="slds-truncate" >{bm35.quantity}</div></td>
-                                    <td><div class="slds-truncate" >{bm35.buildstation_code}</div></td>
-                                    <td>
-                                        <!--lightning-button  data-id={bm35.buspart_no} name={bm35.buildstation_code} value={bm35.buspart_name} onclick={createshortage} variant="border-filled" label="Add Shortage" title={bm35.buspart_id}  class="slds-m-left_xx-small"></lightning-button-->
-                                        <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset} partnumber={bm35.buspart_no} bstationcode={bm35.buildstation_code} partname={bm35.buspart_name} partid={bm35.buspart_id} bstationid={buildstationdata.buildstation_id}></c-new-shortage-component>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                    <template if:true={isbuildstationbm35listempty}>
-                        <div class="slds-align_absolute-center">
-                            <div class="empty-state-container slds-text-align_center">
-                                <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
-                                <div class="emptymessage">
-                                    No data to display.
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>  
-            
-            <!-- modal footer start-->
-            <footer class="slds-modal__footer">
-                <lightning-button label="Cancel" title="Cancel" onclick={cancelBM35modal} class="slds-m-right_x-small"></lightning-button>
-                <!--lightning-button variant="brand" label="Update" title="Update" icon-position="right" class="slds-m-right_x-small"></lightning-button-->
-            </footer>
-        </div>
-    </section>
-    <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!-- BM35 validation modal end -->
-
-<!-- Operation Checks modal start -->
-<template if:true={showopckmodal}>
-    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-06" aria-modal="true" aria-describedby="modal-content-id-6" class="slds-modal slds-fade-in-open slds-modal_medium">
-        <div class="slds-modal__container">
-            <!-- modal header start -->
-            <header class="slds-modal__header">
-                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelopckmodal}>
-                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
-                </button>
-                <h2 id="modal-heading-06" class="slds-text-heading_medium slds-hyphenate">
-                 OPERATION CHECKS
-                </h2>
-            </header>
-            <!-- modal body start -->
-            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-6">
-                <div if:true={showSpinner}>
-                    <div class="slds-align_absolute-center">
-                        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
-                            <span class="slds-assistive-text">Loading</span>
-                            <div class="slds-spinner__dot-a"></div>
-                            <div class="slds-spinner__dot-b"></div>
-                        </div>
-                    </div> 
-                </div>
-                
-                <div style="border-left: 1px solid rgb(221, 219, 218);border-right: 1px solid rgb(221, 219, 218);">
-                    <table class="auto-index slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
-                        <thead>
-                            <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ID">SL NO.</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="VALUE">VALUE</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ACTION">ACTION</div>
-                                </th>
-                                <th class="tblheaderth" scope="col">
-                                    <div class="slds-truncate" title="ACTION">DISCREPANCY</div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={opckdetails} for:item='opck'>
-                                <tr key={opck.operation_check_id}>
-                                    <td></td>
-                                    <td><div class="slds-truncate" >{opck.operation_check_description}</div></td>
-                                    <td><div if:false={opck.value_required} class=""><lightning-input max-length="30" variant="label-hidden" type="text" title={opck.operation_check_id} name="op_check_value" placeholder="Not Required" readonly="true"></lightning-input></div>
-                                        <div if:true={opck.value_required} class=""><lightning-input disabled={opck.op_check_status} max-length="30" onblur={updateopckitem} variant="label-hidden" type="text" title={opck.operation_check_id} name="op_check_value" value={opck.op_check_value} placeholder=""></lightning-input></div></td>
-                                    <td>
-                                        <div class="">
-                                            <c-atp-actions disabled="false" onstatuschange={existingrowstatuschange} permitteduser={permissionset.operation_check.write} uniqueid={opck.operation_check_id} isok={opck.op_check_status}></c-atp-actions>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <!--lightning-button  data-id={opck.operation_check_id} name={opck.operation_check_description} value={opck.operation_check_description} onclick={creatediscrepancy} variant="border-filled" label="Add Discrepancy" title={opck.operation_check_id}  class="slds-m-left_xx-small"></lightning-button-->
-                                        <c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentid} buildstationrequired="true" department-id-map={departmentIdMap} buildstationid={buildstationdata.buildstation_id} permissionset={permissionset}></c-new-discrepancy-component>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                    <template if:true={isbuildstationopcklistempty}>
-                        <div class="slds-align_absolute-center">
-                            <div class="empty-state-container slds-text-align_center">
-                                <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
-                                <div class="emptymessage">
-                                    No data to display.
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>  
-            
-            <!-- modal footer start-->
-            <footer class="slds-modal__footer">
-                <lightning-button label="Cancel" title="Cancel" onclick={cancelopckmodal} class="slds-m-right_x-small"></lightning-button>
-            </footer>
-        </div>
-    </section>
-    <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!-- Operation Checks modal end -->
-        
- <!-- Discrepancy Validation  modal start -->
- <template if:true={showdiscrepancymodal}>
-    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-05" aria-modal="true" aria-describedby="modal-content-id-5" class="slds-modal slds-fade-in-open slds-modal_medium">
-        <div class="slds-modal__container">
-            <!-- modal header start -->
-            <header class="slds-modal__header">
-                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={canceldiscrepancymodal}>
-                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
-                </button>
-                <h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate">
-                 Discrepancy
-                </h2>
-            </header>
-            <!-- modal body start -->
-            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
-                <div class="slds-card">
-                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
-                    <thead>
-                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                    <th class="" scope="col">
-                         <div class="slds-align_absolute-center slds-truncate" title="STATUS">STATUS</div>
-                    </th>
-                    <th class="" scope="col">
-                        <div class="slds-align_absolute-center slds-truncate" title="">DISCREPANCIES</div>
-                    </th>
-                    <th class="" scope="col">
-                        <div class="slds-align_absolute-center slds-truncate" title="PROD">PROD</div>
-                    </th>
-                    <th class="" scope="col">
-                        <div class="slds-align_absolute-center slds-truncate" title="ACTION">ACTION</div>
-                    </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><div class="slds-align_absolute-center">OPEN</div></td>
-                            <td><div class="slds-align_absolute-center" >Radiator leak</div></td>
-                            <td><div class="slds-align_absolute-center" >Joseph Pauly</div></td>
-                            <td><div class="slds-align_absolute-center" ></div></td>
-                        </tr>
-                        <tr>
-                            <td><div class="slds-align_absolute-center">OPEN</div></td>
-                            <td><div class="slds-align_absolute-center" >Fire Suppression</div></td>
-                            <td><div class="slds-align_absolute-center" >Ajay Krishna R</div></td>
-                            <td><div class="slds-align_absolute-center" ></div></td>
-                        </tr>
-                      </tbody>
-                    </table>
-            </div>
-              </div>
-            
-            <!-- modal footer start-->
-            <footer class="slds-modal__footer">
-                <lightning-button label="Cancel" title="Cancel" onclick={canceldiscrepancymodal} class="slds-m-right_x-small"></lightning-button>
-            </footer>
-        </div>
-    </section>
-    <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!-- Discrepancy validation modal end -->        
-        
-    </div>
-</template>
+                       <th class="" scope="col">
+                           <div class="slds-align_absolute-center slds-truncate" title="">DISCREPANCIES</div>
+                       </th>
+                       <th class="" scope="col">
+                           <div class="slds-align_absolute-center slds-truncate" title="PROD">PROD</div>
+                       </th>
+                       <th class="" scope="col">
+                           <div class="slds-align_absolute-center slds-truncate" title="ACTION">ACTION</div>
+                       </th>
+                       </tr>
+                       </thead>
+                       <tbody>
+                           <tr>
+                               <td><div class="slds-align_absolute-center">OPEN</div></td>
+                               <td><div class="slds-align_absolute-center" >Radiator leak</div></td>
+                               <td><div class="slds-align_absolute-center" >Joseph Pauly</div></td>
+                               <td><div class="slds-align_absolute-center" ></div></td>
+                           </tr>
+                           <tr>
+                               <td><div class="slds-align_absolute-center">OPEN</div></td>
+                               <td><div class="slds-align_absolute-center" >Fire Suppression</div></td>
+                               <td><div class="slds-align_absolute-center" >Ajay Krishna R</div></td>
+                               <td><div class="slds-align_absolute-center" ></div></td>
+                           </tr>
+                         </tbody>
+                       </table>
+               </div>
+                 </div>
+               
+               <!-- modal footer start-->
+               <footer class="slds-modal__footer">
+                   <lightning-button label="Cancel" title="Cancel" onclick={canceldiscrepancymodal} class="slds-m-right_x-small"></lightning-button>
+               </footer>
+           </div>
+       </section>
+       <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- Discrepancy validation modal end -->        
+           
+       </div>
+   </template>

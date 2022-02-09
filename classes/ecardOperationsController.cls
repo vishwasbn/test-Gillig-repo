@@ -2268,6 +2268,111 @@ public class ecardOperationsController {
                 return wrapobj;
             }
         }
+
+        //Method to fetch the Shortage Causes list
+        @AuraEnabled
+        public static EcardOperationlog getPartshortageCauses(){
+            EcardOperationlog wrapobj = new EcardOperationlog();
+            try {
+                // AuthorisationData.Token tokendata = userAuthentication.getCachedAccesstoken();
+                AuthorisationData.Token tokendata = userAuthentication.getAccesstoken();
+                string endpoint = System.Label.EcardAppendpoint+'api/shortagecauses';
+                userAuthentication.ResponseWrapper response = userAuthentication.getData(endpoint, 'GET', tokendata.access_token, tokendata.refresh_token);
+                wrapobj.isError = response.isError;
+                if(response.isError){
+                    wrapobj.errorMessage = response.statusCode;
+                    wrapobj.responsebody = response.responseBody;
+                    throw new EcardOperationsException(response.statusCode); 
+                }
+                else{
+                   wrapobj.responsebody = response.responseBody;
+                   wrapobj.errorMessage = response.statusCode;
+                }
+                return wrapobj;
+                
+            } catch (Exception e) {
+                throw new AuraHandledException(e.getMessage());
+            }
+        }
+
+        //Method to fetch All Vendor List of a Bus_Part_No
+        @AuraEnabled
+        public static EcardOperationlog getAllpartsVendorlist(String partNumber){
+            EcardOperationlog wrapobj = new EcardOperationlog();
+            try {
+                // AuthorisationData.Token tokendata = userAuthentication.getCachedAccesstoken();
+                AuthorisationData.Token tokendata = userAuthentication.getAccesstoken();
+                string endpoint = System.Label.EcardAppendpoint+'api/vendorsbypartno/';
+                userAuthentication.ResponseWrapper response = userAuthentication.getData(endpoint+partNumber, 'GET', tokendata.access_token, tokendata.refresh_token);
+                wrapobj.isError = response.isError;
+                if(response.isError){
+                    wrapobj.errorMessage = response.statusCode;
+                    wrapobj.responsebody = response.responseBody;
+                    throw new EcardOperationsException(response.statusCode); 
+                }
+                else{
+                   wrapobj.responsebody = response.responseBody;
+                   wrapobj.errorMessage = response.statusCode;
+                }
+                return wrapobj;
+                
+            } catch (Exception e) {
+                throw new AuraHandledException(e.getMessage());
+            }
+        }
+
+        //Method to get the default Vendor and Buyer of a Bus_Part_No
+        @AuraEnabled
+        public static EcardOperationlog getDefaultVendorandBuyer(String partNumber){
+            EcardOperationlog wrapobj = new EcardOperationlog();
+            try {
+                // AuthorisationData.Token tokendata = userAuthentication.getCachedAccesstoken();
+                AuthorisationData.Token tokendata = userAuthentication.getAccesstoken();
+                string endpoint = System.Label.EcardAppendpoint+'api/buyerAndVendorDetails/';
+                userAuthentication.ResponseWrapper response = userAuthentication.getData(endpoint+partNumber, 'GET', tokendata.access_token, tokendata.refresh_token);
+                wrapobj.isError = response.isError;
+                if(response.isError){
+                    wrapobj.errorMessage = response.statusCode;
+                    wrapobj.responsebody = response.responseBody;
+                    throw new EcardOperationsException(response.statusCode); 
+                }
+                else{
+                   wrapobj.responsebody = response.responseBody;
+                   wrapobj.errorMessage = response.statusCode;
+                }
+                return wrapobj;
+                
+            } catch (Exception e) {
+                throw new AuraHandledException(e.getMessage());
+            }
+        }
+
+    @AuraEnabled
+    public static EcardOperationlog getAllPartshortages(string ecardbusstatus){
+        EcardOperationlog log = new EcardOperationlog();
+        AuthorisationData.Token tokendata = userAuthentication.getAccesstoken();//Vishwas
+        // AuthorisationData.Token tokendata = userAuthentication.getCachedAccesstoken();//Vishwas
+        string endpoint = System.Label.EcardAppendpoint+'api/ecardshortagedb/';
+        userAuthentication.ResponseWrapper statusresponse = userAuthentication.getData(endpoint+ecardbusstatus, 'GET', tokendata.access_token, tokendata.refresh_token);
+        if(statusresponse.isError){
+            log.isError = statusresponse.isError;
+            log.operationlogresponse = statusresponse.responseBody;
+            log.responsebody = statusresponse.responseBody;
+            log.errorMessage = statusresponse.statusCode;
+            if(statusresponse.statusCode == '401'){
+                // Some error has happened
+            }
+            else{
+                // Serious authentication error
+            }
+        }
+        else{
+            log.isError = statusresponse.isError;
+            log.operationlogresponse = statusresponse.responseBody;
+            log.responsebody = statusresponse.responseBody;
+        }
+        return log;
+    }
     
     public class buildstationUserWrap{
         @AuraEnabled
