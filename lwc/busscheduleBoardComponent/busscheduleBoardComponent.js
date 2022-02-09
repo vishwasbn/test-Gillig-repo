@@ -50,7 +50,7 @@ export default class BusscheduleBoardComponent extends NavigationMixin(Lightning
   @track departmentnameidMap;
   @track departmentlistoptions;
   @track selecteddepartment;
-  @track selecteddepartmentid=1;
+  @track selecteddepartmentid = '1';
 
    // Use whenever a false attribute is required in Component.html
    get returnfalse(){
@@ -87,11 +87,49 @@ get returntrue(){
 
   
   
-  connectedCallback(){
+  /*connectedCallback(){
     loadStyle(this, HideLightningHeader);
     this.setdepartmentvalues();
     this.loadscheduleboarddata();
- }
+ }*/ //Unused code commented
+
+    connectedCallback() {
+        loadStyle(this, HideLightningHeader);
+        this.setdepartmentvalues();
+        this.decideview();
+    }
+
+    //Added to facilitate property initialisation when navigating from ecardview
+    decideview() {
+        var scheduledata = JSON.parse(localStorage.getItem('scheduledata'));
+        if (scheduledata == undefined || scheduledata == null) {
+            this.loadscheduleboarddata();
+        }
+        else {
+            this.itemstosearch = scheduledata.itemstosearch;
+            this.bustypelist = scheduledata.bustypelist;
+            this.buspropulsionlist = scheduledata.buspropulsionlist;
+            this.busstatuslist = scheduledata.busstatuslist;
+            this.selectedBusType = scheduledata.selectedbustype;
+            this.selectedCustomer = scheduledata.selectedcustomer;
+            this.selectedDate = scheduledata.selectedDate;
+            this.selectedBusPropulsion = scheduledata.selectedpropulsion;
+            this.selectedBusStatus = scheduledata.selectedbusstatus;
+            this.partShortageFilter = scheduledata.partShortageFilter;
+            this.discrepancyFilter = scheduledata.discrepancyFilter;
+            this.completebusschedule = scheduledata.completebusschedule;
+            this.selectedDays = scheduledata.selectedDays;
+            this.formattedselectedDate = scheduledata.formattedselectedDate;
+            this.formattedtodaysDate = scheduledata.formattedtodaysDate;
+            this.dateFieldValue = scheduledata.dateFieldValue;
+            this.backlimit = scheduledata.backlimit;
+            this.todaysDate = scheduledata.todaysDate;
+            this.frontlimit = scheduledata.frontlimit;
+            this.selecteddepartmentid = scheduledata.selecteddepartmentid;
+            localStorage.removeItem('scheduledata');
+            this.handleallFilterchanges();
+        }
+    }
 
   getschedulemapdata(schedulelist, dayslist){
     let map = [];
@@ -293,9 +331,23 @@ get returntrue(){
   }
 
  loaddata(data){
-        this.showSpinner = true;
+        //this.showSpinner = true;
         this.itemstosearch = data.searchlist;
+        //start - added to enable filter capture for the depatment change handler
         var today = new Date();
+        this.formattedtodaysDate = today.getFullYear() + '-' + ((today.getMonth() + 1) <= 9 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1)) + '-' + ((today.getDate()) <= 9 ? "0" + (today.getDate()) : (today.getDate()));
+        this.todaysDate = this.todaysDate != undefined ? this.todaysDate : today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+        var scheduleBoarddata = data.scheduleBoarddata;
+        this.completebusschedule = []; //empty the complete list - avoid old value if the response value is empty 
+        for (var i in scheduleBoarddata) {
+            this.completebusschedule.push({
+                value: scheduleBoarddata[i].value,
+                key: scheduleBoarddata[i].key
+            });
+        }
+        this.handleallFilterchanges();
+        //End - added to enable filter capture for the depatment change handler
+        /*var today = new Date();
         this.formattedtodaysDate = today.getFullYear()+'-'+((today.getMonth() + 1) <= 9 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1))+'-'+( (today.getDate()) <= 9 ? "0" + (today.getDate()) : (today.getDate()));
         this.todaysDate = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
         var scheduleBoarddata = data.scheduleBoarddata;
@@ -380,9 +432,10 @@ get returntrue(){
         var modifiedlist = this.builddummydata(mapdata);
         // Align design
         this.mapData = modifiedlist;
+        this.setLimits(event,new Date()); */
         this.setLimits(event,new Date());
-        this.showSpinner = false;
-        this.error = undefined;
+        //this.showSpinner = false;
+        //this.error = undefined;
     }
 
  setLimits(event, today){
@@ -748,6 +801,7 @@ get returntrue(){
                 var outerbusclass = 'slds-box busbox';
                 var busdetails = this.completebusschedule[key].value[bus];
                 var dategeneric = new Date(busdetails.busScheduledate).valueOf();
+                var imgdefault = (busdetails.curb_side_image_url == "" || busdetails.curb_side_image_url == null) ? true : false;
                 var buswithstyle = {
                     activeday:activedaybus,
                     outerbusclass: outerbusclass,
@@ -765,8 +819,13 @@ get returntrue(){
                     hasPartshortage : busdetails.busHasPartshortage,
                     OutofStationtotal : busdetails.busoutofStationtotal,
                     bus_image_url:busdetails.bus_image_url,
-                    defaultimage:busdetails.defaultimage,
-                    ecardid : busdetails.ecardid
+                    //defaultimage:busdetails.defaultimage,
+                    defaultimage: imgdefault,
+                    ecardid: busdetails.ecardid,
+                    busSeqavailable: busdetails.busSeqavailable,
+                    busSequence: busdetails.busSequence,
+                    key: this.completebusschedule[key].key,
+                    ScheduledDatenonformattted: busdetails.busScheduledate
                 };
                 busscheduleforday.push(buswithstyle);
             }
@@ -994,7 +1053,35 @@ handlebustypechange(event) {
 }
 
 navigateToEcard() {
-    var ecardid = JSON.stringify(this.selectedBusDetail);
+    //Start - store filter values while navigating to ecardview
+    var requireddata = {
+        scheduleboard: true,
+        selectedbustype: this.selectedBusType,
+        selectedcustomer: this.selectedCustomer,
+        selectedDate: this.dateFieldValue,
+        selectedpropulsion: this.selectedBusPropulsion,
+        selectedbusstatus: this.selectedBusStatus,
+        partShortageFilter: this.partShortageFilter,
+        discrepancyFilter: this.discrepancyFilter,
+        completebusschedule: this.completebusschedule,
+        selectedDays: this.selectedDays,
+        formattedselectedDate: this.formattedselectedDate,
+        formattedtodaysDate: this.formattedtodaysDate,
+        dateFieldValue: this.dateFieldValue,
+        backlimit: this.backlimit,
+        todaysDate: this.todaysDate,
+        frontlimit: this.frontlimit,
+        selectedCustomer: this.selectedCustomer,
+        itemstosearch: this.itemstosearch,
+        bustypelist: this.bustypelist,
+        buspropulsionlist: this.buspropulsionlist,
+        busstatuslist: this.busstatuslist,
+        selecteddepartmentid: this.selecteddepartmentid,
+        ecardid: this.selectedBusDetail
+    }
+    //End - store filter values while navigating to ecardview
+    //var ecardid = JSON.stringify(this.selectedBusDetail); //Commented
+    var ecardid = JSON.stringify(requireddata); //added
     localStorage.setItem('ecardid', ecardid);
     // Navigate to a specific CustomTab.
     this[NavigationMixin.Navigate]({
@@ -1012,11 +1099,11 @@ navigateToEcard() {
     });
 }
 
-setdepartmentvalues(){
+async setdepartmentvalues(){
         
     //let authorisationdata = this.authorisationdata;
     
-    getDepartmentdata(null)
+    await getDepartmentdata(null)
     .then(result => {  
         /*var departmentlistvalues = ['ALL DEPARTMENTS'];
         var departmentidnewmap = [{'bus_area_discrepancy_enabled':false,
@@ -1032,8 +1119,8 @@ setdepartmentvalues(){
         }
         this.departmentnameidMap = departmentidnewmap;
         this.departmentlistoptions = departmentidnewmap;
-        this.selecteddepartment = this.departmentnameidMap[1].label;
-        this.selecteddepartmentid = this.departmentnameidMap[1].value; // 1 for 1st department
+        //this.selecteddepartment = this.departmentnameidMap[1].label;
+        //this.selecteddepartmentid = this.departmentnameidMap[1].value; // 1 for 1st department
         //this.nextdepartment = this.departmentnameidMap[1].value; 
         for(var dept in result.objectdata){
             departmentlistvalues.push(result.objectdata[dept].department_name);

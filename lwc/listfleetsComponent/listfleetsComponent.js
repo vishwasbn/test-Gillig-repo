@@ -51,6 +51,10 @@ export default class ListfleetsComponent extends LightningElement {
     @track recordsToDisplay = []; //Records to be displayed on the page
     @track rowNumberOffset; //Row number
     //@track customerlist = ['Ajay','Arjun','Abhiraj','Ben','Alan','Navaneeth'];
+    get tableHeight(){
+        var height = window.innerHeight * 0.82 - 247.59;
+        return `height: ${height}px;`;
+    }
 
     connectedCallback(){
         //alert('connectedCallback');

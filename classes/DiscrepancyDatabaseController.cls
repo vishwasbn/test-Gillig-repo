@@ -34,11 +34,11 @@ public class DiscrepancyDatabaseController {
     }
 
     @AuraEnabled
-    public static EcardOperationlog getAllDiscrepanciesdetails(){
+    public static EcardOperationlog getAllDiscrepanciesdetails(string ecardbusstatus){
         EcardOperationlog log = new EcardOperationlog();
         AuthorisationData.Token tokendata = userAuthentication.getAccesstoken();
-        string endpoint = System.Label.EcardAppendpoint+'api/ecarddiscrepancydb';
-        userAuthentication.ResponseWrapper statusresponse = userAuthentication.getData(endpoint, 'GET', tokendata.access_token, tokendata.refresh_token);
+        string endpoint = System.Label.EcardAppendpoint+'api/ecarddiscrepancydb/';
+        userAuthentication.ResponseWrapper statusresponse = userAuthentication.getData(endpoint+ecardbusstatus, 'GET', tokendata.access_token, tokendata.refresh_token);
         if(statusresponse.isError){
             log.isError = statusresponse.isError;
             log.operationlogresponse = statusresponse.responseBody;
@@ -222,8 +222,10 @@ public class DiscrepancyDatabaseController {
         else{
             endpoint = System.Label.EcardAppendpoint+'api/ecardbuildstationdiscrepancy';
         }
-         
+        System.debug('@@@ End Point ::'+endpoint);
+        System.debug('@@@ Request Body ::'+requestbody); 
         userAuthentication.ResponseWrapper statusresponse = userAuthentication.postData(endpoint, 'POST', requestbody, tokendata.access_token, tokendata.refresh_token);
+        System.debug('@@@ Response ::'+ JSON.serialize(statusresponse));
         if(statusresponse.isError){
             log.isError = statusresponse.isError;
             log.operationlogresponse = statusresponse.responseBody;

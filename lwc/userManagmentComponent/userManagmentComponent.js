@@ -90,13 +90,23 @@ export default class UserManagmentComponent extends LightningElement {
 
   @track checkBool = true;
   @track selection = " ";
-  finalpin = " ";
+  //finalpin = " "; //
 
   @track departmentlistoptions;
 
   resetpinmodal = false;
   pattern = '[0-9]{4}';
   @track isselectedcustomer = false;
+
+  get tableheight(){
+    var height = window.innerHeight*0.82 - 173.64;
+    return `height: ${height}px;`;
+  }
+  /*@track tableheight;
+  renderedCallback(){
+    var height = window.innerHeight*0.82 - 173.64;
+    this.tableheight = `height: ${height}px;`;
+  }*/
 
   connectedCallback() {
     loadStyle(this, HideLightningHeader);

@@ -105,6 +105,7 @@
         <members>customSearchResultComponent</members>
         <members>discrepancyDbComponent</members>
         <members>ecardListComponent</members>
+        <members>helpComponent</members>
         <members>listbuildStationsComponent</members>
         <members>listbusPropulsionComponent</members>
         <members>listbusStatusComponent</members>
@@ -119,6 +120,9 @@
         <members>listworkcentresComponent</members>
         <members>manageCrewingScheduleComponent</members>
         <members>masterDataComponent</members>
+        <members>meetingNoteComponent</members>
+        <members>newDiscrepancyComponent</members>
+        <members>newShortageComponent</members>
         <members>operationActionsComponent</members>
         <members>operationChecksComponent</members>
         <members>operationalDiscrepanciesComponent</members>
@@ -127,6 +131,7 @@
         <members>paginator</members>
         <members>partnumberValidationComponent</members>
         <members>pubsub</members>
+        <members>qcCheckList</members>
         <members>reUsableMultiSelectLookup</members>
         <members>reUsableMultiSelectLookupResult</members>
         <members>serialnumberComponent</members>

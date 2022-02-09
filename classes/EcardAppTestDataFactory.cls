@@ -212,6 +212,7 @@ public class EcardAppTestDataFactory {
         ecardOperationsController.addnewMeetingNote('"meeting_note_id":"4"');
         ecardOperationsController.updateMeetingNote('"meeting_note_id":"5"');
         ecardOperationsController.deleteMeetingNote('"meeting_note_id":"6"');
+        ecardOperationsController.deleteTargetPicture('{"fleet_id" : 222,"buildstation_id" : 183}');
         /*ecardOperationsController.getAllHelpDocs();
         ecardOperationsController.addnewHelpDocs('"ecard_id":"7"');
         ecardOperationsController.updateHelpDocs('"ecard_id":"7"');
@@ -679,7 +680,7 @@ public class EcardAppTestDataFactory {
         HttpCalloutMock multiCalloutMock = new MultiRequestMock(endpoint2TestResp);
         Test.setMock(HttpCalloutMock.class, multiCalloutMock);
         DiscrepancyDatabaseController.getAllEcarddetails();
-		DiscrepancyDatabaseController.getAllDiscrepanciesdetails();
+		DiscrepancyDatabaseController.getAllDiscrepanciesdetails('Test');
 		DiscrepancyDatabaseController.getAllComments('123');
 		DiscrepancyDatabaseController.addnewComment('Test Req Body');
 		DiscrepancyDatabaseController.getPicklistOptions('departments');
@@ -711,15 +712,16 @@ public class EcardAppTestDataFactory {
         HttpCalloutMock multiCalloutMock = new MultiRequestMock(endpoint2TestResp);
         Test.setMock(HttpCalloutMock.class, multiCalloutMock);
         DiscrepancyDatabaseController.getAllEcarddetails();
-		DiscrepancyDatabaseController.getAllDiscrepanciesdetails();
+		DiscrepancyDatabaseController.getAllDiscrepanciesdetails('Test');
 		DiscrepancyDatabaseController.getAllComments('123');
 		DiscrepancyDatabaseController.addnewComment('Test Req Body');
 		DiscrepancyDatabaseController.getPicklistOptions('departments');
 		DiscrepancyDatabaseController.raisenewDiscrepancy('Test','Dept');
 		DiscrepancyDatabaseController.updateDiscrepancy('Test');
 		DiscrepancyDatabaseController.getdiscrepancyimage('Test');
-    }
-     public static testmethod void DepartmentDataTest() {
+    } 
+    
+    public static testmethod void DepartmentDataTest() {
 		DepartmentData ddata=new DepartmentData();
 		DepartmentData.parse('{"data":[{"created_date":"2020-09-25T06:01:50.424657+00:00","createdby_id":null,"factory_id":1,"factory_name":"Gillig","guid":null,"modified_date":null,"modifiedby_id":null}]}');
     } 
@@ -747,5 +749,4 @@ public class EcardAppTestDataFactory {
         deptwrap.modifiedby_id='123';
         deptwrap.createdby_id ='123';      
     } 
-    
 }

@@ -1,0 +1,86 @@
+<template>
+    <lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button> 
+    <!-- QC Check List  modal start -->
+    <template if:true={showqcchecklist}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-81" aria-modal="true"
+            aria-describedby="modal-content-id-81" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <!-- modal header start -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={hideqcchecklist}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small"></lightning-icon>
+                    </button>
+                    <h2 id="modal-heading-81" class="slds-text-heading_medium slds-hyphenate">
+                        QC Check List
+                    </h2>
+                </header>
+                <!-- modal body start -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-81">
+                    <div class="slds-m-bottom_small">
+                        <lightning-combobox label="Department" name="department" value={selecteddeptformodals}
+                            placeholder="Departments" options={departmentoptions} onchange={handleDepartmentchange}>
+                        </lightning-combobox>
+                    </div>
+                    <template if:false={isqcchecklistpresent}>
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <template for:each={qcchecklists} for:item='checklist'>
+                                <div key={checklist.qc_check_list_id} class="slds-col slds-size_1-of-3">
+                                    <div class="slds-file slds-file_card slds-has-title">
+                                        <figure>
+                                            <!--a target="_blank" href={checklist.qc_check_list_url} class="slds-file__crop"-->
+                                            <a onclick={openfile} name={checklist.qc_check_list_url}
+                                                class="slds-file__crop">
+                                                <span class="slds-assistive-text">Preview:</span>
+                                                <span class="slds-file__icon slds-icon_container" title="pdf">
+                                                    <lightning-icon icon-name="doctype:pdf" size="large"
+                                                        alternative-text="PDF file" title="PDF"></lightning-icon>
+                                                    <span class="slds-assistive-text">{checklist.filename}</span>
+                                                </span>
+                                            </a>
+                                            <figcaption class="slds-file__title slds-file__title_card">
+                                                <div class="slds-media slds-media_small slds-media_center">
+                                                    <div class="slds-media__figure slds-line-height_reset">
+                                                        <span class="slds-icon_container" title="pdf">
+                                                            <lightning-icon icon-name="doctype:pdf" size="x-small"
+                                                                alternative-text="PDF file" title="PDF">
+                                                            </lightning-icon>
+                                                            <span class="slds-assistive-text">pdf</span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="slds-media__body">
+                                                        <span class="slds-file__text slds-truncate"
+                                                            title={checklist.filename}>{checklist.filename}</span>
+                                                    </div>
+                                                </div>
+                                            </figcaption>
+                                        </figure>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:true={isqcchecklistpresent}>
+                        <div class="slds-align_absolute-center">
+                            <div class="empty-state-container slds-text-align_center">
+                                <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                                <div class="emptymessage">
+                                    No QC Checklist yet.
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" title="Cancel" onclick={hideqcchecklist}
+                        class="slds-m-right_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!-- Discrepancy list modal end -->
+</template>

@@ -27,6 +27,13 @@
                     <lightning-button disabled={disablenewattchmentitem} label={buttonLabel} variant="brand-outline" title="New List Item" onclick={addnewlistitem} class="slds-m-right_xxx-small"></lightning-button> 
                 </div>
             </div>
+            <div class="slds-col alignbutton">
+               <!--c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentId} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset}></c-new-discrepancy-component-->
+               <c-new-discrepancy-component if:true={addrepetitionbtn} buttonlabel="Add Repetitive Item" modalheading="New Repetitive Item" type="department" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentId} buildstationrequired="false" department-id-map={departmentIdMap} permissionset={permissionset}></c-new-discrepancy-component>
+               <c-qc-check-list departmentoptions={departmentoptions} ecardid={ecardid} departmentid={selecteddepartmentId}></c-qc-check-list>
+               <c-meeting-note-component departmentoptions={departmentoptions} ecardid={ecardid} departmentid={selecteddepartmentId}></c-meeting-note-component>
+               <c-help-component departmentoptions={departmentoptions} ecardid={ecardid} departmentid={selecteddepartmentId}></c-help-component>
+            </div>
         </div>
     </section>
     <section>
@@ -82,7 +89,9 @@
                               </div>
                            </td>
                            <td>
-                              <lightning-button  data-id={opck.operation_check_id} name={opck.operation_check_description} value={opck.operation_check_description} onclick={creatediscrepancy} variant="border-filled" label="Add Discrepancy" title={opck.operation_check_id}  class="slds-m-left_xx-small"></lightning-button>
+                              <!--lightning-button  data-id={opck.operation_check_id} name={opck.operation_check_description} value={opck.operation_check_description} onclick={creatediscrepancy} variant="border-filled" label="Add Discrepancy" title={opck.operation_check_id}  class="slds-m-left_xx-small"></lightning-button-->
+                              <!--c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentId} buildstationrequired="true" department-id-map={departmentIdMap} buildstationid={opck.buildstation_id} permissionset={permissionset}></c-new-discrepancy-component-->
+                              <c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={dept.department_name} departmentid={dept.department_id} buildstationrequired="true" department-id-map={departmentIdMap} buildstationid={opck.buildstation_id} permissionset={permissionset}></c-new-discrepancy-component>                              
                           </td>
                         </tr>
                      </template>

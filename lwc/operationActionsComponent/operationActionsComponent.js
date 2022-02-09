@@ -12,25 +12,16 @@ import insertOperationlog from "@salesforce/apex/ecardOperationsController.inser
 import updateOperationlog from "@salesforce/apex/ecardOperationsController.updateOperationlog";
 import raiseBsDiscrepancy from "@salesforce/apex/ecardOperationsController.raiseBsDiscrepancy";
 import raiseDepartmentDiscrepancy from "@salesforce/apex/ecardOperationsController.raiseDepartmentDiscrepancy";
-import getrepopresigneds3Url from "@salesforce/apex/ecardOperationsController.getrepopresigneds3Url";
 import raisenewShortage from "@salesforce/apex/ecardOperationsController.raisenewShortage";
 import updatePartshortage from "@salesforce/apex/ecardOperationsController.updatePartshortage";
-import raisenewDiscrepancy from "@salesforce/apex/DiscrepancyDatabaseController.raisenewDiscrepancy";
-import getmeetingnotes from "@salesforce/apex/ecardOperationsController.getmeetingnotes";
 import deleteDiscOrShortage from "@salesforce/apex/ecardOperationsController.deleteDiscOrShortage";
-
 import getAllComments from "@salesforce/apex/DiscrepancyDatabaseController.getAllComments";
 import addnewComment from "@salesforce/apex/DiscrepancyDatabaseController.addnewComment";
 import updateDiscrepancy from "@salesforce/apex/DiscrepancyDatabaseController.updateDiscrepancy";
 import getBusPartdetails from "@salesforce/apex/ecardOperationsController.getBusPartdetails";
-
-import getqcchecklist from "@salesforce/apex/ecardOperationsController.getqcchecklist";
-import gethelpdocument from "@salesforce/apex/ecardOperationsController.gethelpdocument";
-
 import deleteTempAttachment from "@salesforce/apex/ecardOperationsController.deleteTempAttachment";
 import pubsub from 'c/pubsub' ; 
-import {modifieduserlist, getmoddeddate, getselectedformandetails, preassignforeman, preassignqc, setstatusfordisplay}  from 'c/userPermissionsComponent';
-
+import {modifieduserlist, getmoddeddate, getselectedformandetails, setstatusfordisplay}  from 'c/userPermissionsComponent';
 import getcrewingsuserslist from "@salesforce/apex/CrewingScheduleController.getcrewingsuserslist";
 
 //----Extension Imports Start-------//
@@ -110,6 +101,14 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     @track vsbuildstation;
     @track vsbs;
     @track vspartname;
+    @track statusascomment = false;
+    @track statuscommentmap = {
+        "resolve": "Status changed to Resolved",
+        "approve": "Status changed to Verified",
+        "open": "Status changed to Open"
+    };
+    @track scheduleflow = false;
+    @track scheduledata;
 
     get todaysdate(){
         var today = new Date();
@@ -202,7 +201,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
 
     // Disable/Enable Production User For Selected Discrepancy
     get disableprodforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status != 'open'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open'){
             return true;
         }
         else{
@@ -212,7 +211,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
 
     // Disable/Enable QC User For Selected Discrepancy
     get disableqcforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status == 'approve'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'approve'){
             return true;
         }
         else{
@@ -222,7 +221,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
 
     // Disable/Enable QC User For Selected shortage
     get disableqcforselectedshortage(){
-        if(this.selectedshortage.discrepancy_status == 'approve'){
+        if(this.selectedshortage.discrepancy_status.toLowerCase() == 'approve'){
             return true;
         }
         else{
@@ -232,7 +231,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
 
     // Disable/Enable Production User For Selected Shortage
     get disableprodforselectedshortage(){
-        if(this.selectedshortage.discrepancy_status != 'open'){
+        if(this.selectedshortage.discrepancy_status.toLowerCase() != 'open'){
             return true;
         }
         else{
@@ -243,10 +242,14 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     get isalldepartment(){
         return this.departmentName == 'ALL DEPARTMENTS';
     }
-   
+    //To check if user have new discrepancy add access or prod user
+    get addrepetitionbtn() {
+        return this.permissionset.dept_discrepancy_new.write;
+    }
     // Sets the functions/data on intial load.
     connectedCallback(){
         this.getloggedinuser();
+        this.getscheduleflowdata();
         var options = [];
         for(var i in this.departmentIdMap){
             if(this.departmentIdMap[i].value != 'None' && this.departmentIdMap[i].label != 'ALL DEPARTMENTS'){
@@ -282,6 +285,8 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
         if(this.operation==='Operation Checks'){
             this.showSpinner = false;
         }
+        pubsub.register('operationrefresh', this.refreshoperation.bind(this));
+        pubsub.register('refreshdata', this.refreshoperation.bind(this));
     }
     getloggedinuser(){
         EcardLogin()
@@ -296,6 +301,16 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
         })
         .catch((error) => {
         });//sajith
+    }
+
+    //To set the data from the schedule page flow navigation
+    getscheduleflowdata() {
+        var scheduleflowdata = JSON.parse(localStorage.getItem('scheduleflowdata'));
+        if (scheduleflowdata != undefined || scheduleflowdata != null) {
+            this.scheduleflow = true;
+            this.scheduledata = scheduleflowdata;
+            localStorage.removeItem('scheduleflowdata');
+        }
     }
 
     // To set the Bus Overview filters based on the applyfilter method fired and values.
@@ -332,7 +347,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
      }
 
     messageFromEvt = undefined;
-    department=undefined;
+    //department=undefined; //
     // To trigger a Department/Operation change and reload the data based on selected department and tab.
     @api
     departmentchanged(departmentId, departmentName, operation, messageFromEvt) {
@@ -377,12 +392,6 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             this.showSpinner = false;
         }
         if(operation === 'Operation Checks'){
-            /*var deptid=departmentName=='ALL DEPARTMENTS'?null:this.departmentId;
-            let message = {
-                "departmentid" : deptid,
-                "filterstatus" : this.filter
-            };
-            pubsub.fire('opckdeptchanged', JSON.stringify(message));  */
             this.showSpinner = false;
         }
     }
@@ -503,8 +512,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                                 var index = {index:Number(i)+1};
                                 let modifiedws = Object.assign(index,buildstationlist[i]);
                                 modifiedworkstationdatawithindex.push(modifiedws);
-                            }
-                           
+                            }       
                     }
                     else{
                         var index = {index:Number(i)+1};
@@ -512,8 +520,6 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                         modifiedworkstationdatawithindex.push(modifiedws);
                         
                     }
-                    
-    
                 }
                 this.modifiedbuildstations = modifiedworkstationdatawithindex;
                 this.showSpinner = false;
@@ -554,7 +560,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             var modifieddiscrepancyList=[];
                 for(var i in discrepancylist){
                     if(this.filter != undefined){
-                        if(this.filter == discrepancylist[i].discrepancy_status){
+                        if(this.filter == discrepancylist[i].discrepancy_status.toLowerCase()){
                             modifieddiscrepancyList.push(discrepancylist[i]);
                         }
                     }
@@ -605,7 +611,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             var modifiedshortagesList=[];
                 for(var i in shortageslist){
                     if(this.filter != undefined){
-                        if(this.filter == shortageslist[i].discrepancy_status){
+                        if(this.filter == shortageslist[i].discrepancy_status.toLowerCase()){
                             modifiedshortagesList.push(shortageslist[i]);
                         }
                     }
@@ -617,8 +623,6 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                 this.showSpinner = false;
                 this.error = undefined;
             //
-            
-
         })
         .catch(error => {
             this.error = error;
@@ -691,7 +695,6 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                 validlist = false;
             }
         }
-
         if(validlist){
             this.showmessage('Select users accordingly.','Please select atleast one user or a maximum of 5 users for PROD.','warning');
         }
@@ -712,71 +715,11 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                 this.updatebuildstationtoServer(this.selectedbuildstationId);
             }
             this.showuserlist = false;
-
         }
-        
-
     }
     //Cancel operation on user select modal. Hides the modal.
     hideuserlist(event){
         this.showuserlist = false;
-    }
-
-    // Show Add Department Discrepancy Modal and sets the default values.
-    showDescrepancyAdd(event){
-        this.s3tempurlfornewdiscrepancy = [];
-        var ecard_id = this.ecardid;
-        var departmentid = this.departmentId;
-        this.moddifydefectpickvalues(departmentid);
-        var ecardiddeptid = {ecard_id:ecard_id ,dept_id:departmentid};
-        getDepartmentOperations({ecardiddeptid:JSON.stringify(ecardiddeptid)})
-            .then(data => {
-                var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
-                this.deptsupervisorforselecteddept = prod_supervisor;
-                this.buildstationoptions =  data.buildstationList;
-                this.thisdepartmentbuildstations = this.getcompleteBuilstationlist(data);
-                var todaydate = new Date();
-                var PRODlist = [];
-                var QClist = [];
-                var selectedbus = `${this.busname}, ${this.buschasisnumber}`;
-                var selectedbuildstation = this.modifiedbuildstations[0];
-                var allPRODlist = [];
-                var allQClist = [];
-                if(selectedbuildstation.QClist!=null && selectedbuildstation.QClist.length != 0){
-                    allQClist = selectedbuildstation.QClist;
-                }
-                if(this.deptsupervisor.length != 0){
-                    allPRODlist = this.deptsupervisor;
-                }
-                var PRODlist = this.deptsupervisor;
-                var QClist = [];
-                if(this.deptsupervisorforselecteddept.length != 0){
-                    allPRODlist = this.deptsupervisorforselecteddept;
-                }
-                var newdeptdiscrepancydefaults = {
-                    ecard_id : ecard_id,
-                    selectedbus : selectedbus,
-                    description : null,
-                    departmentid : departmentid,
-                    busname : this.busname,
-                    buschasisnumber : this.buschasisnumber,
-                    date : getmoddeddate(todaydate),
-                    priority : 'Normal',
-                    buildstation_id : undefined, 
-                    buildstation_code : selectedbuildstation.buildstation_code,
-                    defectcode : undefined,
-                    prodlist : PRODlist,
-                    qclist : QClist,
-                    allPRODlist :allPRODlist,
-                    allQClist : allQClist
-             };
-            this.newdeptdiscrepancy = newdeptdiscrepancydefaults; 
-            this.adddescrepancymodal = true;
-            }).catch(error => {
-                this.error = error;
-                this.showmessage('Data fetch failed.','Something unexpected occured. Please contact your Administrator.','error');
-            });
-        
     }
 
     // Updating Department Discrepancy Values
@@ -867,8 +810,6 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                     else{
                         bscode= s;
                     }
-                    
-
                     var modifiedwsdata = {
                         workcenter_id : workcenter_id,
                         ecard_operation_log_id : buildstation.ecard_operation_log_id,
@@ -887,9 +828,9 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                     modifiedworkstationdata.push(modifiedwsdata);
                 }
             }
-}
-return modifiedworkstationdata;
-}
+        }
+        return modifiedworkstationdata;
+    }
     // Update the values of QC and PROD when changed in Departmental Discrepancy Modal.
     updateuserselectondeptdesc(event){
         var detail = event.detail;
@@ -899,22 +840,18 @@ return modifiedworkstationdata;
         if(detail.type == 'Production Supervisor'){
             this.newdeptdiscrepancy.prodlist = detail.userlist;
         }
-
     }
-
     // Hide Add Departmental Discrepancy Modal
     hideDescrepancyAdd(event){
         this.adddescrepancymodal = false;
         this.deletetempattachments();
     }
-
     // For updating Operational Discrepancy values on update from modal.
     updateoperationaldiscvalues(event){
         var targetvalue = event.target.value;
         var targetname = event.target.name;
         this.newoperationaldiscrepancy[targetname] = targetvalue;
     }
-
     // To Update the values of QC and PROD when changed in Operational Discrepancy Modal.
     updateuserselectonopdesc(event){
         var detail = event.detail;
@@ -925,7 +862,6 @@ return modifiedworkstationdata;
             this.newoperationaldiscrepancy.prodlist = detail.userlist;
         }
     }
-
     // To Update the responsebody with selected formanIds from List Views.
     updateformans(responsebody, formanlist){
         var newresponse = JSON.parse(responsebody);
@@ -997,8 +933,7 @@ return modifiedworkstationdata;
                     }
             } 
             // Update Buildstation changes to server.
-            this.updatebuildstationtoServer(selectedbsid);
-            
+            this.updatebuildstationtoServer(selectedbsid);    
         }
     }
 
@@ -1066,12 +1001,11 @@ return modifiedworkstationdata;
             allPRODlist = userdetails.length>0?modifieduserlist(userdetails):userdetails;
         }
         var selectedbus = `${this.busname}, ${this.buschasisnumber}`;
-        
             this.newoperationaldiscrepancy = {
                 ecard_id : ecard_id,
                 description : null,
                 selectedbus : selectedbus,
-                departmentid : departmentid,
+                departmentid : selectedbuildstation.department_id.toString(),//departmentid
                 ecard_operation_log_id : selectedbuildstation.ecard_operation_log_id,
                 busname : this.busname,
                 buschasisnumber : this.buschasisnumber,
@@ -1111,7 +1045,6 @@ return modifiedworkstationdata;
         this.newpartshortage = newpartshortage;
         this.addoperationaldescrepancymodal = true;
     }    
-
     // Hide Operational Discrepancy Tab and refresh view.
     hideoperationalDescrepancyAdd(event){
         this.addoperationaldescrepancymodal = false;
@@ -1119,7 +1052,6 @@ return modifiedworkstationdata;
         this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
         
     }
-
     // Adding the Discrepancy to the Server.
     addnewopdiscrepancy(event){
          // Check Validations
@@ -1184,20 +1116,22 @@ return modifiedworkstationdata;
             this.showmessage('Please fill all required fields.','Please fill required and update all blank form entries.','warning');
         }
     }
-
     // Showing the Discrepancy within operation modal.
     showdiscrepancylistmodal(event){
         var selectedbsid = event.currentTarget.dataset.id;
-        let selectedbuildstation = getselectedbuildstationDetails(selectedbsid,this.modifiedbuildstations);
+        let selectedbuildstation = getselectedbuildstationDetails(selectedbsid, this.modifiedbuildstations);
         var requireddata = {
-            department : selectedbuildstation.departmentcode,
-            selecteddepartmentId : selectedbuildstation.department_id,
-            busname : this.busname,
-            ecardid : this.ecardid,
-            buschasisnumber : this.buschasisnumber,
-            bussequence : this.seq,
-            buildstationId : selectedbsid,
-            buildstationcode : selectedbuildstation.buildstation_code
+            department: selectedbuildstation.departmentcode,
+            selecteddepartmentId: selectedbuildstation.department_id,
+            busname: this.busname,
+            ecardid: this.ecardid,
+            buschasisnumber: this.buschasisnumber,
+            bussequence: this.seq,
+            buildstationId: selectedbsid,
+            buildstationcode: selectedbuildstation.buildstation_code,
+            departmentIdMap: this.departmentIdMap,
+            scheduleflow: this.scheduleflow,
+            scheduledata: this.scheduledata
         };
         var filterconditions = JSON.stringify(requireddata);
         localStorage.removeItem('requiredfilters');
@@ -1207,8 +1141,7 @@ return modifiedworkstationdata;
              type: 'standard__navItemPage',
              attributes: {
                      apiName: 'Selected_Discrepancies'
-             }
-        
+             }    
     });
     }
 
@@ -1292,7 +1225,6 @@ return modifiedworkstationdata;
               this.error = error;
               this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
              });
-
         }
     }
 
@@ -1353,12 +1285,10 @@ return modifiedworkstationdata;
               this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
      
               });
-        
         }
         else {
             this.showmessage('Please fill all required fields.','Please fill required and update all blank form entries.','warning');
-        }
-         
+        } 
     }
 
     // Capitalize string passed Display purposes.
@@ -1376,6 +1306,7 @@ return modifiedworkstationdata;
                 this.selecteddiscrepancy = this.modifieddiscrepancyList[i];
             }
         }
+        this.statusascomment = true;
         if(action == 'Mark as done'){
             // Check Validations
             this.qccaptureaction=false;
@@ -1383,7 +1314,7 @@ return modifiedworkstationdata;
               this.showmessage('Please fill all required fields.','Please fill required and update all blank form entries.','warning');
               this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
               this.isdelenabled=false;
-              if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+              if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
                   this.isdelenabled=true;
               }
               this.discdetailsmodal = true;
@@ -1422,12 +1353,8 @@ return modifiedworkstationdata;
             }
             this.updatediscrepancytoserver();
         }
-        
-
         // Need to call the update to server
     }
-
-   
     // To show Discrepancy Details view
     async showdiscdetails(event){
         var selecteddiscrepancylogid = event.currentTarget.dataset.id;
@@ -1448,7 +1375,7 @@ return modifiedworkstationdata;
         }
         this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
         this.isdelenabled=false;
-        if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+        if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
         }
         this.discdetailsmodal = true;
@@ -1487,6 +1414,33 @@ return modifiedworkstationdata;
 
     }
 
+    // Add the discrepancy status change as comment
+    addstatusasdiscrepancycomment(discrepancylogid,commenttext){
+        var ecarddiscrepancylogid = discrepancylogid;
+        var newcommentbody = {
+            "ecard_discrepancy_log_id"  : discrepancylogid,             
+            /*"commentedby_id": event.detail.loggedinuserid,*/               
+            "discrepancy_comments": commenttext
+        };
+        //alert(JSON.stringify(newcommentbody)); 
+        addnewComment({requestbody:JSON.stringify(newcommentbody)})
+        .then(data => {
+            if(data.isError){
+                //this.showmessage('Failed to add Comments.','Something unexpected occured. Please contact your Administrator.','error');
+            }
+            else{
+                //this.showmessage('Comment saved successfully.','Your Comment was recorded successfully.','success');
+                this.getselecteddiscrepancycomments(ecarddiscrepancylogid);
+            }
+           
+        })
+        .catch(error => {
+            //this.showmessage('Failed to add Comments.','Something unexpected occured. Please contact your Administrator.','error');
+        });
+        
+
+    }
+    
     // Get Comments of selected discrepancy
     getselecteddiscrepancycomments(selecteddiscrepancylogid){
         var requesthead =  selecteddiscrepancylogid.toString();
@@ -1545,7 +1499,7 @@ return modifiedworkstationdata;
 
     // To disable fields like Component, Cut In Date, Root Cause once Department discrepancy is Marked as Done. 
     get disablecomponentdates(){
-        return this.selecteddiscrepancy.discrepancy_status != 'open';
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open';
     }
 
     // Handle discrepancy status change from modal
@@ -1599,7 +1553,8 @@ return modifiedworkstationdata;
             this.selecteddiscrepancy.discrepancy_status ='resolve';
         }
         if(passedallvalidation){
-             this.updatediscrepancytoserver();
+            this.statusascomment = true;
+            this.updatediscrepancytoserver();
         }
     }
 
@@ -1647,6 +1602,11 @@ return modifiedworkstationdata;
                 } else {
                     this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;  
                     this.showmessage('Record Updated.','Record updated Successfully.','success');
+                    if (this.statusascomment) {
+                        this.statusascomment = false;
+                        var response = JSON.parse(data.operationlogresponse).data;
+                        this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+                    }
                     this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
                 }
               }).catch(error => {
@@ -1832,12 +1792,6 @@ return modifiedworkstationdata;
         }
     }
 
-    // To hide Report shortage addition Modal
-    hideReportShortageAdd(event){
-        this.partshortageaddmodal = false;
-        this.deletetempattachments();
-    }
-    
     // Add New Part Shortage to Server 
     addnewpartshortage(event){
         // Check Validations
@@ -1941,7 +1895,7 @@ return modifiedworkstationdata;
         }
         this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
         this.isdelenabled=false;
-        if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status =='open')){
+        if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
         }
         this.partshortagedetailsmodal = true;
@@ -1982,13 +1936,13 @@ return modifiedworkstationdata;
                 this.selectedshortage = this.modifiedshortageslist[i];
             }
         }
-
+        this.statusascomment = true;
         if(action == 'Mark as done'){
             this.qccaptureaction=false;
             this.selectedshortage.discrepancy_statusdisplay = setstatusfordisplay('resolve');
             this.selectedshortage.discrepancy_status ='resolve';
             this.isdelenabled=false;
-            if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status =='open')){
+            if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status.toLowerCase() =='open')){
                 this.isdelenabled=true;
             }
             
@@ -2063,6 +2017,7 @@ return modifiedworkstationdata;
         }
         
         // Update to server
+        this.statusascomment = true;
         this.updatepartshortagetoserver();
         
     }
@@ -2095,7 +2050,7 @@ return modifiedworkstationdata;
             "ecard_id" : discrepancytobeupdated.ecard_id,
             "department_id" : discrepancytobeupdated.department_id,
             "component" : discrepancytobeupdated.component,
-            "cut_off_date" : new Date(discrepancytobeupdated.cut_off_date),
+            "cut_off_date" : discrepancytobeupdated.cut_off_date != null ? new Date(discrepancytobeupdated.cut_off_date) : discrepancytobeupdated.cut_off_date,
             "root_cause" : discrepancytobeupdated.root_cause,
             "discrepancy_status" : discrepancytobeupdated.discrepancy_status,
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
@@ -2126,6 +2081,11 @@ return modifiedworkstationdata;
                    } 
                    else {
                             this.selectedshortage['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;  
+                            if (this.statusascomment) {
+                                this.statusascomment = false;
+                                var response = JSON.parse(data.operationlogresponse).data;
+                                this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+                            }
                             this.showmessage('Record Updated.','Record updated Successfully.','success');
                             this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
                     }
@@ -2137,263 +2097,8 @@ return modifiedworkstationdata;
 
     // For General Discrepancy raising similar to Discrepancy DB.
     
-    // To show Add new discrepancy modal and set the default values.
-    async addnewdiscrepancymodal(event){
-        this.s3tempurlfornewdiscrepancy = [];
-        this.fetchcompletedefectList();
-        var ecard_id = this.ecardid;
-        var departmentid = this.departmentId;
-        this.moddifydefectpickvalues(departmentid);
-        var selectedbus = `${this.busname}, ${this.buschasisnumber}`;
-        var ecardiddeptid = {ecard_id:ecard_id ,dept_id:departmentid};
-        await getDepartmentOperations({ecardiddeptid:JSON.stringify(ecardiddeptid)})
-        .then(data => {
-            var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
-            this.deptsupervisorforselecteddept = prod_supervisor;
-            this.buildstationoptions =  data.buildstationList;
-            this.selecteddeptbsdetails = this.getcompleteBuilstationlist(data);
-            
-        }).catch(error => {
-            this.error = error;
-            this.showmessage('Failed to fetch Build Station Details.','Something unexpected occured. Please contact your Administrator.','error');
-        }); 
-        var todaydate = new Date();
-        var discription=null;
-        var buildstation_id=undefined;
-        var buildstationId = undefined;
-        if (event.detail.opcheckdetails!=null && event.detail.opcheckdetails!=undefined){
-            discription=event.detail.opcheckdetails.description;
-            buildstation_id=event.detail.opcheckdetails.buildstation.buildstation_id.toString();
-            var buildstationId = buildstation_id;
-        }
-        var buildstationdetails = this.selecteddeptbsdetails;
-        var selectedbuildstation;
-        if(buildstationId!=undefined){
-            for(var bs in buildstationdetails){
-                if(buildstationId.toString() == buildstationdetails[bs].buildstation_id.toString()){
-                    selectedbuildstation = buildstationdetails[bs];
-                }
-            }
-        }
-        let newdiscrepancy = {
-            description : discription,
-            selectedbus : selectedbus,
-            date : getmoddeddate(todaydate),
-            type : 'buildstation',
-            ecardid : ecard_id,
-            departmentid : departmentid,
-            buildstation_id : buildstation_id,
-            priority : 'Normal',
-            defectcode : undefined,
-            qclist : [],
-            prodlist : [],
-            allQClist : [],
-            allPRODlist : []
-        };
-        if(buildstationId!=undefined && selectedbuildstation.PRODlist!=null && selectedbuildstation.PRODlist.length != 0){
-            newdiscrepancy.allPRODlist = selectedbuildstation.PRODlist;
-        }
-        if(newdiscrepancy.allPRODlist.length==0){
-            var userdetails=[];
-             await getcrewingsuserslist({deptid:newdiscrepancy.departmentid})
-             .then((result) => {
-             userdetails = JSON.parse(result.responsebody).data.user;
-             newdiscrepancy.allPRODlist = userdetails.length>0?modifieduserlist(userdetails):userdetails;
-             })
-             .catch((error) => {
-             });
-        }
-        this.newdiscrepancy = newdiscrepancy;
-        this.buildstationrequired=true;
-        this.newdiscrepancymodal = true;
-    }
-
     // Update New Discrepancy values.
     @track buildstationrequired = true;
-    modifynewdiscrepancyvalues(event){
-        var targetvalue = event.target.value;
-        var targetname = event.target.name;
-        this.newdiscrepancy[targetname] = targetvalue;
-        if(targetname == 'type'){
-          this.buildstationrequired = targetvalue=='department'?false:true;
-          var emptylist = [];
-          this.newdiscrepancy.departmentid = undefined;
-          this.newdiscrepancy.buildstation_id = undefined;
-          this.newdiscrepancy.defectcode = undefined;
-          this.newdiscrepancy.qclist = emptylist;
-          this.newdiscrepancy.prodlist = emptylist;
-          this.newdiscrepancy.allQClist = emptylist;
-          this.newdiscrepancy.allPRODlist = emptylist;
-        }
-        if(targetname == 'departmentid'){
-            this.newdiscrepancy.departmentid = targetvalue;
-            if(this.newdiscrepancy.ecardid != undefined){
-                this.moddifydefectpickvalues(targetvalue);
-                var ecardid = this.newdiscrepancy.ecardid;
-                var departmentId = targetvalue;
-                var ecardiddeptid = {ecard_id:ecardid ,dept_id:departmentId};
-                getDepartmentOperations({ecardiddeptid:JSON.stringify(ecardiddeptid)})
-                .then(data => {
-                    var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
-                    this.deptsupervisorforselecteddept = prod_supervisor;
-                    this.buildstationoptions =  data.buildstationList;
-                    this.selecteddeptbsdetails = this.getcompleteBuilstationlist(data);
-                    this.newdiscrepancy.buildstation_id = undefined;
-                
-                }).catch(error => {
-                    this.error = error;
-                    this.showmessage('Failed to fetch Build Station Details.','Something unexpected occured. Please contact your Administrator.','error');
-                }); 
-            }
-            else{
-                this.newdiscrepancy.departmentid = undefined;
-                this.showmessage('Select a Bus.','Please select a Bus before selecting Department.','warning');
-            }
-            
-        }
-        if(targetname == 'buildstation_id'){
-            var buildstationdetails = this.selecteddeptbsdetails;
-            var buildstationId = targetvalue;
-            var selectedbuildstation;
-            for(var bs in buildstationdetails){
-                if(buildstationId.toString() == buildstationdetails[bs].buildstation_id.toString()){
-                 selectedbuildstation = buildstationdetails[bs];
-                }
-            }
-            this.newdiscrepancy.buildstation_id = selectedbuildstation.buildstation_id.toString();
-            // Set Prod and QC also
-           
-            var allPRODlist = [];
-            var allQClist = [];
-            var PRODlist = [];
-            if(selectedbuildstation.QClist!=null && selectedbuildstation.QClist.length != 0){
-                allQClist = selectedbuildstation.QClist;
-            }
-            if(this.newdiscrepancy.type == 'department'){
-                if(this.deptsupervisorforselecteddept.length != 0){
-                    allPRODlist = this.deptsupervisorforselecteddept;
-                }
-                PRODlist = this.deptsupervisorforselecteddept;
-            }
-            else{
-                if(selectedbuildstation.PRODlist!=null && selectedbuildstation.PRODlist.length != 0){
-                    allPRODlist = selectedbuildstation.PRODlist;
-                }
-                PRODlist = selectedbuildstation.selectedprod;
-            }
-            var QClist = selectedbuildstation.selectedqc;
-            this.newdiscrepancy.qclist = QClist;
-            this.newdiscrepancy.prodlist = PRODlist;
-            this.newdiscrepancy.allPRODlist = allPRODlist;
-            if(this.newdiscrepancy.allPRODlist.length==0){
-                var userdetails=[];
-                 getcrewingsuserslist({deptid:this.newdiscrepancy.departmentid})
-                 .then((result) => {
-                 userdetails = JSON.parse(result.responsebody).data.user;
-                 this.newdiscrepancy.allPRODlist = userdetails.length>0?modifieduserlist(userdetails):userdetails;
-                 })
-                 .catch((error) => {
-                 });
-            }
-            this.newdiscrepancy.allQClist = allQClist;
-        }
-    }
-
-    // Update PROD And QC on New Discrepancy
-    updateuserselectonnewdesc(event){
-        var detail = event.detail;
-        if(detail.type == 'QC'){
-            this.newdiscrepancy.qclist = detail.userlist;
-        }
-        if(detail.type == 'PROD'){
-            this.newdiscrepancy.prodlist = detail.userlist;
-        }
-    }
-    
-    // To hide the new Discrepancy modal.
-    hidenewdiscrepancymodal(event){
-        this.newdiscrepancymodal = false;
-        this.deletetempattachments();
-    }
-
-    // Add new Discrepancy to Server
-    addnewdiscrepancytoserver(event){
-        // Check Validations
-        const allValid = [...this.template.querySelectorAll('.newdiscvalidation')]
-            .reduce((validSoFar, inputCmp) => {
-                        inputCmp.reportValidity();
-                        return validSoFar && inputCmp.checkValidity();
-            }, true);
-        if (allValid) {
-         //Submit information on Server
-         event.target.disabled = true;
-         var newdiscrepancyvalues = this.newdiscrepancy;
-         if (newdiscrepancyvalues.type=='department' && newdiscrepancyvalues.buildstation_id==undefined){
-            newdiscrepancyvalues.buildstation_id=null;
-        }
-         var newdiscrequestbody = {
-            "discrepancy_type": newdiscrepancyvalues.type,
-            "discrepancy_priority": newdiscrepancyvalues.priority,
-            "discrepancy_status": "open",
-            "ecard_id": newdiscrepancyvalues.ecardid,
-            "department_id": newdiscrepancyvalues.departmentid,
-            "discrepancy": newdiscrepancyvalues.description,
-            "dat_defect_code_id" : newdiscrepancyvalues.defectcode,
-            "buildstation_id" : newdiscrepancyvalues.buildstation_id  
-            };
-
-           if(newdiscrepancyvalues.qclist.length != 0){
-                newdiscrequestbody["assigend_qc_id"] =  newdiscrepancyvalues.qclist[0].Id;
-            }
-        var disctype = newdiscrepancyvalues.type;
-        if(this.s3tempurlfornewdiscrepancy.length != 0){
-                newdiscrequestbody["s3_file_paths"] = JSON.stringify(this.s3tempurlfornewdiscrepancy);
-            }
-            else{
-                newdiscrequestbody["s3_file_paths"] = null;
-            }
-        var withforemans = this.updateformans(JSON.stringify(newdiscrequestbody),newdiscrepancyvalues.prodlist);
-        
-        raisenewDiscrepancy({requestbody:JSON.stringify(withforemans), discrepancytype: disctype})
-              .then(data => {
-                  if(data.isError){
-                    event.target.disabled = false;
-                    this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
-                  }
-                  else{
-                    this.showmessage('Added new Discrepancy.','A new discrepancy was successfully raised.','success');
-                    this.newdiscrepancymodal = false;
-                    this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
-                  }
-                    
-              }).catch(error => {
-              this.error = error;
-              event.target.disabled = false;
-              this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
-     
-              });
-        }
-        else{
-            this.showmessage('Please fill all required fields.','Please fill required and update all blank form entries.','warning');
-        }
-
-
-    }
-
-    // To handle the department change for QC Checklist and Help Documents across the tabs.
-    handleDepartmentchange(event){
-        this.selecteddeptformodals = event.detail.value;
-        if(this.showqcchecklist){
-            this.showqccheclist();
-        }
-        if(this.showhelpdocuments){
-            this.gethelpdocuments();
-        }
-        if(this.showmeetingnotes){
-            this.fetchmeetingnotes();
-        }
-        
-    }
 
     @track selecteddeptformodals;
     @track qcchecklists = [];
@@ -2406,96 +2111,11 @@ return modifiedworkstationdata;
     get ismeetingnotespresent(){
         return this.meetingnotes.length == 0;
     }
-    // Show QC Check List Modal.
-    showqccheclist(event){
-    if(this.selecteddeptformodals == undefined ){
-        this.selecteddeptformodals  = this.departmentId;
-    }
-    var ecardid = this.ecardid;
-    var deptmentId = this.selecteddeptformodals;
-    var ecardiddeptid = { ecard_id: ecardid, dept_id: deptmentId };
-    this.showqcchecklist = true;
-    getqcchecklist({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
-      .then((data) => {
-        if (data.isError) {
-            this.showmessage('Failed to fetch QC Check List.','Something unexpected occured. Please contact your Administrator.','error');
-        } else {
-          var qcchecklist = JSON.parse(data.responsebody).data.qc_check_list;
-          var qcchecklists = [];
-          if (qcchecklist.length != 0) {
-            for (var checklist in qcchecklist) {
-              var qccheck = qcchecklist[checklist];
-              var filename = qccheck.qc_check_list_url.substring(
-                qccheck.qc_check_list_url.lastIndexOf("/") + 1
-              );
-              qccheck["filename"] = filename;
-              qcchecklists.push(qccheck);
-            }
-          }
-          this.qcchecklists = qcchecklists;
-          this.showqcchecklist = true;
-        }
-      })
-      .catch((error) => {
-        this.showmessage('Failed to fetch QC Check List.','Something unexpected occured. Please contact your Administrator.','error');
-      });
-    } 
-
-    // Hide QC Check list Modal.
-    hideqcchecklist(event){
-        this.showqcchecklist = false;
-        this.selecteddeptformodals = undefined;
-    }
-    // Hide Meeting Notes Modal.
-    hidemeetingnotes(event){
-        this.showmeetingnotes = false;
-        this.selecteddeptformodals = undefined;
-    }
 
     @track helpdocumntslist = [];
     @track showhelpdocuments = false;
     get ishelpdocpresent(){
         return this.helpdocumntslist.length == 0;
-    }
-    // Show Help Documents Modal.
-    gethelpdocuments(event){
-        if(this.selecteddeptformodals == undefined ){
-            this.selecteddeptformodals  = this.departmentId;
-        }
-        var ecardid = this.ecardid;
-        var deptmentId = this.selecteddeptformodals;
-        var ecardiddeptid = { ecard_id: ecardid, dept_id: deptmentId };
-        this.showhelpdocuments = true;
-        gethelpdocument({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
-          .then((data) => {
-            if (data.isError) {
-                this.showmessage('Failed to fetch Help Documents.','Something unexpected occured. Please contact your Administrator.','error');
-            } else {
-              var helpdoclist = JSON.parse(data.responsebody).data.help_document;
-              var helpdoclists = [];
-              if (helpdoclist.length != 0) {
-                for (var hdoc in helpdoclist) {
-                  var helpdoc = helpdoclist[hdoc];
-                  var filename = helpdoc.help_document_url.substring(
-                    helpdoc.help_document_url.lastIndexOf("/") + 1
-                  );
-                  helpdoc["filename"] = filename;
-                  helpdoclists.push(helpdoc);
-                }
-              }
-              this.helpdocumntslist = helpdoclists;
-              this.showhelpdocuments = true;
-            }
-          })
-          .catch((error) => {
-            this.showmessage('Failed to fetch Help Documents.','Something unexpected occured. Please contact your Administrator.','error');
-          });
-    }
-
-    // Hide Help Document Modal.
-    hidehelpdocument(event){
-        this.showhelpdocuments = false;
-        this.selecteddeptformodals = undefined;
     }
 
     @track showattachments = false;
@@ -2551,86 +2171,6 @@ return modifiedworkstationdata;
         }
     }
 
-    // Whenever theattachments are added we reload the list to update operationlogid if not present.
-    reloadlist(event){
-        this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
-    }
-    // Show Meeting List Modal.
-    fetchmeetingnotes(event){
-        if(this.selecteddeptformodals == undefined ){
-            this.selecteddeptformodals  = this.departmentId;
-        }
-        var ecardid = this.ecardid;
-        var deptmentId = this.selecteddeptformodals;
-        var ecardiddeptid = { ecard_id: ecardid, dept_id: deptmentId };
-        this.showmeetingnotes = true;
-        getmeetingnotes({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
-          .then((data) => {
-            if (data.isError) {
-                this.showmessage('Failed to fetch Meeting Notes.','Something unexpected occured. Please contact your Administrator.','error');
-            } else {
-              var meetingnotelist = JSON.parse(data.responsebody).data.meeting_note;
-              var meetingnotelists = [];
-              if (meetingnotelist.length != 0) {
-                for (var mnote in meetingnotelist) {
-                  var mnotes = meetingnotelist[mnote];
-                  var filename = mnotes.meeting_note_url.substring(
-                    mnotes.meeting_note_url.lastIndexOf("/") + 1
-                  );
-                  mnotes["filename"] = filename;
-                  meetingnotelists.push(mnotes);
-                }
-              }
-              this.meetingnotes = meetingnotelists;
-              this.showmeetingnotes = true;
-            }
-          })
-          .catch((error) => {
-            this.showmessage('Failed to fetch Meeting Notes.','Something unexpected occured. Please contact your Administrator.','error');
-          });
-        }
-    
-        openfile(event){
-            var filepath=event.target.name;
-            if(filepath != undefined && filepath != ''){
-				var s3files=[];
-				s3files.push(filepath);
-				var requestbody = {
-				  's3_file_paths' : JSON.stringify(s3files)
-				};
-				this.gets3urls(JSON.stringify(requestbody));
-			  }
-
-        }
-
-    // To get s3URL
-	gets3urls(requestbody){
-		getrepopresigneds3Url({ requestbody: requestbody })
-		  .then((data) => {
-			if (data.isError) {
-			  const alertmessage = new ShowToastEvent({
-				title: "Failed to fetch Label Images.",
-				message:
-				  "Something unexpected occured. Please contact your Administrator",
-				variant: "error"
-			  });
-			  this.dispatchEvent(alertmessage);
-			} else {
-			  var presigned_urls = JSON.parse(data.responsebody).data.presigned_url;
-			  console.log('Presigned URL ::' +presigned_urls[0].s3url);
-			  window.open(presigned_urls[0].s3url,'_blank');
-			}
-		  })
-		  .catch((error) => {
-			const alertmessage = new ShowToastEvent({
-			  title: "Failed to fetch Label Images.",
-			  message:
-				"Something unexpected occured. Please contact your Administrator",
-			  variant: "error"
-			});
-			this.dispatchEvent(alertmessage);
-		  });
-      }    
     deletediscshortage(event){
         var status=confirm("Discrepancy/Shortage once deleted can not be retrieved. Are you sure you want to continue this action?");
 		var discrepancyid = event.target.name;
@@ -2673,91 +2213,8 @@ return modifiedworkstationdata;
         }
 
     }
-    // To show Report shortage addition Modal
-    async showReportShortageAdd(event){
-         var shortagevalues = event.detail.message;
-         var selectedbus = `${this.busname}, ${this.buschasisnumber}`;
-         var ecardid = this.ecardid;
-         var departmentId = this.departmentId; 
-         var ecardiddeptid = {ecard_id:ecardid ,dept_id:departmentId};
-         var allPRODlist = [];
-         var allQClist = [];
-         var PRODlist = [];
-         var QClist = [];
-         var emptylist = [];
-         var bs={label: "Unknown", value:"Unknown", workcentreId: 0, workcentreName: "0000"}
-         await getDepartmentOperations({ecardiddeptid:JSON.stringify(ecardiddeptid)})
-         .then(data => {
-             var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
-             this.deptsupervisorforselecteddept = prod_supervisor;
-             this.buildstationoptions =  data.buildstationList;
-             this.buildstationoptions.push(bs);
-             this.thisdepartmentbuildstations = this.getcompleteBuilstationlist(data);
-             var selectedbuildstation = this.thisdepartmentbuildstations[0];
-             // Set Prod and QC also
-             
-             if(selectedbuildstation.QClist!=null && selectedbuildstation.QClist.length != 0){
-                   allQClist = selectedbuildstation.QClist;
-             }
-             if(selectedbuildstation.PRODlist!=null && selectedbuildstation.PRODlist.length != 0){
-                  allPRODlist = selectedbuildstation.PRODlist;
-             }
-             PRODlist = this.deptsupervisorforselecteddept;
-             QClist = selectedbuildstation.selectedqc;
-             var todaydate = new Date();
-         this.moddifydefectpickvalues(departmentId);   
-         var partno=undefined;
-         var buildstation=undefined;
-         var buildstationid=undefined;
-         var partname=undefined;
-         var partid=null;
-         if(shortagevalues!=undefined){
-             partno=shortagevalues.partno;
-             buildstation=shortagevalues.buildstation;
-             buildstationid=shortagevalues.buildstation_id.toString();;
-             partname=shortagevalues.partname;
-             partid=shortagevalues.part_id;
-         }
-         var newpartshortage = {
-             'buspart_id' : partid,
-             'buspart_no' : partno,
-             'buspart_name' : partname,
-             'quantity' : undefined,
-             'po_no' : undefined,
-             'cut_off_date' : undefined,
-             'selectedbus' : selectedbus,
-             'discrepancy_type': 'partshortage',
-             //'has_part_shortage': true,  
-             'department_id' : departmentId,
-             'ecard_id' : ecardid,
-             'priority' : 'Normal',
-             'buildstation_id' : buildstationid, 
-             'buschasisnumber' : this.buschasisnumber,
-             'date' : getmoddeddate(todaydate),
-             'qclist' : [],
-             'allQClist' : allQClist,
-             'prodlist' : [],
-             'allPRODlist' : allPRODlist
-         };   
-         this.newpartshortage = newpartshortage;
-             
-         }).catch(error => {
-             this.error = error;
-             this.showmessage('Data fetch failed.','Something unexpected occured. Please contact your Administrator.','error');
-         });
-         if(allPRODlist.length==0){
-            var userdetails=[];
-                await getcrewingsuserslist({deptid :this.departmentId})
-                        .then((result) => {
-                userdetails = JSON.parse(result.responsebody).data.user;
-                this.newpartshortage.allPRODlist = userdetails.length>0?modifieduserlist(userdetails):userdetails;
-            })
-            .catch((error) => {
-            });
-        }
-        
-        this.partshortageaddmodal = true; 
-         
-     }
- 
+    
+    refreshoperation(){
+       this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
+    }
 }
