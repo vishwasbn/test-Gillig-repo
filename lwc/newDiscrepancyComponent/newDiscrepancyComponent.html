@@ -1,5 +1,5 @@
 <template>
-  <lightning-button label={buttonlabel} variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
+  <lightning-button disabled={disablebutton} label={buttonlabel} variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
   <template if:true={newdiscrepancymodal}>
     <section role="dialog" tabindex="-1"
       aria-labelledby="modal-heading-17"

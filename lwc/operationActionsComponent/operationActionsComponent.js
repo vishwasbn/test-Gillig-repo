@@ -23,6 +23,9 @@ import deleteTempAttachment from "@salesforce/apex/ecardOperationsController.del
 import pubsub from 'c/pubsub' ; 
 import {modifieduserlist, getmoddeddate, getselectedformandetails, setstatusfordisplay}  from 'c/userPermissionsComponent';
 import getcrewingsuserslist from "@salesforce/apex/CrewingScheduleController.getcrewingsuserslist";
+import getPartshortagecauselist from "@salesforce/apex/ecardOperationsController.getPartshortageCauses";
+import getAllpartsVendorlist from '@salesforce/apex/ecardOperationsController.getAllpartsVendorlist';
+import getDefaultVendorandBuyer from '@salesforce/apex/ecardOperationsController.getDefaultVendorandBuyer';
 
 //----Extension Imports Start-------//
 import {getselectedbuildstationDetails, getmodifiedbuildstationlist, getmodifieddiscrepancylist, getmodifiedshortageslist,getmodifiedvalidationlist} from "./operationActionsExtended";
@@ -130,6 +133,10 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
   @track newdiscrepancy;
   @track selecteddeptbsdetails = [];
   @track buildstationfornewdisc;
+  @track shortgecauselist = [];
+  @track partsvendorslist = [];
+  @track timeoutId = 0;
+  @track isupdated = false;
     
     // To show tabs based on the operation selected from operationsComponent.
     get isdeletable(){
@@ -200,13 +207,14 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     }
 
     // Disable/Enable Production User For Selected Discrepancy
-    get disableprodforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open'){
-            return true;
+    get disableprodforselecteddiscrepancy() {
+        var updatepermission = false;
+        if (this.selecteddiscrepancy.discrepancy_type == 'department') {
+            updatepermission = this.permissionset.dept_discrepancy_update_prod.write;
+        } else {
+            updatepermission = this.permissionset.discrepancy_update_prod.write;
         }
-        else{
-            return false;
-        }
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !updatepermission;
     }
 
     // Disable/Enable QC User For Selected Discrepancy
@@ -230,13 +238,8 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     }
 
     // Disable/Enable Production User For Selected Shortage
-    get disableprodforselectedshortage(){
-        if(this.selectedshortage.discrepancy_status.toLowerCase() != 'open'){
-            return true;
-        }
-        else{
-            return false;
-        }
+    get disableprodforselectedshortage() {
+        return !this.permissionset.shortage_update_prod.write || this.selectedshortage.discrepancy_status.toLowerCase() != "open";
     }
     // To know when the ALL DEPARTMENT operation is selected and make required changes in UI.
     get isalldepartment(){
@@ -245,6 +248,24 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     //To check if user have new discrepancy add access or prod user
     get addrepetitionbtn() {
         return this.permissionset.dept_discrepancy_new.write;
+    }
+
+    get disablevendorselection(){
+        return this.partsvendorslist.length == 0 ;
+    }
+    
+    
+    get disablebuyercode(){
+        return this.newpartshortage.buyer_code == undefined;
+    }
+    
+    //TO disable the selected part shortage fields from edit
+    get disableeditshortage() {
+        return this.permissionset.shortage_update.write != true || this.selectedshortage.discrepancy_status.toLowerCase() != "open"; //corrected
+    }
+    //to disable ops discrepancy / shortage button
+    get enableoperationdisc() {
+        return this.permissionset.shortage_new.write && this.permissionset.discrepancy_new.write;
     }
     // Sets the functions/data on intial load.
     connectedCallback(){
@@ -347,7 +368,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
      }
 
     messageFromEvt = undefined;
-    //department=undefined; //
+    //department=undefined; //Vishwas Commented
     // To trigger a Department/Operation change and reload the data based on selected department and tab.
     @api
     departmentchanged(departmentId, departmentName, operation, messageFromEvt) {
@@ -620,6 +641,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                     }
                 }
                 this.modifiedshortageslist = modifiedshortagesList;
+                this.loadpartshotcauselist();
                 this.showSpinner = false;
                 this.error = undefined;
             //
@@ -648,7 +670,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
         let selectedbuildstation = getselectedbuildstationDetails(this.selectedbuildstationId,this.modifiedbuildstations); 
         if(this.fieldtoupdate == 'QC'){
             this.completesearchlistUsers = selectedbuildstation.QClist;
-            if(selectedbuildstation.status == 'approve' || selectedbuildstation.status == 'reject'){
+            if (selectedbuildstation.status == 'approve' || selectedbuildstation.status == 'reject' || !this.permissionset.operation_update_qc.write) {
                 this.disableuserselection = true;
             }
         }
@@ -659,12 +681,13 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                 getcrewingsuserslist({deptid:selectedbuildstation.department_id})
                 .then((result) => {
 			        userdetails = JSON.parse(result.responsebody).data.user;
+                    userdetails = this.removeDuplicates(userdetails);//todo
                     this.completesearchlistUsers = userdetails.length>0?modifieduserlist(userdetails):userdetails;
                 })
                 .catch((error) => {
                 });
             }
-            if(selectedbuildstation.status != 'open'){
+            if (selectedbuildstation.status != 'open' || !this.permissionset.operation_update_prod.write) {//vishwas
                 this.disableuserselection = true;
             }
         }
@@ -994,7 +1017,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             await  getcrewingsuserslist({deptid:this.departmentId})
              .then((result) => {
              userdetails = JSON.parse(result.responsebody).data.user;
-                
+             userdetails = this.removeDuplicates(userdetails);//todo
              })
              .catch((error) => {
              });
@@ -1040,7 +1063,10 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             'qclist' : QClist,
             'allQClist' : allQClist,
             'prodlist' : PRODlist,
-            'allPRODlist' : allPRODlist
+            'allPRODlist' : allPRODlist,
+            'is_b_whs_kit': false,
+            'is_long_term': false,
+            'is_ship_short': false
         };   
         this.newpartshortage = newpartshortage;
         this.addoperationaldescrepancymodal = true;
@@ -1181,7 +1207,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                     this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
                   }
                   else{
-                    this.showmessage('Record Update Successfull.','The record was successfully updated.','success');
+                    this.showmessage('Record Update Successful.','The record was successfully updated.','success');
                     this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
                   }
                     
@@ -1217,7 +1243,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                     this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
                   }
                   else{
-                    this.showmessage('Record Update Successfull.','The record was successfully updated.','success');
+                    this.showmessage('Record Update Successful.','The record was successfully updated.','success');
                     this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
                   }
                     
@@ -1368,6 +1394,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             await getcrewingsuserslist({deptid:this.selecteddiscrepancy.departmentid})
                         .then((result) => {
                 userdetails = JSON.parse(result.responsebody).data.user;
+                userdetails = this.removeDuplicates(userdetails);//todo
                 this.selecteddiscrepancy.prod = userdetails.length>0?modifieduserlist(userdetails):userdetails;
             })
             .catch((error) => {
@@ -1499,7 +1526,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
 
     // To disable fields like Component, Cut In Date, Root Cause once Department discrepancy is Marked as Done. 
     get disablecomponentdates(){
-        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open';
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !this.permissionset.dept_discrepancy_update.write;//vishwas
     }
 
     // Handle discrepancy status change from modal
@@ -1678,6 +1705,10 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                     this.newpartshortage.buspart_id = this.partnumberdetails[i].buspart_id;
                 }
             }
+            if (event.detail.incident != undefined && event.detail.incident == 'selection') {
+                this.getPartsVendorBuyerDetails(selectedbuspart, this.newpartshortage, 'addnew');
+                this.getVendorlistforparts(selectedbuspart);
+            }
         }else{
             this.newpartshortage.buspart_no = 'Part No. Not Found';
             this.newpartshortage.buspart_name = undefined;
@@ -1690,6 +1721,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     onpartnumberclear(event){
         this.newpartshortage.buspart_no = undefined;
         this.newpartshortage.buspart_name = undefined;
+        this.clearpartsvendordetails();
     }
 
     //To update other fields on user selection
@@ -1709,6 +1741,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             this.thisdepartmentbuildstations = this.getcompleteBuilstationlist(data);
             var selectedbuildstation = this.thisdepartmentbuildstations[0];
             this.newpartshortage.buildstation_id = undefined;
+            this.clearpartsvendordetails();//new requirement
             // Set Prod and QC also
             
             if(selectedbuildstation.QClist!=null && selectedbuildstation.QClist.length != 0){
@@ -1822,6 +1855,35 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                 "po_no" : partshortageaddmodalvalues.po_no
                };
          }
+            part_shortage['buyer'] = partshortageaddmodalvalues.buyer == undefined ? null : partshortageaddmodalvalues.buyer;
+            part_shortage['planner_code'] = partshortageaddmodalvalues.planner_code == undefined ? null : partshortageaddmodalvalues.planner_code;
+            part_shortage['vendor_number'] = partshortageaddmodalvalues.vendor_number == undefined ? null : partshortageaddmodalvalues.vendor_number;
+            if (partshortageaddmodalvalues.vendor_name == undefined) {
+                if (this.partsvendorslist.length > 0) {
+                    part_shortage['vendor_name'] = this.partsvendorslist[0].vendor_name;
+                    part_shortage['vendor_number'] = this.partsvendorslist[0].vendor_number;
+                }
+                else
+                    part_shortage['vendor_name'] = null;
+            }
+            else {
+                for (var item in this.partsvendorslist) {
+                    var vendordetails = this.partsvendorslist[item];
+                    if (vendordetails.vendor_number == partshortageaddmodalvalues.vendor_number) {
+                        part_shortage['vendor_name'] = vendordetails.vendor_name;
+                    }
+
+                }
+            }
+            part_shortage['carrier_text'] = partshortageaddmodalvalues.carrier_text == undefined ? null : partshortageaddmodalvalues.carrier_text;
+            part_shortage['carrier_arrival_text'] = partshortageaddmodalvalues.carrier_arrival_text == undefined ? null : partshortageaddmodalvalues.carrier_arrival_text;
+            part_shortage['shortage_cause_id'] = partshortageaddmodalvalues.shortage_cause_id == undefined ? null : partshortageaddmodalvalues.shortage_cause_id;
+            part_shortage['tracking'] = partshortageaddmodalvalues.tracking == undefined ? null : partshortageaddmodalvalues.tracking;
+            part_shortage['date_received'] = partshortageaddmodalvalues.date_received == undefined ? null : this.modifydate(partshortageaddmodalvalues.date_received);
+            part_shortage['is_b_whs_kit'] = partshortageaddmodalvalues.is_b_whs_kit == undefined ? null : partshortageaddmodalvalues.is_b_whs_kit;
+            part_shortage['is_long_term'] = partshortageaddmodalvalues.is_long_term == undefined ? null : partshortageaddmodalvalues.is_long_term;
+            part_shortage['is_ship_short'] = partshortageaddmodalvalues.is_ship_short == undefined ? null : partshortageaddmodalvalues.is_ship_short;
+            part_shortage['remarks'] = partshortageaddmodalvalues.remarks == undefined ? null : partshortageaddmodalvalues.remarks;
          var bsid= partshortageaddmodalvalues.buildstation_id==-1?null:partshortageaddmodalvalues.buildstation_id;
          var newpartshortagebody = {
                 "component": null,  
@@ -1877,6 +1939,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     @track partshortagedetailsmodal = false;
     // To Show Part Shortage Detail
     async showpartshortagedetail(event){
+        this.isupdated = false;
         var selecteddiscrepancylogid = event.currentTarget.dataset.id;
         for(var i in this.modifiedshortageslist){
             if(this.modifiedshortageslist[i].ecard_discrepancy_log_id == selecteddiscrepancylogid){
@@ -1888,12 +1951,20 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             await getcrewingsuserslist({deptid:this.selectedshortage.departmentid})
                         .then((result) => {
                 userdetails = JSON.parse(result.responsebody).data.user;
+                userdetails = this.removeDuplicates(userdetails);//todo
                 this.selectedshortage.allprodlist = userdetails.length>0?modifieduserlist(userdetails):userdetails;
             })
             .catch((error) => {
             });
         }
         this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
+        this.getVendorlistforparts(this.selectedshortage.buspart_no);
+        if (this.selectedshortage.vendor_name == null) {
+            this.getPartsVendorBuyerDetails(this.selectedshortage.buspart_no, this.selectedshortage, 'update');
+        }
+        if (this.selectedshortage.buyer != null && this.selectedshortage.planner_code != null) {
+            this.selectedshortage.buyer_code = this.selectedshortage.buyer + ' / ' + this.selectedshortage.planner_code;
+        }
         this.isdelenabled=false;
         if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
@@ -1908,12 +1979,26 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     }
 
     // Update selected shortage fields.
-    updateselectedshortage(event){
-        var targetvalue = event.target.value;
+    updateselectedshortage(event) {
+        this.isupdated = true;
+        var targetvalue;
+        if (event.target.type == "checkbox") {
+            targetvalue = event.target.checked;
+        }
+        else {
+            targetvalue = event.target.value;
+        }
         var targetname = event.target.name;
         this.selectedshortage[targetname] = targetvalue;
+        // this.updatepartshortage(event);//timer triggered
     }
 
+    updatepartshortage(event) {
+        window.clearTimeout(this.delayTimeout);
+        this.delayTimeout = setTimeout(() => { this.updatepartshortagetoserver(); }, 1000);
+    }
+
+    
     // Update user selection of selected shortage.
      updateuserpartshortage(event){
         var detail = event.detail;
@@ -2045,6 +2130,29 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                 "part_shortage_id": discrepancytobeupdated.part_shortage_id
                };
          }
+        part_shortage['buyer'] = discrepancytobeupdated.buyer == undefined ? null : discrepancytobeupdated.buyer;
+        part_shortage['planner_code'] = discrepancytobeupdated.planner_code == undefined ? null : discrepancytobeupdated.planner_code;
+        part_shortage['vendor_number'] = discrepancytobeupdated.vendor_number == undefined ? null : discrepancytobeupdated.vendor_number;
+        if (discrepancytobeupdated.vendor_name == undefined) {
+            if (this.partsvendorslist.length > 0) {
+                part_shortage['vendor_name'] = this.partsvendorslist[0].vendor_name;
+                part_shortage['vendor_number'] = this.partsvendorslist[0].vendor_number;
+            }
+            else
+                part_shortage['vendor_name'] = null;
+        }
+        else {
+            part_shortage['vendor_name'] = discrepancytobeupdated.vendor_name;
+        }
+        part_shortage['carrier_text'] = discrepancytobeupdated.carrier_text == undefined ? null : discrepancytobeupdated.carrier_text;
+        part_shortage['carrier_arrival_text'] = discrepancytobeupdated.carrier_arrival_text == undefined ? null : discrepancytobeupdated.carrier_arrival_text;
+        part_shortage['shortage_cause_id'] = discrepancytobeupdated.shortage_cause_id == undefined ? null : discrepancytobeupdated.shortage_cause_id;
+        part_shortage['tracking'] = discrepancytobeupdated.tracking == undefined ? null : discrepancytobeupdated.tracking;
+        part_shortage['date_received'] = discrepancytobeupdated.date_received == undefined ? null : this.modifydate(discrepancytobeupdated.date_received);
+        part_shortage['is_b_whs_kit'] = discrepancytobeupdated.is_b_whs_kit == undefined ? null : discrepancytobeupdated.is_b_whs_kit;
+        part_shortage['is_long_term'] = discrepancytobeupdated.is_long_term == undefined ? null : discrepancytobeupdated.is_long_term;
+        part_shortage['is_ship_short'] = discrepancytobeupdated.is_ship_short == undefined ? null : discrepancytobeupdated.is_ship_short;
+        part_shortage['remarks'] = discrepancytobeupdated.remarks == undefined ? null : discrepancytobeupdated.remarks;
         var responsebody = {
             "ecard_discrepancy_log_id": discrepancytobeupdated.ecard_discrepancy_log_id,
             "ecard_id" : discrepancytobeupdated.ecard_id,
@@ -2081,6 +2189,7 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
                    } 
                    else {
                             this.selectedshortage['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;  
+                            this.isupdated = false;
                             if (this.statusascomment) {
                                 this.statusascomment = false;
                                 var response = JSON.parse(data.operationlogresponse).data;
@@ -2216,5 +2325,172 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
     
     refreshoperation(){
        this.departmentchanged(this.departmentId, this.departmentName, this.operation, this.messageFromEvt);
+    }
+
+    //To load the partshortage cause list
+    loadpartshotcauselist() {
+        getPartshortagecauselist()
+            .then(data => {
+                if (data.isError) {
+                    this.showmessage('Sorry we could not fetch the Shortage Cause List operation.',
+                        'Something unexpected occured. Please try again or contact your Administrator.',
+                        'error');
+                }
+                else {
+                    var causelist = JSON.parse(data.responsebody).data.shortagecauses;
+                    var modifiedcauselist = [];
+                    for (var item in causelist) {
+                        causelist[item]['label'] = causelist[item].shortage_cause_name;
+                        causelist[item]['value'] = causelist[item].shortage_cause_id.toString();
+                        modifiedcauselist.push(causelist[item]);
+                    }
+                    this.shortgecauselist = modifiedcauselist;
+                }
+
+            }).catch(error => {
+                this.error = error;
+                this.showmessage('Sorry we could not complete Shortage Cause List operation.',
+                    'Something unexpected occured. Please try again or contact your Administrator.',
+                    'error');
+            });
+    }
+
+    @track vendornamelist = [];
+    //to get default vendor and buyers details for selected part
+    getVendorlistforparts(selectedpartno) {
+        getAllpartsVendorlist({ partNumber: selectedpartno })
+            .then(data => {
+                if (data.isError) {
+                    this.showmessage('Sorry we could not fetch Vendor List for Shortage operation.',
+                        'Something unexpected occured. Please try again or contact your Administrator.',
+                        'error');
+                }
+                else {
+                    var partsvendorlist = JSON.parse(data.responsebody).data.vendors;
+                    var modifiedpartsvendorlist = [];
+                    var vendornamelist = [];
+                    for (var item in partsvendorlist) {
+                        partsvendorlist[item]['label'] = partsvendorlist[item].vendor_name;
+                        partsvendorlist[item]['value'] = partsvendorlist[item].vendor_number;
+                        modifiedpartsvendorlist.push(partsvendorlist[item]);
+                        vendornamelist.push(partsvendorlist[item].vendor_name);
+                    }
+                    this.partsvendorslist = modifiedpartsvendorlist;
+                    this.vendornamelist = vendornamelist;
+                }
+
+            }).catch(error => {
+                this.error = error;
+                this.showmessage('Sorry we could not complete Vendor List for Shortage operation.',
+                    'Something unexpected occured. Please try again or contact your Administrator.',
+                    'error');
+            });
+    }
+    //to get default vendor and buyers details for selected part is not already selected
+    getPartsVendorBuyerDetails(selectedpartno, shortagedata, operation) {
+        getDefaultVendorandBuyer({ partNumber: selectedpartno })
+            .then(data => {
+                if (data.isError) {
+                    this.showmessage('Sorry we could not fetch the default Buyer and Vendor details operation.',
+                        'Something unexpected occured. Please try again or contact your Administrator.',
+                        'error');
+                }
+                else {
+                    var result = JSON.parse(data.responsebody).data;
+                    var selectedshortage = shortagedata;
+                    // Only assigne if the value is not emnpty
+                    Object.keys(result).forEach(function (key) {
+                        if (result[key] != '') {
+                            selectedshortage[key] = result[key];
+                        }
+                    })
+                    if(operation == 'addnew'){
+                        this.newpartshortage = selectedshortage;
+                        if (this.newpartshortage.buyer != undefined && this.newpartshortage.planner_code != undefined) {
+                            this.newpartshortage.buyer_code = this.newpartshortage.buyer + ' / ' + this.newpartshortage.planner_code;
+                        }
+                    }else{
+                        this.selectedshortage = selectedshortage;
+                    }
+                }
+
+            }).catch(error => {
+                this.error = error;
+                this.showmessage('Sorry we could not complete the default Buyer and Vendor details.',
+                    'Something unexpected occured. Please try again or contact your Administrator.',
+                    'error');
+            });
+    }
+
+    // Update vendor selected in shortage
+    onvendorselection(event) {
+        var selectedvendor = event.detail.selectedRecord;
+        this.selectedshortage.vendor_name = selectedvendor;
+        this.selectedshortage.vendor_number = null;
+        for (var item in this.partsvendorslist) {
+            if (selectedvendor == this.partsvendorslist[item].label) {
+                this.selectedshortage.vendor_number = this.partsvendorslist[item].value;
+            }
+        }
+        if (event.detail.incident == 'selection') {
+            this.updatepartshortage(event);//timer triggered
+        }
+    }
+
+    // On clearing the vendor selection. added
+    onclearvendor(event) {
+        this.selectedshortage.vendor_name = null;
+        this.selectedshortage.vendor_number = null;
+        this.updatepartshortage(event);//timer triggered
+    }
+
+    // To update new shortage checkbox
+    updatenewpartshortagecheckbox(event) {
+        var targetvalue = event.target.checked;
+        var targetname = event.target.name;
+        this.newpartshortage[targetname] = targetvalue;
+    }
+    
+    //To clear partvendor and buyer details
+    clearpartsvendordetails() {
+        this.newpartshortage['buyer'] = undefined;
+        this.newpartshortage['planner_code'] = undefined;
+        this.newpartshortage['vendor_number'] = undefined;
+        this.newpartshortage['buyer_code'] = undefined;
+        this.newpartshortage['vendor_name'] = undefined;
+        this.partsvendorslist = [];
+    }
+    //To create custome date formate 2021-07-14 to 2021-07-14 00:00:00
+    modifydate(date){
+        var formatteddate = undefined;
+        if(date != undefined){
+            var jsdate = new Date(date);
+            return jsdate.getFullYear() + "-" + (jsdate.getMonth()+1) + "-" + jsdate.getDate() + " " + "00:00:00";
+        }
+        return formatteddate;
+    }
+
+    //removeduplicate user
+    removeDuplicates(objectArray) {
+        console.log(objectArray);
+        // Declare a new array
+        let newArray = [];
+        // Declare an empty object
+        let uniqueObject = {};
+        var objTitle;
+        // Loop for the array elements
+        for (let item in objectArray) {
+            // Extract the title
+            objTitle = objectArray[item]['appuser_name'];
+            // Use the title as the index
+            uniqueObject[objTitle] = objectArray[item];
+        }
+        // Loop to push unique object into array
+        for (let item in uniqueObject) {
+            newArray.push(uniqueObject[item]);
+        }
+        // Display the unique objects
+        console.log(newArray);
+        return newArray;
     }
 }

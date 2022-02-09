@@ -175,7 +175,7 @@ export default class CustomSearchComponent extends LightningElement {
         const selectedRecord = new CustomEvent(
             "select",
             {
-                detail : {selectedRecord: this.selectedRecord, labelvalue: this.label} 
+                detail : {selectedRecord: this.selectedRecord, labelvalue: this.label, incident: 'selection'} 
                 
             }
         );

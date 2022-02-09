@@ -1,0 +1,70 @@
+<template>
+
+    <div onmouseleave={onblurmethod} data-id="searchRes" class="slds-form-element slds-lookup slds-is-close"
+        data-select="single">
+        <!--<label class="slds-form-element__label" for="lookup-348">{label}</label> -->
+        <!--This part is for display search bar for lookup-->
+        <div class="slds-form-element__control">
+
+            <div class="slds-input-has-icon slds-input-has-icon--right">
+                <!-- This markup is for when an record is selected -->
+                <div data-id="lookup-pill" class="slds-hide">
+                    <template if:true={showlabel}>
+                        <label class="slds-form-element__label" for="lookup-348">
+                            <abbr if:true={isrequired} title="required" class="slds-required">*</abbr>
+                            {label}</label><!-- {label}-->
+                    </template>
+                    <div class="slds-pill_container">
+                        <lightning-pill label={selectedRecord} onremove={clear} class={pillstate}>
+                            <template if:true={showicon}>
+                                <lightning-icon icon-name={IconName} size="x-small"></lightning-icon>
+                            </template>
+                        </lightning-pill>
+                    </div>
+                </div>
+                <div data-id="lookupField" class="slds-show slds-list_horizontal">
+                    <!-- <lightning-icon class="slds-input__icon slds-show" icon-name="utility:search" size="x-small" ></lightning-icon> -->
+                    <!--<span class="slds-icon_container  slds-combobox__input-entity-icon" title="record">
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name={IconName} size="x-small" ></lightning-icon>
+                                        <span class="slds-assistive-text"></span>
+                                    </span>-->
+                    <!-- <div class="inputsize">
+                        <lightning-input required={isrequired} variant={showlabelvariant} onkeyup={keyPressController}
+                            onclick={onfocusmethod} type="search" value={SearchKeyWord} label={label}
+                            placeholder={placeholdertext}></lightning-input>
+                    </div>
+                    <div class="inputiconsize">
+                        <lightning-button-icon if:true={enableaddbutton} onclick={addcustomvendor} name="custom_vendor"
+                            icon-name="utility:check" alternative-text="Add" title="Add" class={addiconclass}>
+                        </lightning-button-icon>
+                    </div>
+                    <div class="clearfix"></div> -->                    
+                        <lightning-input class="inputsize" required={isrequired} variant={showlabelvariant} onkeyup={keyPressController} name={selectedcustomer}
+                            disabled={disableselection} onclick={onfocusmethod} type="search" value={SearchKeyWord} label={label} placeholder={placeholdertext}>
+                        </lightning-input>
+                        
+                        <lightning-button-icon if:true={enableaddbutton} onclick={addcustomvendor} name="custom_vendor"
+                            icon-name="utility:check" alternative-text="Add" title="Add" class={addiconclass}>
+                        </lightning-button-icon>
+                        <div class="clearfix"></div>
+                    <!---->
+                </div>
+            </div>
+        </div>
+        <!--This part is for Display typehead lookup result List-->
+        <ul style="min-height:40px;margin-top:0px !important"
+            class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid slds-lookup__menu slds"
+            role="listbox">
+            <lightning-spinner class="slds-hide" alternative-text="Loading" variant="brand" data-id="mySpinner"
+                size="small"></lightning-spinner>
+            <center> {Message}</center>
+            <div if:true={condition}>
+                <template for:each={listOfSearchRecords} for:item="singleRec">
+                    <c-custom-search-result-component showicon={showicon} key={singleRec} -icon-name={IconName}
+                        search-item={singleRec} onselect={hanldeSelect}></c-custom-search-result-component>
+                </template>
+            </div>
+        </ul>
+    </div>
+
+</template>

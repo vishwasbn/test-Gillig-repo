@@ -17,6 +17,7 @@ export default class SerialnumberComponent extends LightningElement {
     @api operation;
     @api ecardid;
     @api departmentIdMap;
+    @api permissionset;
 
     @api
     get filter(){
@@ -90,6 +91,9 @@ export default class SerialnumberComponent extends LightningElement {
     }
     get isselectedgeneral(){
         return this.selectedserialview == 'Other';
+    }
+    get disableserialnumberlog() {
+        return !this.permissionset.serail_no_log.write;
     }
 
     connectedCallback(){

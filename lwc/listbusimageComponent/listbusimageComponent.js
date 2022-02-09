@@ -127,8 +127,8 @@ export default class listbusimageComponent extends LightningElement {
                 }
                 else{
                     const alertmessage = new ShowToastEvent({
-                        title : 'Record update Successfull',
-                        message : 'Curbside image URL updated suceessfully.',
+                        title : 'Record update Successful',
+                        message : 'Curbside image URL updated successfully.',
                         variant : 'success'
                     });
                     this.dispatchEvent(alertmessage);
@@ -175,8 +175,8 @@ export default class listbusimageComponent extends LightningElement {
                 }
                 else{
                     const alertmessage = new ShowToastEvent({
-                        title : 'Record update Successfull',
-                        message : 'Streetside image URL updated suceessfully.',
+                        title : 'Record update Successful',
+                        message : 'Streetside image URL updated successfully.',
                         variant : 'success'
                     });
                     this.dispatchEvent(alertmessage);

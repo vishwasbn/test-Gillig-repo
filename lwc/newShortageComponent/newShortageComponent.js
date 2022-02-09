@@ -6,6 +6,10 @@ import {modifieduserlist, getmoddeddate, getselectedformandetails}  from 'c/user
 import getBusPartdetails from "@salesforce/apex/ecardOperationsController.getBusPartdetails";
 import deleteTempAttachment from "@salesforce/apex/ecardOperationsController.deleteTempAttachment";
 import raisenewShortage from "@salesforce/apex/ecardOperationsController.raisenewShortage";
+import getPartshortagecauselist from "@salesforce/apex/ecardOperationsController.getPartshortageCauses";
+import getDefaultVendorandBuyer from '@salesforce/apex/ecardOperationsController.getDefaultVendorandBuyer';
+import getAllpartsVendorlist from '@salesforce/apex/ecardOperationsController.getAllpartsVendorlist';
+import getAllEcarddetailsfromServer from "@salesforce/apex/DiscrepancyDatabaseController.getAllEcarddetails";
 import pubsub from 'c/pubsub' ;
 
 export default class NewShortageComponent extends LightningElement {
@@ -25,12 +29,23 @@ export default class NewShortageComponent extends LightningElement {
     @api partname;
     @api partid;
     @api bstationid;
+    // @api btndisabled;
+    //used to display/hide the shortage button based on role access
+    get btndisabled() {
+        if (this.permissionset != undefined) {
+            return !this.permissionset.shortage_new.write;
+        } else
+            return false;
+    }
 
     @track partshortageaddmodal=false;
     @track modifiedshortageslist = [];
     @track partnumberlist;
     @track partnumberdetails;
     @track newpartshortage;
+    @track shortgecauselist = [];
+    @track partsvendorslist = [];
+    @track vendornamelist = [];
     /*@track newpartshortage={
         'buspart_id' : undefined,
         'buspart_no' : undefined,
@@ -77,13 +92,38 @@ export default class NewShortageComponent extends LightningElement {
             return false;
         }
     }
+
+    // get disablevendoredit(){
+    //     return this.partsvendorslist.length == 0;
+    // }
+
+    get disablevendorfield(){
+        return (this.newpartshortage.buspart_no == undefined || this.newpartshortage.buspart_no == 'Part No. Not Found');
+    }
+
+    get disablebuyercode(){
+        return this.newpartshortage.buyer_code == undefined;
+    }
+    get ecardnotselected(){
+        return this.newpartshortage.ecard_id == undefined;
+    }
+    get deptnotselected(){
+        return this.newpartshortage.department_id == undefined;
+    }
+    // Use whenever a true attribute is required in Component.html
+    get returntrue() {
+        return true;
+    }
+
+    @api page;
+    @track shortagedb = false;
     // To show Report shortage addition Modal
     async showReportShortageAdd(event) {
         var selectedbus = `${this.busname}, ${this.buschasisnumber}`;
         var ecardid = this.ecardid;
         var options = [];
         for (var i in this.departmentIdMap) {
-            if (this.departmentIdMap[i].value != 'None' && this.departmentIdMap[i].label != 'ALL DEPARTMENTS') {
+            if (this.departmentIdMap[i].value != 'None' && this.departmentIdMap[i].label != 'ALL DEPARTMENTS' && this.departmentIdMap[i].label != 'All Departments') {
                 options.push(this.departmentIdMap[i]);
             }
         }
@@ -103,88 +143,189 @@ export default class NewShortageComponent extends LightningElement {
         var QClist = [];
         var emptylist = [];
         var bs = { label: "Unknown", value: "Unknown", workcentreId: 0, workcentreName: "0000" }
-        await getDepartmentOperations({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
-            .then(data => {
-                var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
-                this.deptsupervisorforselecteddept = prod_supervisor;
-                this.buildstationoptions = data.buildstationList;
-                this.buildstationoptions.push(bs);
-                this.thisdepartmentbuildstations = this.getcompleteBuilstationlist(data);
-                /*var selectedbuildstation = this.thisdepartmentbuildstations[0];
-                // Set Prod and QC also
-
-                if (selectedbuildstation.QClist != null && selectedbuildstation.QClist.length != 0) {
-                    allQClist = selectedbuildstation.QClist;
-                }
-                if (selectedbuildstation.PRODlist != null && selectedbuildstation.PRODlist.length != 0) {
-                    allPRODlist = selectedbuildstation.PRODlist;
-                }
-                QClist = selectedbuildstation.selectedqc;*/
-                PRODlist = this.deptsupervisorforselecteddept;
-                var todaydate = new Date();
-                //this.moddifydefectpickvalues(departmentId);   
-                var partno = undefined;
-                var buildstation = undefined;
-                var buildstationid = undefined;
-                var partname = undefined;
-                var partid = null;
-                partno = this.partnumber;
-                buildstation = this.bstationcode;
-                buildstationid = this.bstationid != undefined ? this.bstationid.toString() : this.bstationid;
-                partname = this.partname;
-                partid = this.partid;
-                //Start - prod listing for BS
-                var buildstationdetails = this.thisdepartmentbuildstations;
-                var selectedbsstation;
-                if (buildstationid != undefined) {
-                    for (var item in buildstationdetails) {
-                        if (buildstationid.toString() == buildstationdetails[item].buildstation_id.toString()) {
-                            selectedbsstation = buildstationdetails[item];
+        var newpartshortage = {}; //
+        if (this.page == 'shortagedb') {
+            this.shortagedb = true;
+        }
+        if (this.shortagedb) {
+            this.getAllEcarddetails();
+            newpartshortage = {
+                'buspart_id': undefined,
+                'buspart_no': undefined,
+                'buspart_name': undefined,
+                'quantity': undefined,
+                'po_no': undefined,
+                'cut_off_date': undefined,
+                'selectedbus': undefined,
+                'discrepancy_type': 'partshortage',
+                'department_id': undefined,
+                'ecard_id': undefined,
+                'priority': 'Normal',
+                'buildstation_id': undefined,
+                'buschasisnumber': undefined,
+                'date': getmoddeddate(new Date()),
+                'is_b_whs_kit': false,
+                'is_long_term': false,
+                'is_ship_short': false,
+                'remarks': undefined,
+                'qclist': [],
+                'allQClist': [],
+                'prodlist': [],
+                'allPRODlist': []
+            };
+            this.newpartshortage = newpartshortage;
+        }
+        else {
+            await getDepartmentOperations({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
+                .then(data => {
+                    var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
+                    this.deptsupervisorforselecteddept = prod_supervisor;
+                    this.buildstationoptions = data.buildstationList;
+                    this.buildstationoptions.push(bs);
+                    this.thisdepartmentbuildstations = this.getcompleteBuilstationlist(data);
+                    /*var selectedbuildstation = this.thisdepartmentbuildstations[0];
+                    // Set Prod and QC also
+    
+                    if (selectedbuildstation.QClist != null && selectedbuildstation.QClist.length != 0) {
+                        allQClist = selectedbuildstation.QClist;
+                    }
+                    if (selectedbuildstation.PRODlist != null && selectedbuildstation.PRODlist.length != 0) {
+                        allPRODlist = selectedbuildstation.PRODlist;
+                    }
+                    QClist = selectedbuildstation.selectedqc;*/
+                    PRODlist = this.deptsupervisorforselecteddept;
+                    var todaydate = new Date();
+                    //this.moddifydefectpickvalues(departmentId);   
+                    var partno = undefined;
+                    var buildstation = undefined;
+                    var buildstationid = undefined;
+                    var partname = undefined;
+                    var partid = null;
+                    partno = this.partnumber;
+                    buildstation = this.bstationcode;
+                    buildstationid = this.bstationid != undefined ? this.bstationid.toString() : this.bstationid;
+                    partname = this.partname;
+                    partid = this.partid;
+                    //Start - prod listing for BS
+                    var buildstationdetails = this.thisdepartmentbuildstations;
+                    var selectedbsstation;
+                    if (buildstationid != undefined) {
+                        for (var item in buildstationdetails) {
+                            if (buildstationid.toString() == buildstationdetails[item].buildstation_id.toString()) {
+                                selectedbsstation = buildstationdetails[item];
+                            }
                         }
                     }
-                }
-                if (buildstationid != undefined && selectedbsstation.PRODlist != null) {//&& selectedbsstation.PRODlist.length != 0
-                    PRODlist = selectedbsstation.PRODlist;
-                }
-                //End - prod listing for BS
-                var newpartshortage = {
-                    'buspart_id': partid,
-                    'buspart_no': partno,
-                    'buspart_name': partname,
-                    'quantity': undefined,
-                    'po_no': undefined,
-                    'cut_off_date': undefined,
-                    'selectedbus': selectedbus,
-                    'discrepancy_type': 'partshortage',
-                    'department_id': departmentId.toString(),
-                    'ecard_id': ecardid,
-                    'priority': 'Normal',
-                    'buildstation_id': buildstationid,
-                    'buschasisnumber': this.buschasisnumber,
-                    'date': getmoddeddate(todaydate),
-                    'qclist': [],
-                    'allQClist': allQClist,
-                    'prodlist': [],
-                    'allPRODlist': PRODlist
-                };
-                this.newpartshortage = newpartshortage;
-            }).catch(error => {
-                this.error = error;
-                this.showmessage('Data fetch failed.', 'Something unexpected occured. Please contact your Administrator.', 'error');
-            });
-        if (this.newpartshortage.allPRODlist.length == 0) {
-            var userdetails = [];
-            await getcrewingsuserslist({ deptid: this.departmentid })
-                .then((result) => {
-                    userdetails = JSON.parse(result.responsebody).data.user;
-                    this.newpartshortage.allPRODlist = userdetails.length > 0 ? modifieduserlist(userdetails) : userdetails;
-                })
-                .catch((error) => {
+                    if (buildstationid != undefined && selectedbsstation.PRODlist != null) {//&& selectedbsstation.PRODlist.length != 0
+                        PRODlist = selectedbsstation.PRODlist;
+                    }
+                    //End - prod listing for BS
+                    //var newpartshortage = {
+                    newpartshortage = {
+                        'buspart_id': partid,
+                        'buspart_no': partno,
+                        'buspart_name': partname,
+                        'quantity': undefined,
+                        'po_no': undefined,
+                        'cut_off_date': undefined,
+                        'selectedbus': selectedbus,
+                        'discrepancy_type': 'partshortage',
+                        'department_id': departmentId.toString(),
+                        'ecard_id': ecardid,
+                        'priority': 'Normal',
+                        'buildstation_id': buildstationid,
+                        'buschasisnumber': this.buschasisnumber,
+                        'date': getmoddeddate(todaydate),
+                        'is_b_whs_kit': false,
+                        'is_long_term': false,
+                        'is_ship_short': false,
+                        'qclist': [],
+                        'allQClist': allQClist,
+                        'prodlist': [],
+                        'allPRODlist': PRODlist
+                    };
+                    this.newpartshortage = newpartshortage;
+                    if (partno != undefined || partno != '') {
+                        this.getPartsVendorBuyerDetails(partno);
+                    }
+                }).catch(error => {
+                    this.error = error;
+                    this.showmessage('Data fetch failed.', 'Something unexpected occured. Please contact your Administrator.', 'error');
                 });
+            if (this.newpartshortage.allPRODlist.length == 0) {
+                var userdetails = [];
+                await getcrewingsuserslist({ deptid: this.departmentid })
+                    .then((result) => {
+                        userdetails = JSON.parse(result.responsebody).data.user;
+                        this.newpartshortage.allPRODlist = userdetails.length > 0 ? modifieduserlist(userdetails) : userdetails;
+                    })
+                    .catch((error) => {
+                    });
+            }
         }
-
         this.partshortageaddmodal = true;
+    }
 
+    @track ecardoptions;
+    @track ecardnamechasislist;
+    //To get all Ecard Details from Server
+    getAllEcarddetails() {
+        getAllEcarddetailsfromServer()
+            .then((result) => {
+                var ecards = JSON.parse(result.response).data.ecard;
+                var ecardoptions = [];
+                for (var ec in ecards) {
+                    //${ecards[ec].first_name} ${ecards[ec].customer_name}
+                    var ecardopt = {
+                        label: `${ecards[ec].chassis_no} (${ecards[ec].customer_name})`,
+                        value: ecards[ec].ecard_id.toString()
+                    };
+                    ecardoptions.push(ecardopt);
+                }
+                this.ecardoptions = ecardoptions;
+                var ecardnamelist = [];
+                for (var ecard in this.ecardoptions) {
+                    ecardnamelist.push(this.ecardoptions[ecard].label);
+                }
+                this.ecardnamechasislist = ecardnamelist;
+            })
+            .catch((error) => {
+                const alertmessage = new ShowToastEvent({
+                    title: "Failed to fetch list of Bus.",
+                    message:
+                        "Something unexpected occured. Please contact your Administrator",
+                    variant: "error"
+                });
+                this.dispatchEvent(alertmessage);
+            });
+    }
+
+    // Update Bus/Ecard selected in new disscrepancy
+    onbusselection(event) {
+        if (event.detail.labelvalue == "Select a Bus") {
+            var selectedbus = event.detail.selectedRecord;
+            for (var ecard in this.ecardoptions) {
+                if (selectedbus == this.ecardoptions[ecard].label) {
+                    this.newpartshortage.ecard_id = this.ecardoptions[ecard].value;
+                }
+            }
+        }
+    }
+
+    // On clearing the bus selection. added
+    onclearbus(event) {
+        var emptylist = [];
+        this.newpartshortage.ecard_id = undefined;
+        this.newpartshortage.buspart_no = undefined;
+        this.newpartshortage.buspart_name = undefined;
+        this.newpartshortage.department_id = undefined;
+        this.newpartshortage.buildstation_id = undefined;
+        this.newpartshortage.buschasisnumber = undefined;
+        this.newpartshortage.qclist = emptylist;
+        this.newpartshortage.prodlist = emptylist;
+        this.newpartshortage.allQClist = emptylist;
+        this.newpartshortage.allPRODlist = emptylist;
+        this.clearpartsvendordetails();
     }
 
     // For getting Buildstation Details on department change for Department Discrepancy.
@@ -274,8 +415,10 @@ export default class NewShortageComponent extends LightningElement {
         this.newpartshortage.buspart_no = undefined;
         this.newpartshortage.buspart_name = undefined;
         if (this.partnumberlist == undefined && (event != undefined && event.target.dataset.id == 'partmnumbersearch')) {
-            this.getbuspartdetails(this.ecardid, this.newpartshortage.buildstation_id);
+            //this.getbuspartdetails(this.ecardid, this.newpartshortage.buildstation_id);
+            this.getbuspartdetails(this.newpartshortage.ecard_id, this.newpartshortage.buildstation_id);
         }
+        this.clearpartsvendordetails();
     }
     
      //To update other fields on user selection
@@ -284,7 +427,8 @@ export default class NewShortageComponent extends LightningElement {
         var targetname = event.target.name;
         this.newpartshortage[targetname] = targetvalue;
         if(targetname == 'department_id'){
-            var ecardid = this.ecardid;
+            //var ecardid = this.ecardid;
+            var ecardid = this.newpartshortage.ecard_id;
             var departmentId = targetvalue;
             this.newpartshortage.department_id = departmentId;
             this.newpartshortage.allPRODlist = [];
@@ -300,6 +444,7 @@ export default class NewShortageComponent extends LightningElement {
                 var selectedbuildstation = this.thisdepartmentbuildstations[0];
                 this.newpartshortage.buildstation_id = undefined;
                 this.newpartshortage.buspart_name = undefined;
+                this.clearpartsvendordetails();
                 // Set Prod and QC also
                 
                 if(selectedbuildstation.QClist!=null && selectedbuildstation.QClist.length != 0){
@@ -333,7 +478,8 @@ export default class NewShortageComponent extends LightningElement {
                 this.template.querySelector('[data-id="partmnumbersearch"]').clear();
             } 
             if(buildstationId!='Unknown'){
-                this.getbuspartdetails(this.ecardid, this.newpartshortage.buildstation_id);
+                //this.getbuspartdetails(this.ecardid, this.newpartshortage.buildstation_id);
+                this.getbuspartdetails(this.newpartshortage.ecard_id, this.newpartshortage.buildstation_id);
             }else{
                 var partnumberlist = [];
                 var partdetails = [];
@@ -379,6 +525,24 @@ export default class NewShortageComponent extends LightningElement {
                 .catch((error) => {
                 });
         }
+    }
+
+    // Update vendor selected in shortage
+    onvendorselection(event) {
+        var selectedvendor = event.detail.selectedRecord;
+        this.newpartshortage.vendor_name = selectedvendor;
+        this.newpartshortage.vendor_number = null;
+        for (var item in this.partsvendorslist) {
+            if (selectedvendor == this.partsvendorslist[item].label) {
+                this.newpartshortage.vendor_number = this.partsvendorslist[item].value;
+            }
+        }
+    }
+
+    // On clearing the vendor selection. added
+    onclearvendor(event) {
+        this.newpartshortage.vendor_name = null;
+        this.newpartshortage.vendor_number = null;
     }
     
     // Update user selection on new Part Shortage
@@ -451,6 +615,9 @@ export default class NewShortageComponent extends LightningElement {
                     this.newpartshortage.buspart_id = this.partnumberdetails[i].buspart_id;
                 }
             }
+            if (event.detail.incident != undefined && event.detail.incident == 'selection') {
+                this.getPartsVendorBuyerDetails(selectedbuspart);
+            }
         }else{
             this.newpartshortage.buspart_no = 'Part No. Not Found';
             this.newpartshortage.buspart_name = undefined;
@@ -493,6 +660,29 @@ export default class NewShortageComponent extends LightningElement {
                 "po_no" : partshortageaddmodalvalues.po_no
                };
          }
+         part_shortage['buyer'] = partshortageaddmodalvalues.buyer == undefined ? null : partshortageaddmodalvalues.buyer;
+         part_shortage['planner_code'] = partshortageaddmodalvalues.planner_code  == undefined ? null : partshortageaddmodalvalues.planner_code;
+         part_shortage['vendor_number'] = partshortageaddmodalvalues.vendor_number == undefined ? null : partshortageaddmodalvalues.vendor_number;
+        if (partshortageaddmodalvalues.vendor_name == undefined) {
+            if (this.partsvendorslist.length > 0) {
+                part_shortage['vendor_name'] = this.partsvendorslist[0].vendor_name;
+                part_shortage['vendor_number'] = this.partsvendorslist[0].vendor_number;
+            }
+            else
+                part_shortage['vendor_name'] = null;
+        }
+        else {
+            part_shortage['vendor_name'] = partshortageaddmodalvalues.vendor_name;
+        }
+         part_shortage['carrier_text'] = partshortageaddmodalvalues.carrier_text == undefined ? null : partshortageaddmodalvalues.carrier_text;
+         part_shortage['carrier_arrival_text'] = partshortageaddmodalvalues.carrier_arrival_text == undefined ? null : partshortageaddmodalvalues.carrier_arrival_text;
+         part_shortage['shortage_cause_id'] = partshortageaddmodalvalues.shortage_cause_id == undefined ? null : partshortageaddmodalvalues.shortage_cause_id;
+         part_shortage['tracking'] = partshortageaddmodalvalues.tracking == undefined ? null : partshortageaddmodalvalues.tracking;
+         part_shortage['date_received'] = partshortageaddmodalvalues.date_received == undefined ? null : this.modifydate(partshortageaddmodalvalues.date_received);
+         part_shortage['is_b_whs_kit'] = partshortageaddmodalvalues.is_b_whs_kit == undefined ? null : partshortageaddmodalvalues.is_b_whs_kit;
+         part_shortage['is_long_term'] = partshortageaddmodalvalues.is_long_term == undefined ? null : partshortageaddmodalvalues.is_long_term;
+         part_shortage['is_ship_short'] = partshortageaddmodalvalues.is_ship_short == undefined ? null : partshortageaddmodalvalues.is_ship_short;
+         part_shortage['remarks'] = partshortageaddmodalvalues.remarks == undefined ? null : partshortageaddmodalvalues.remarks; //to-do
          var bsid= partshortageaddmodalvalues.buildstation_id==-1?null:partshortageaddmodalvalues.buildstation_id;
          var newpartshortagebody = {
                 "component": null,  
@@ -581,5 +771,119 @@ export default class NewShortageComponent extends LightningElement {
         
         return newresponse;
     }
+    //To load the partshortage cause list
+    loadpartshotcauselist() {
+        getPartshortagecauselist()
+            .then(data => {
+                if (data.isError) {
+                    this.showmessage('Sorry we could not process shortage Cause List operation.',
+                        'Something unexpected occured. Please try again or contact your Administrator.',
+                        'error');
+                }
+                else {
+                    var causelist = JSON.parse(data.responsebody).data.shortagecauses;
+                    var modifiedcauselist = [];
+                    for (var item in causelist) {
+                        causelist[item]['label'] = causelist[item].shortage_cause_name;
+                        causelist[item]['value'] = causelist[item].shortage_cause_id.toString();
+                        modifiedcauselist.push(causelist[item]);
+                    }
+                    this.shortgecauselist = modifiedcauselist;
+                }
 
+            }).catch(error => {
+                this.error = error;
+                this.showmessage('Sorry we could not complete shortage Cause List operation.',
+                    'Something unexpected occured. Please try again or contact your Administrator.',
+                    'error');
+            });
+    }
+
+    //to get default vendor and buyers details for selected part
+    getPartsVendorBuyerDetails(selectedpartno){
+        getDefaultVendorandBuyer({partNumber : selectedpartno})
+        .then(data => {
+            if (data.isError) {
+                this.showmessage('Sorry we could not get Default buyer and vendor operation.',
+                    'Something unexpected occured. Please try again or contact your Administrator.',
+                    'error');
+            }
+            else {
+                var result = JSON.parse(data.responsebody).data;
+                var newpartshortage = this.newpartshortage;
+                Object.keys(result).forEach(function (key) {
+                    if(result[key] != '') {
+                        newpartshortage[key] = result[key];
+                    }
+                })
+                this.newpartshortage = newpartshortage;
+                if(this.newpartshortage['buyer'] != undefined && this.newpartshortage['planner_code'] != undefined){
+                    this.newpartshortage['buyer_code'] = this.newpartshortage.buyer+' / '+this.newpartshortage.planner_code;
+                }
+                this.getVendorlistforparts(selectedpartno);
+            }
+
+        }).catch(error => {
+            this.error = error;
+            this.showmessage('Sorry we could not complete Default buyer and vendor operation.',
+                'Something unexpected occured. Please try again or contact your Administrator.',
+                'error');
+        });
+    }
+
+    //to get default vendor and buyers details for selected part
+    getVendorlistforparts(selectedpartno){
+        getAllpartsVendorlist({partNumber : selectedpartno})
+        .then(data => {
+            if (data.isError) {
+                this.showmessage('Sorry we could not fetch Vendor list for Shortage operation.',
+                    'Something unexpected occured. Please try again or contact your Administrator.',
+                    'error');
+            }
+            else {
+                var partsvendorlist = JSON.parse(data.responsebody).data.vendors;
+                    var modifiedpartsvendorlist = [];
+                    var vendornamelist = [];
+                    for (var item in partsvendorlist) {
+                        partsvendorlist[item]['label'] = partsvendorlist[item].vendor_name;
+                        partsvendorlist[item]['value'] = partsvendorlist[item].vendor_number;
+                        modifiedpartsvendorlist.push(partsvendorlist[item]);
+                        vendornamelist.push(partsvendorlist[item].vendor_name);
+                    }
+                    this.partsvendorslist = modifiedpartsvendorlist;
+                    this.vendornamelist = vendornamelist;
+            }
+
+        }).catch(error => {
+            this.error = error;
+            this.showmessage('Sorry we could not complete Vendor list for Shortage operation.',
+                'Something unexpected occured. Please try again or contact your Administrator.',
+                'error');
+        });
+    }
+    // Update new shortage checkbox values
+    updatenewpartshortagecheckbox(event) {
+        var targetvalue = event.target.checked;
+        var targetname = event.target.name;
+        this.newpartshortage[targetname] = targetvalue;
+    }
+    //To clear partvendor and buyer details
+    clearpartsvendordetails() {
+        this.newpartshortage['buyer'] = undefined;
+        this.newpartshortage['planner_code'] = undefined;
+        this.newpartshortage['vendor_number'] = undefined;
+        this.newpartshortage['buyer_code'] = undefined;
+        this.newpartshortage['vendor_name'] = undefined;
+        this.partsvendorslist = [];
+        this.vendornamelist = [];
+    }
+    //To create custome date formate 2021-07-14 to 2021-07-14 00:00:00
+    modifydate(date) {
+        var formatteddate = undefined;
+        if (date != undefined) {
+            var jsdate = new Date(date);
+            return jsdate.getFullYear() + "-" + (jsdate.getMonth() + 1) + "-" + jsdate.getDate() + " " + "00:00:00";
+        }
+        return formatteddate;
+    }
 }

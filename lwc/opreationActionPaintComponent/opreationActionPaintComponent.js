@@ -83,13 +83,22 @@ export default class OpreationActionPaintComponent extends LightningElement {
     }
 
     // Disable/Enable Production User For Selected Discrepancy
-    get disableprodforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open'){
-            return true;
+    get disableprodforselecteddiscrepancy() {
+        // if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open'){
+        //     return true;
+        // }
+        // else{
+        //     return false;
+        // }
+        var updatepermission = false;
+        if (this.selecteddiscrepancy.discrepancy_type == 'department') {
+            updatepermission = this.permissionset.dept_discrepancy_update_prod.write;
+        } else if (this.selecteddiscrepancy.discrepancy_type == 'busarea') {
+            updatepermission = this.permissionset.busarea_discrepancy_update_prod.write;
+        } else {
+            updatepermission = this.permissionset.discrepancy_update_prod.write;
         }
-        else{
-            return false;
-        }
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !updatepermission;
     }
 
     // Disable/Enable QC User For Selected Discrepancy
@@ -448,6 +457,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
             await getcrewingsuserslist({ deptid: this.selecteddiscrepancy.departmentid })
                 .then((result) => {
                     userdetails = JSON.parse(result.responsebody).data.user;
+                    userdetails = this.removeDuplicates(userdetails);//todo
                     this.selecteddiscrepancy.prod = userdetails.length > 0 ? modifieduserlist(userdetails) : userdetails;
                 })
                 .catch((error) => {
@@ -596,7 +606,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
     }
 
     get disablecomponentdates(){
-        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open';
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !this.permissionset.dept_discrepancy_update.write;//vishwas
     }
 
     // Handle status change from modal
@@ -945,4 +955,27 @@ export default class OpreationActionPaintComponent extends LightningElement {
         this.loadDiscrepancydata();
      }
 
+    //removeduplicate user
+    removeDuplicates(objectArray) {
+        console.log(objectArray);
+        // Declare a new array
+        let newArray = [];
+        // Declare an empty object
+        let uniqueObject = {};
+        var objTitle;
+        // Loop for the array elements
+        for (let item in objectArray) {
+            // Extract the title
+            objTitle = objectArray[item]['appuser_name'];
+            // Use the title as the index
+            uniqueObject[objTitle] = objectArray[item];
+        }
+        // Loop to push unique object into array
+        for (let item in uniqueObject) {
+            newArray.push(uniqueObject[item]);
+        }
+        // Display the unique objects
+        console.log(newArray);
+        return newArray;
+    }
 }

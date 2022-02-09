@@ -15,3 +15,30 @@
 .tblheader{
     height: 3rem;
 }
+.headerborder{
+    border-style: solid;
+    border-width: 2px 2px 2px 2px;
+    border-color: rgb(3 45 96);    
+}
+
+.tablelayout{
+    table-layout: fixed;
+}
+
+.tablelayout th, .tablelayout td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    font-size: 12px;
+    white-space: normal;
+}
+
+.avoidclicks {
+    pointer-events: none;
+  }
+
+.inactive{
+    /* background-color: rgb(240, 240, 245); */
+    /* background-color: rgb(224, 223, 226); */
+    background-color: rgb(224 223 226 / 32%);
+}

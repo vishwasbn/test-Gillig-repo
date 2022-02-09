@@ -218,6 +218,87 @@ public class CrewingScheduleController {
          }
      }
 
+     @AuraEnabled
+     public static  ResponseWrapperData getcrewingadjustmentlist(){
+         ResponseWrapperData wrapobj = new ResponseWrapperData();
+         try{
+             AuthorisationData authdata = userAuthentication.EcardLogin();
+             string endpoint = System.Label.EcardAppendpoint+'api/all_crewing_adjustment';
+             userAuthentication.ResponseWrapper response = userAuthentication.getData(endpoint, 'GET', authdata.data.token.access_token, authdata.data.token.refresh_token);
+             wrapobj.isError = response.isError;
+             wrapobj.statusCode = response.statusCode;
+             if(response.isError){
+                 wrapobj.errorMessage = 'ERROR';
+                 wrapobj.responsebody = response.responseBody;
+             }
+             else{
+                 wrapobj.errorMessage = 'SUCCESS';
+                 wrapobj.responsebody = response.responseBody;
+             }
+             return wrapobj;
+         }
+         catch(Exception ex){
+             wrapobj.isError = true;
+             wrapobj.responsebody = null;
+             wrapobj.errorMessage = ex.getMessage();
+             return wrapobj;
+         }
+     }
+
+     @AuraEnabled
+     public static  ResponseWrapperData createcrewadjustment(string requestbody){
+         ResponseWrapperData wrapobj = new ResponseWrapperData();
+         try{
+             AuthorisationData authdata = userAuthentication.EcardLogin();
+             string endpoint = System.Label.EcardAppendpoint+'api/crewingadjustment';
+             userAuthentication.ResponseWrapper response = userAuthentication.getData(endpoint, 'GET', authdata.data.token.access_token, authdata.data.token.refresh_token);
+             wrapobj.isError = response.isError;
+             wrapobj.statusCode = response.statusCode;
+             if(response.isError){
+                 wrapobj.errorMessage = 'ERROR';
+                 wrapobj.responsebody = response.responseBody;
+             }
+             else{
+                 wrapobj.errorMessage = 'SUCCESS';
+                 wrapobj.responsebody = response.responseBody;
+             }
+             return wrapobj;
+         }
+         catch(Exception ex){
+             wrapobj.isError = true;
+             wrapobj.responsebody = null;
+             wrapobj.errorMessage = ex.getMessage();
+             return wrapobj;
+         }
+     }
+
+     @AuraEnabled
+     public static  ResponseWrapperData updatecrewadjustment(string requestbody){
+         ResponseWrapperData wrapobj = new ResponseWrapperData();
+         try{
+             AuthorisationData authdata = userAuthentication.EcardLogin();
+             string endpoint = System.Label.EcardAppendpoint+'api/update_crewing_adjustment';
+             userAuthentication.ResponseWrapper response = userAuthentication.getData(endpoint, 'GET', authdata.data.token.access_token, authdata.data.token.refresh_token);
+             wrapobj.isError = response.isError;
+             wrapobj.statusCode = response.statusCode;
+             if(response.isError){
+                 wrapobj.errorMessage = 'ERROR';
+                 wrapobj.responsebody = response.responseBody;
+             }
+             else{
+                 wrapobj.errorMessage = 'SUCCESS';
+                 wrapobj.responsebody = response.responseBody;
+             }
+             return wrapobj;
+         }
+         catch(Exception ex){
+             wrapobj.isError = true;
+             wrapobj.responsebody = null;
+             wrapobj.errorMessage = ex.getMessage();
+             return wrapobj;
+         }
+     }
+
   
     public class ResponseWrapperData{
         @auraEnabled

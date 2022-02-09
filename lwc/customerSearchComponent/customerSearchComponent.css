@@ -1,0 +1,11 @@
+.leftPaddingClass {
+    padding-left: 2rem;
+}
+ 
+.pillSize{
+ width:100%;
+}
+
+.pillSize .slds-pill__action{
+    padding-left:.5rem !important;
+}

@@ -39,7 +39,7 @@ public class EcardAppTestDataFactory {
         SingleRequestMock deactivateuserresult = new SingleRequestMock(200,'SUCCESS','{success}',null);
         SingleRequestMock deactivateuserresulterror = new SingleRequestMock(401,'NOT FOUND','{exception}',null);
         SingleRequestMock updateuserresult = new SingleRequestMock(200,'SUCCESS','Keep the valid result here.',null);
-        SingleRequestMock alldepartmentdata = new SingleRequestMock(401,'NOT FOUND','{exception}',null);
+        SingleRequestMock alldepartmentdata = new SingleRequestMock(200,'SUCCESS','{{"data": {"departments": [{"bus_area_discrepancy_enabled": false,"created_date": "2020-12-09T07:45:25.086189+00:00","createdby_id": null,"defect_type": "department","department_id": 21,"department_name": "03 - ELECTRICAL","factory_id": 1,"guid": null,"is_assembly_line": true,"modified_date": "2021-03-12T12:30:33.255626+00:00","modifiedby_id": null,"reference_key": "03"},{"bus_area_discrepancy_enabled": false,                "created_date": "2020-09-25T06:01:57.619806+00:00","createdby_id": null,"defect_type": "department","department_id": 1,"department_name": "04A - CHASSIS","factory_id": 1,"guid": null,"is_assembly_line": true, "modified_date": "2021-03-12T12:30:33.255626+00:00","modifiedby_id": null,"reference_key": "04A"}]}}',null);
         
         Map<String, HttpCalloutMock> endpoint2TestResp = new Map<String,HttpCalloutMock>();
         endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/sflogin',logindata);
@@ -67,6 +67,7 @@ public class EcardAppTestDataFactory {
         HttpCalloutMock multiCalloutMock2 = new MultiRequestMock(endpoint2TestResp);
         Test.setMock(HttpCalloutMock.class, multiCalloutMock2);
         UserListingController.deactivateUser('{appuser_id:15,is_active:true}');
+        System.debug('@@@ getallDepartments Call from Test Class');
         UserListingController.getallDepartments();
         
     } 
@@ -536,6 +537,9 @@ public class EcardAppTestDataFactory {
         SingleRequestMock unassigneddeptusers = new SingleRequestMock(200,'SUCCESS','{"data":{"employee":[]}}',null);
         SingleRequestMock getDeparmentCrewingData = new SingleRequestMock(200,'SUCCESS','{"data":{"employee":[]}}',null);
         SingleRequestMock getcrewingsuserslist = new SingleRequestMock(200,'SUCCESS','{"data":{"user":[{"appuser_name":"90000","employee_id":883,"employee_number":"90000","first_name":"JithinFroman","last_name":"Forman"}]}}',null);
+        SingleRequestMock getcrewingadjustmentdata = new SingleRequestMock(200,'SUCCESS','{"data":[{"assigned_department_id":1,"created_date":"2021-11-18T11:09:31+00:00","createdby_id":{"appuser_name":"andrel","employee_id":193,"employee_number":"62563","first_name":"Andre","last_name":"Leonardo"},"crewing_adj_comments":"test data","crewing_adj_end_date":"2021-11-30T12:30:00+00:00","crewing_adj_start_date":"2021-11-21T12:30:00+00:00","crewingadjustment_id":81,"deactivate_date":"2021-11-13T12:30:00+00:00","employee_id":896,"employee_name":"63054","employee_number":"63054","first_name":"Khoi","last_name":"Trinh","modified_date":null,"modifiedby_id":null,"original_department_id":13},{"assigned_department_id":1,"created_date":"2021-11-18T11:09:03+00:00","createdby_id":{"appuser_name":"andrel","employee_id":193,"employee_number":"62563","first_name":"Andre","last_name":"Leonardo"},"crewing_adj_comments":"test data","crewing_adj_end_date":"2021-11-30T12:30:00+00:00","crewing_adj_start_date":"2021-11-21T12:30:00+00:00","crewingadjustment_id":80,"deactivate_date":"2021-11-13T12:30:00+00:00","employee_id":896,"employee_name":"63054","employee_number":"63054","first_name":"Khoi","last_name":"Trinh","modified_date":null,"modifiedby_id":null,"original_department_id":13}]}',null);
+        SingleRequestMock createNewAdjustmentassignment = new SingleRequestMock(200,'SUCCESS','{"data":"success"}',null);
+        SingleRequestMock updateAdjustmentassignment = new SingleRequestMock(200,'SUCCESS','{"data":{"assigned_department_id":1,"created_date":"2021-11-22T09:10:07+00:00","createdby_id":18,"crewing_adj_comments":"test data","crewing_adj_end_date":"2021-11-23T12:30:00+00:00","crewing_adj_start_date":"2021-11-22T12:30:00+00:00","crewingadjustment_id":100,"deactivate_date":null,"employee_id":811,"employee_name":"60748","guid":"848de005-0181-4369-9f3a-6323430a0b49","modified_date":"2021-11-22T09:20:58.373694+00:00","modifiedby_id":18,"original_department_id":12}}',null);
         Map<String, HttpCalloutMock> endpoint2TestResp = new Map<String,HttpCalloutMock>();
         endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/sflogin',logindata);
         endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/userauthorization/15',permissionsdata);
@@ -545,6 +549,9 @@ public class EcardAppTestDataFactory {
         endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/unassignedcrewingschedules/1',unassigneddeptusers);
         endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/crewingsuser/1',getcrewingsuserslist);
         endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/assignedpoolcrewingschedules/1',getDeparmentCrewingData);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/all_crewing_adjustment',getcrewingadjustmentdata);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/crewingadjustment',createNewAdjustmentassignment);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/update_crewing_adjustment',updateAdjustmentassignment);
         HttpCalloutMock multiCalloutMock = new MultiRequestMock(endpoint2TestResp);
         Test.setMock(HttpCalloutMock.class, multiCalloutMock);
         CrewingScheduleController.getDeparmentCrewingData('1');
@@ -554,6 +561,8 @@ public class EcardAppTestDataFactory {
         CrewingScheduleController.assignPoolUserstoBuildStation('{"department_id":"1","buildstation_id":166,"mapped_employees":"[492]"}');
         CrewingScheduleController.assignPoolUserstoDept('{"department_id":1,"department_code":"22A","mapped_employees":"[812,492,811]"}');
         CrewingScheduleController.getcrewingsuserslist('1');
+        CrewingScheduleController.createcrewadjustment('{"employee_id":[811],"employee_name":["60748"],"crewing_adj_start_date":"2021-11-22 12:30:00","crewing_adj_end_date":"2021-11-23 12:30:00","crewing_adj_comments":"test data","deactivate_date":null,"assigned_department_id":1,"original_department_id":12}');
+        CrewingScheduleController.updatecrewadjustment('{"crewingadjustment_id":100,"employee_id":811,"employee_name":"60748","crewing_adj_start_date":"2021-11-22 12:30:00","crewing_adj_end_date":"2021-11-23 12:30:00","crewing_adj_comments":"test data","deactivate_date":null,"assigned_department_id":1,"original_department_id":12}');
     }
     // Negative Test Method for CrewingScheduleController
     public static testmethod void CrewingScheduleNegativeTest(){
