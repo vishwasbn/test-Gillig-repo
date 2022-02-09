@@ -10,11 +10,13 @@ export default class OpertaionChecksComponent extends LightningElement {
     @api operation;
     @api ecardid;
     @api departmentIdMap;
+    @api permissionset;
+    @api isverified;
+    @api departmentoptions;
+    
     @track departmentId;
     @track departmentName;
     @track showSpinner=false;
-    @api permissionset;
-    @api isverified;
     @track opckdetails=[];
     @track alldepts=false;
     @track filterlocal;
@@ -57,6 +59,11 @@ export default class OpertaionChecksComponent extends LightningElement {
       this.departmentlocal = value;
     }
 
+    //To check if user have new discrepancy add access or prod user
+    get addrepetitionbtn() {
+      return this.permissionset.dept_discrepancy_new.write;
+    }
+
     get filterapplied(){
       return this.filterlocal!=undefined;
     }
@@ -80,7 +87,7 @@ export default class OpertaionChecksComponent extends LightningElement {
         this.opckdetails=this.tmpopckdetails;
       } 
     }*/
-    opckdetails=[];
+    //opckdetails=[]; //
     /*connectedCallback(){
         console.log('Inside Operation Checks');
         if(this.check){
@@ -276,32 +283,4 @@ export default class OpertaionChecksComponent extends LightningElement {
       }
       return moddeptopcklist;
     }
-    // To add new discrepancy
-    creatediscrepancy(event){
-      this.selectedopcheckid = event.target.dataset.id;
-      for(var i in this.opckdetails){
-        for(var j in this.opckdetails[i].op_check)
-          if(this.opckdetails[i].op_check[j].operation_check_id==this.selectedopcheckid){
-              this.selectedopchek=this.opckdetails[i].op_check[j];
-              //this.selectedopchek.op_check_status=event.detail.status;
-          }
-      }
-      var bs={
-        "ecard_id":this.ecardid,
-        "buildstation_id": this.selectedopchek.buildstation_id
-      }
-      var opcheckdetails={
-          //description : event.target.value,
-          description : '',
-          buildstation: bs
-              };
-      const adddiscrepancy = new CustomEvent(
-          "addopckdiscrepancy",
-          {
-              detail : {opcheckdetails: opcheckdetails} 
-          }
-      );
-      this.dispatchEvent(adddiscrepancy);
-      //pubsub.fire('adddiscrepancy', JSON.stringify(opcheckdetails) );
-  }
 }

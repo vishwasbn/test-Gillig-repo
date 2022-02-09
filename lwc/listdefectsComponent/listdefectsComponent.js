@@ -45,6 +45,10 @@ export default class ListdefectsComponent extends LightningElement {
       @track recordsToDisplay = []; //Records to be displayed on the page
       @track rowNumberOffset; //Row number
       @track error;
+      get tableHeight() {
+        var height = window.innerHeight * 0.82 - 247.59;
+        return `height: ${height}px;`;
+      }
 
       newdefect;
 
@@ -167,8 +171,9 @@ export default class ListdefectsComponent extends LightningElement {
                     if(data.errorMessage == 202){
                         const alertmessage = new ShowToastEvent({
                             title: "Sorry we could not complete the operation.",
-                            message: JSON.parse(data.responsebody).data.validation_message,
-                            variant: "error"
+                            //message: JSON.parse(data.responsebody).data.validation_message,
+                            message: 'Data type mismatch for one of the field.' ,
+                            variant: "warning"
                           });
                           this.dispatchEvent(alertmessage);
                     }
@@ -288,7 +293,7 @@ export default class ListdefectsComponent extends LightningElement {
                         const alertmessage = new ShowToastEvent({
                             title: "Sorry we could not complete the operation.",
                             message: JSON.parse(data.responsebody).data.validation_message,
-                            variant: "error"
+                            variant: "warning"
                           });
                           this.dispatchEvent(alertmessage);
                     }

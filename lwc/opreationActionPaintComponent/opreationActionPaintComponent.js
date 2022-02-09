@@ -12,6 +12,8 @@ import getdiscrepancyimage from "@salesforce/apex/DiscrepancyDatabaseController.
 import getDiscrepancylist from "@salesforce/apex/ecardOperationsController.getDiscrepancylist";
 import EcardLogin from "@salesforce/apex/userAuthentication.EcardLogin";
 import {modifieduserlist, getmoddeddate, getselectedformandetails, preassignforeman, preassignqc, setstatusfordisplay}  from 'c/userPermissionsComponent';
+import pubsub from 'c/pubsub' ;
+import getcrewingsuserslist from "@salesforce/apex/CrewingScheduleController.getcrewingsuserslist";
 
 export default class OpreationActionPaintComponent extends LightningElement {
     nodatadessert = noDatadessert;     // No Data Image(Static Resource).
@@ -26,6 +28,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
     @api ecardid;
     @api departmentIdMap;
     @api permissionset;
+    @api departmentoptions;
 
     @api
     get selecteddepartmentId() {
@@ -54,6 +57,13 @@ export default class OpreationActionPaintComponent extends LightningElement {
     @track loggedinuser;
     @track qccapturerole=false;
     @track qccaptureaction=false;
+    @track isbusareaarray = false;
+    @track statusascomment = false;
+    @track statuscommentmap = {
+        "resolve": "Status changed to Resolved",
+        "approve": "Status changed to Verified",
+        "open": "Status changed to Open"
+    };
 
      // For Showing no data message when Discrepancy List is Empty.   
      get discrepancylistempty(){
@@ -74,7 +84,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
 
     // Disable/Enable Production User For Selected Discrepancy
     get disableprodforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status != 'open'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open'){
             return true;
         }
         else{
@@ -84,7 +94,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
 
     // Disable/Enable QC User For Selected Discrepancy
     get disableqcforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status == 'approve'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'approve'){
             return true;
         }
         else{
@@ -97,6 +107,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
         this.getloggedinuser();
         this.loadDiscrepancydata();
         //alert('Fresh Load');
+        pubsub.register('operationrefresh', this.refreshoperation.bind(this));
     }
 
     getloggedinuser(){
@@ -220,7 +231,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
                      createdbyempid= `${created_by[0].userid}`;
                  }
             }
-            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancylogs[disc].discrepancy_status=="open")){
+            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancylogs[disc].discrepancy_status.toLowerCase()=="open")){
                 is_deletable=true;
             }
             var isdepartmentdiscrepancy = false;
@@ -229,6 +240,8 @@ export default class OpreationActionPaintComponent extends LightningElement {
                 moddedprod = prod_supervisor;
                 isdepartmentdiscrepancy = true;
             }
+            moddedprod = this.updateprodlistwithforeman(assignedprod,moddedprod);
+            var bsavailable=discrepancylogs[disc].buildstation_code=='9999'?false:true;
             var hasbusareapicture = false;
             if(discrepancylogs[disc].bus_area_picture_id != undefined){
                 hasbusareapicture = true;
@@ -266,6 +279,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
                 assigend_qc_id : discrepancylogs[disc].assigend_qc_id,
                 buildstation_code: discrepancylogs[disc].buildstation_code,
                 buildstation_id: discrepancylogs[disc].buildstation_id,
+                disc_bsavailable:bsavailable,
                 dat_defect_code_id : discrepancylogs[disc].dat_defect_code_id,
                 dat_discrepancy_code_id: discrepancylogs[disc].dat_discrepancy_code_id,
                 defect_code : discrepancylogs[disc].defect_code,
@@ -274,8 +288,8 @@ export default class OpreationActionPaintComponent extends LightningElement {
                 defect_codename : `${discrepancylogs[disc].defect_code}, ${discrepancylogs[disc].defect_name}`,
                 discrepancy: discrepancylogs[disc].discrepancy,
                 discrepancy_name: discrepancylogs[disc].discrepancy_name,
-                discrepancy_status: discrepancylogs[disc].discrepancy_status,
-                discrepancy_statusdisplay : setstatusfordisplay(discrepancylogs[disc].discrepancy_status),
+                discrepancy_status: discrepancylogs[disc].discrepancy_status.toLowerCase(),
+                discrepancy_statusdisplay : setstatusfordisplay(discrepancylogs[disc].discrepancy_status.toLowerCase()),
                 discrepancy_type: this.capitalize(discrepancylogs[disc].discrepancy_type),
                 root_cause : discrepancylogs[disc].root_cause,
                 component : discrepancylogs[disc].component,
@@ -296,6 +310,31 @@ export default class OpreationActionPaintComponent extends LightningElement {
         }
         return modifieddiscrepancyList;
 }
+
+    // Update PROD list with foreman users who are not listed
+    updateprodlistwithforeman(selectedprod, allprod) {
+        function checkifexisting(element, searcharray) {
+            var elementexisting = true;
+            for (var i in searcharray) {
+                if (searcharray[i].Id == element) {
+                    elementexisting = false;
+                }
+            }
+            return elementexisting;
+        }
+        var updatedprodlist = [];
+        if (allprod != undefined && allprod.length != 0) {
+            updatedprodlist = JSON.parse(JSON.stringify(allprod));
+        }
+        if (selectedprod != undefined && selectedprod.length != 0) {
+            for (var i in selectedprod) {
+                if (checkifexisting(selectedprod[i].Id, updatedprodlist)) {
+                    updatedprodlist.push(selectedprod[i]);
+                }
+            }
+        }
+        return updatedprodlist;
+    }
 
  // Load Discrepancy tab data and formatting based on the Ecard and Department selected from API.
  loadDiscrepancydata(event){
@@ -344,7 +383,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
             }
         }
         
-        
+        this.statusascomment = true;
         if(action == 'Mark as done'){
             // Check Validations
             if(this.selecteddiscrepancy.isdepartmentdiscrepancy){
@@ -356,7 +395,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
               this.dispatchEvent(alertmessage);
               this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
               this.isdelenabled=false;
-              if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+              if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
                   this.isdelenabled=true;
               }
               this.discdetailsmodal = true;
@@ -397,16 +436,26 @@ export default class OpreationActionPaintComponent extends LightningElement {
 
 
     // To show Discrepancy Details view
-    showdiscdetails(event){
+    async showdiscdetails(event){
         var selecteddiscrepancylogid = event.currentTarget.dataset.id;
         for(var i in this.modifieddiscrepancyList){
             if(this.modifieddiscrepancyList[i].ecard_discrepancy_log_id == selecteddiscrepancylogid){
                 this.selecteddiscrepancy = this.modifieddiscrepancyList[i];
             }
         }
+        if (this.selecteddiscrepancy.prod.length == 0) {
+            var userdetails = [];
+            await getcrewingsuserslist({ deptid: this.selecteddiscrepancy.departmentid })
+                .then((result) => {
+                    userdetails = JSON.parse(result.responsebody).data.user;
+                    this.selecteddiscrepancy.prod = userdetails.length > 0 ? modifieduserlist(userdetails) : userdetails;
+                })
+                .catch((error) => {
+                });
+        }
         this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
         this.isdelenabled=false;
-        if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+        if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
         }
         this.discdetailsmodal = true;
@@ -511,7 +560,27 @@ export default class OpreationActionPaintComponent extends LightningElement {
         });
     }
 
-
+    // Add the discrepancy status change as comment
+    addstatusasdiscrepancycomment(discrepancylogid, commenttext) {
+        var ecarddiscrepancylogid = discrepancylogid;
+        var newcommentbody = {
+            "ecard_discrepancy_log_id": discrepancylogid,
+            "discrepancy_comments": commenttext
+        };
+        addnewComment({ requestbody: JSON.stringify(newcommentbody) })
+            .then(data => {
+                if (data.isError) {
+                    this.showmessage('Failed to add Comments.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+                }
+                else {
+                    this.getselecteddiscrepancycomments(ecarddiscrepancylogid);
+                }
+            })
+            .catch(error => {
+                this.showmessage('Failed to add Comments.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+            });
+    }
+    
     // Update user selection of selected discrepancy
     updateuserselection(event){
         var detail = event.detail;
@@ -527,7 +596,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
     }
 
     get disablecomponentdates(){
-        return this.selecteddiscrepancy.discrepancy_status != 'open';
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open';
     }
 
     // Handle status change from modal
@@ -590,7 +659,8 @@ export default class OpreationActionPaintComponent extends LightningElement {
             this.selecteddiscrepancy.discrepancy_status ='resolve';
         }
         if(passedallvalidation){
-             this.updatediscrepancytoserver();
+            this.statusascomment = true;
+            this.updatediscrepancytoserver();
         }
     }
 
@@ -669,6 +739,11 @@ export default class OpreationActionPaintComponent extends LightningElement {
                 } else {
                     this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;  
                     this.showmessage('Record Updated.','Record updated Successfully.','success');
+                    if (this.statusascomment) {
+                        this.statusascomment = false;
+                        var response = JSON.parse(data.operationlogresponse).data;
+                        this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+                    }
                     this.loadDiscrepancydata();
                 }
                     
@@ -684,57 +759,6 @@ export default class OpreationActionPaintComponent extends LightningElement {
               });
     }
 
-
-    // To add new shortage
-    showReportShortageAdd(event){
-        const addshortage = new CustomEvent(
-            "addshortage",
-            {
-                detail : {} 
-                
-            }
-        );
-        /* eslint-disable no-console */
-        //console.log( this.record.Id);
-        /* fire the event to be handled on the Parent Component */
-        this.dispatchEvent(addshortage);
-    }
-
-    // To add new discrepancy
-    addnewdiscrepancymodal(event){
-        const adddiscrepancy = new CustomEvent(
-            "adddiscrepancy",
-            {
-                detail : {} 
-                
-            }
-        );
-        this.dispatchEvent(adddiscrepancy);
-    }
-
-    // To show QC checklist
-    showqccheclist(event){
-        const showqccheclist = new CustomEvent(
-            "showqccheclist",
-            {
-                detail : {} 
-                
-            }
-        );
-        this.dispatchEvent(showqccheclist);
-    }
-
-    // To show gethelpdocuments
-    gethelpdocuments(event){
-        const gethelpdocuments = new CustomEvent(
-            "gethelpdocuments",
-            {
-                detail : {} 
-                
-            }
-        );
-        this.dispatchEvent(gethelpdocuments);
-    }
 
     // Show Add Discrepancy Modal
     showDescrepancyAdd(event){
@@ -828,10 +852,10 @@ export default class OpreationActionPaintComponent extends LightningElement {
         };
         debugger
         var discrepancycolor = '#ff3b30';
-        if(this.selecteddiscrepancy.discrepancy_status == 'open'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'resolve'){
             discrepancycolor = '#e8bb07';
         }
-        if(this.selecteddiscrepancy.discrepancy_status == 'approve'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'approve'){
             discrepancycolor = '#34c759';
         }
         var maxwidth = 1200; 
@@ -854,13 +878,26 @@ export default class OpreationActionPaintComponent extends LightningElement {
         }
         var bus_area = this.selecteddiscrepancy.bus_area;
         this.parentdivdimensions = `height: ${parentdivheight}px; weight: ${parentdivwidth}px`;
-        this.setdiscrepancypoint =`top: ${bus_area.y*zoomScale}px;left: ${bus_area.x*zoomScale}px;background: ${discrepancycolor};`;
+        this.isbusareaarray = Array.isArray(bus_area);
+        /** this is to consider the array of the paint discrepancy point - new implementation*/
+        if (this.isbusareaarray) {
+            var buspointlist = [];
+            for (var i in bus_area) {
+                var style = `top: ${bus_area[i].y * zoomScale}px;left: ${bus_area[i].x * zoomScale}px;background: ${discrepancycolor};`;
+                buspointlist.push({ index: i, style: style });
+            }
+            this.setdiscrepancypoint = buspointlist;
+        }
+        else { /** This condition is to take care of historical Discrepancy point as object - can be removed from next release */
+            this.setdiscrepancypoint = `top: ${bus_area.y * zoomScale}px;left: ${bus_area.x * zoomScale}px;background: ${discrepancycolor};`;
+        }
         this.previewimageexist = true;
         this.showspinnerwithmodal = false;
     }
 
     hidepreviewimage(event){
         this.showpreviewimage = false;
+        this.previewimageexist = false;
     }
 
     deletediscshortage(event){
@@ -904,5 +941,8 @@ export default class OpreationActionPaintComponent extends LightningElement {
         }
 
     }
+    refreshoperation(){
+        this.loadDiscrepancydata();
+     }
 
 }

@@ -20,6 +20,11 @@ export default class ATPCheckLists extends LightningElement {
     @api operation;
     @api ecardid;
     @api departmentIdMap;
+    @api departmentoptions;
+    @api departmentid;
+    @api permissionset;
+    @api isverified;
+
     @track departmentId;
     @track departmentName;
     @track showSpinner;
@@ -34,14 +39,14 @@ export default class ATPCheckLists extends LightningElement {
     @track returntrue;
     @track updateuserselectonnewdesc;
     @track action;
-    @api permissionset;
-    @api isverified;
     @track description;
     @track qcselectmodal;
     @track qccapturerole=false;
     @track loggedinuser;
     @track filterlocal;
     @track filterlabellocal;
+    @track newdiscrepancymodal=false;
+    
     
     @api
     get filter(){
@@ -89,6 +94,7 @@ export default class ATPCheckLists extends LightningElement {
     connectedCallback(){
         this.getloggedinuser();
         this.loadAtpChecklistsdata();
+        this.departmentId = this.selecteddepartmentId;
     }
     getloggedinuser(){
         EcardLogin()
@@ -358,7 +364,6 @@ export default class ATPCheckLists extends LightningElement {
             "attachment_check_list_id":this.availableattchmentidlist[0],
             "selectedqcuserlist":[]
         };
-        console.log('@@@ Inside New Attachment Item');
         this.newattchmentmodal=true;
     }
 
@@ -402,7 +407,6 @@ export default class ATPCheckLists extends LightningElement {
     }
 
     hidenewattachmentlist(){
-        console.log('@@@ Hide New Attachment Item');
         this.newattchmentmodal=false;
     }
 
@@ -999,6 +1003,9 @@ export default class ATPCheckLists extends LightningElement {
         this.filterlabellocal=undefined;
         pubsub.fire('applyfilters', undefined );
         this.loadAtpChecklistsdata();
+    }
+    addnewdiscrepancymodal(event){
+        this.newdiscrepancymodal=true;
     }
 
 }

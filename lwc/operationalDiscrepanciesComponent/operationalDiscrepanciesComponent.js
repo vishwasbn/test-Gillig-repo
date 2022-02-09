@@ -47,21 +47,31 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
     @track departmentName;
     @track showSpinner;
     @track priorityoptions = [{"label":"High", "value":"High"}, {"label":"Normal", "value":"Normal"}, {"label":"Low", "value":"Low"}] ; 
-     // Descrepancy options
-     @track modifieddiscrepancyList = []; // To store Formated Discrepancy List.
-     @track isdescripancybyrejection = false; // To ensure if the Discrepancy modal was raised due to rejection of an operation.
- 
-     @track paintdefects = []; // To store the paint defect code details.
-     @track otherdefects = []; // To store the other defect code details.
- 
-     @track discdetailsmodal = false;;
-     @track selecteddiscrepancy;
-     @track newdiscrepancymodal = false;
-     @track qccapturerole=false;
-     @track qccaptureaction=false;
-     @track bussequence;
-     @track seqdisplay;
-     @track busSeqavailable;
+    // Descrepancy options
+    @track modifieddiscrepancyList = []; // To store Formated Discrepancy List.
+    @track isdescripancybyrejection = false; // To ensure if the Discrepancy modal was raised due to rejection of an operation.
+
+    @track paintdefects = []; // To store the paint defect code details.
+    @track otherdefects = []; // To store the other defect code details.
+
+    @track discdetailsmodal = false;;
+    @track selecteddiscrepancy;
+    @track newdiscrepancymodal = false;
+    @track qccapturerole = false;
+    @track qccaptureaction = false;
+    @track bussequence;
+    @track seqdisplay;
+    @track busSeqavailable;
+    @track isbusareaarray = false;
+    @track statusascomment = false;
+    @track statuscommentmap = {
+        "resolve": "Status changed to Resolved",
+        "approve": "Status changed to Verified",
+        "open": "Status changed to Open"
+    };
+    @track scheduleflow = false;
+    @track scheduledata;
+     
     // For Showing no data message when Discrepancy List is Empty.   
     get discrepancylistempty(){
         return this.modifieddiscrepancyList.length == 0;
@@ -97,7 +107,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
 
     // Disable/Enable Production User For Selected Discrepancy
     get disableprodforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status != 'open'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open'){
             return true;
         }
         else{
@@ -107,7 +117,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
 
     // Disable/Enable QC User For Selected Discrepancy
     get disableqcforselecteddiscrepancy(){
-        if(this.selecteddiscrepancy.discrepancy_status == 'approve'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'approve'){
             return true;
         }
         else{
@@ -117,7 +127,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
 
     // Disable/Enable QC User For Selected shortage
     get disableqcforselectedshortage(){
-        if(this.selectedshortage.discrepancy_status == 'approve'){
+        if(this.selectedshortage.discrepancy_status.toLowerCase() == 'approve'){
             return true;
         }
         else{
@@ -127,12 +137,24 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
 
     // Disable/Enable Production User For Selected Shortage
     get disableprodforselectedshortage(){
-        if(this.selectedshortage.discrepancy_status != 'open'){
+        if(this.selectedshortage.discrepancy_status.toLowerCase() != 'open'){
             return true;
         }
         else{
             return false;
         }
+    }
+
+    //To show preview image col for Paint discrepancy only
+    get isdepartmentPaint(){
+        var isdepartmentpaintortrim = false;
+        var departmentid = this.departmentId.toString();
+        for(var i in this.departmentIdMap){
+            if(this.departmentIdMap[i].value == departmentid){
+                isdepartmentpaintortrim = this.departmentIdMap[i].bus_area_discrepancy_enabled;
+            }
+        }
+        return isdepartmentpaintortrim;
     }
 
     @track isdelenabled;
@@ -176,7 +198,10 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
         this.bussequence =  requireddata.bussequence;
         this.seqdisplay =this.bussequence!=undefined?"\("+this.bussequence+"\)":"";
         this.busSeqavailable=this.bussequence!=undefined?true:false;
-        this.selectedBusLabel = `${requireddata.busname}, ${requireddata.buschasisnumber},${this.seqdisplay}`
+        this.selectedBusLabel = `${requireddata.busname}, ${requireddata.buschasisnumber},${this.seqdisplay}`;
+        this.departmentIdMap = requireddata.departmentIdMap;
+        this.scheduleflow = requireddata.scheduleflow;
+        this.scheduledata = requireddata.scheduledata; 
         //localStorage.removeItem('requiredfilters');
         this.showSpinner = true;
         if(this.selectedview == 'Discrepancies'){
@@ -329,7 +354,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                      createdbyempid=`${created_by[0].userid}`;
                  }
             }
-            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancylogs[disc].discrepancy_status=="open")){
+            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancylogs[disc].discrepancy_status.toLowerCase()=="open")){
                 is_deletable=true;
             }
             var isdepartmentdiscrepancy = false;
@@ -384,8 +409,8 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                 defect_codename : `${discrepancylogs[disc].defect_code}, ${discrepancylogs[disc].defect_name}`,
                 discrepancy: discrepancylogs[disc].discrepancy,
                 discrepancy_name: discrepancylogs[disc].discrepancy_name,
-                discrepancy_status: discrepancylogs[disc].discrepancy_status,
-                discrepancy_statusdisplay : setstatusfordisplay(discrepancylogs[disc].discrepancy_status),
+                discrepancy_status: discrepancylogs[disc].discrepancy_status.toLowerCase(),
+                discrepancy_statusdisplay : setstatusfordisplay(discrepancylogs[disc].discrepancy_status.toLowerCase()),
                 discrepancy_type: this.capitalize(discrepancylogs[disc].discrepancy_type),
                 root_cause : discrepancylogs[disc].root_cause,
                 component : discrepancylogs[disc].component,
@@ -463,7 +488,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                      }
                 }
                 var is_deletable=false;
-                if((createdbyempid==this.loggedinuser.appuser_id) && (shortageobj.discrepancy_status=="open")){
+                if((createdbyempid==this.loggedinuser.appuser_id) && (shortageobj.discrepancy_status.toLowerCase()=="open")){
                     is_deletable=true;
                 }
                 var partname;
@@ -493,7 +518,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                     component : shortageobj.component,
                     createdby_id : this.getmodifiediserlist([shortageobj.createdby_id]),
                     defect_codename : `${shortageobj.defect_code}, ${shortageobj.defect_name}`,
-                    discrepancy_statusdisplay : setstatusfordisplay(shortageobj.discrepancy_status),
+                    discrepancy_statusdisplay : setstatusfordisplay(shortageobj.discrepancy_status.toLowerCase()),
                     discrepancy_type: this.capitalize(shortageobj.discrepancy_type),
                     cut_off_date : shortageobj.cut_off_date,
                     displaycutoffdate : this.getmoddeddate(shortageobj.cut_off_date),
@@ -506,7 +531,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                     discrepancy : shortageobj.discrepancy,
                     isdeletable:is_deletable,
                     discrepancy_priority : this.capitalize(shortageobj.discrepancy_priority),
-                    discrepancy_status : shortageobj.discrepancy_status,
+                    discrepancy_status : shortageobj.discrepancy_status.toLowerCase(),
                     ecard_discrepancy_area_id : shortageobj.ecard_discrepancy_area_id,
                     ecard_discrepancy_log_id : shortageobj.ecard_discrepancy_log_id,
                     ecard_discrepancy_log_number: shortageobj.discrepancy_log_number,
@@ -623,7 +648,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
         }
         this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
         this.isdelenabled=false;
-        if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+        if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
         }
         this.discdetailsmodal = true;
@@ -733,6 +758,27 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
         });
     }
 
+    // Add the discrepancy status change as comment
+    addstatusasdiscrepancycomment(discrepancylogid, commenttext) {
+        var ecarddiscrepancylogid = discrepancylogid;
+        var newcommentbody = {
+            "ecard_discrepancy_log_id": discrepancylogid,
+            "discrepancy_comments": commenttext
+        };
+        addnewComment({ requestbody: JSON.stringify(newcommentbody) })
+            .then(data => {
+                if (data.isError) {
+                    this.showmessage('Failed to add Comments.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+                }
+                else {
+                    this.getselecteddiscrepancycomments(ecarddiscrepancylogid);
+                }
+            })
+            .catch(error => {
+                this.showmessage('Failed to add Comments.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+            });
+    }
+    
     // Handle Status Change (Action) for Discrepancy Tab.
     discrepancyactionshandler(event){
         var action = event.detail.action;
@@ -743,7 +789,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             }
         }
         
-        
+        this.statusascomment = true;
         if(action == 'Mark as done'){
             this.qccaptureaction=false;
             // Check Validations
@@ -756,7 +802,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
               this.dispatchEvent(alertmessage);
               this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
               this.isdelenabled=false;
-              if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+              if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
                   this.isdelenabled=true;
               }
               this.discdetailsmodal = true;
@@ -818,7 +864,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
     }
 
     get disablecomponentdates(){
-        return this.selecteddiscrepancy.discrepancy_status != 'open';
+        return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != 'open';
     }
 
     // Handle status change from modal
@@ -881,7 +927,8 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             this.selecteddiscrepancy.discrepancy_status ='resolve';
         }
         if(passedallvalidation){
-             this.updatediscrepancytoserver();
+            this.statusascomment = true;
+            this.updatediscrepancytoserver();
         }
     }
 
@@ -933,6 +980,11 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                 } else {
                     this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;  
                     this.showmessage('Record Updated.','Record updated Successfully.','success');
+                    if (this.statusascomment) {
+                        this.statusascomment = false;
+                        var response = JSON.parse(data.operationlogresponse).data;
+                        this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+                    }
                     this.loadDiscrepancydata();
                 }
                     
@@ -1023,7 +1075,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
         }
         this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
         this.isdelenabled=false;
-        if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status =='open')){
+        if(this.selectedshortage.isdeletable || (this.permissionset.shortage_delete.write && this.selectedshortage.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
         }
         this.partshortagedetailsmodal = true;
@@ -1101,6 +1153,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             }
             
         }
+        this.statusascomment = true;
         this.updatepartshortagetoserver();
         // update changes to server.
     }
@@ -1143,6 +1196,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
         }
         
         // Update to server
+        this.statusascomment = true;
         this.updatepartshortagetoserver();
         
     }
@@ -1185,7 +1239,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             "ecard_id" : discrepancytobeupdated.ecard_id,
             "department_id" : discrepancytobeupdated.department_id,
             "component" : discrepancytobeupdated.component,
-            "cut_off_date" : new Date(discrepancytobeupdated.cut_off_date),
+            "cut_off_date" : discrepancytobeupdated.cut_off_date != null ? new Date(discrepancytobeupdated.cut_off_date) : discrepancytobeupdated.cut_off_date,
             "root_cause" : discrepancytobeupdated.root_cause,
             "discrepancy_status" : discrepancytobeupdated.discrepancy_status,
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
@@ -1220,6 +1274,11 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                    else {
                             this.selectedshortage['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;  
                             this.showmessage('Record Updated.','Record updated Successfully.','success');
+                            if (this.statusascomment) {
+                                this.statusascomment = false;
+                                var response = JSON.parse(data.operationlogresponse).data;
+                                this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+                            }
                             this.loadShortagesdata();
                     }
                     
@@ -1321,10 +1380,10 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
           };
           debugger
           var discrepancycolor = '#ff3b30';
-          if(this.selecteddiscrepancy.discrepancy_status == 'open'){
+          if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'resolve'){
               discrepancycolor = '#e8bb07';
           }
-          if(this.selecteddiscrepancy.discrepancy_status == 'approve'){
+          if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'approve'){
               discrepancycolor = '#34c759';
           }
           var maxwidth = 1200; 
@@ -1347,13 +1406,26 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
           }
           var bus_area = this.selecteddiscrepancy.bus_area;
           this.parentdivdimensions = `height: ${parentdivheight}px; weight: ${parentdivwidth}px`;
-          this.setdiscrepancypoint =`top: ${bus_area.y*zoomScale}px;left: ${bus_area.x*zoomScale}px;background: ${discrepancycolor};`;
+          this.isbusareaarray = Array.isArray(bus_area);
+          /** this is to consider the array of the paint discrepancy point - new implementation*/
+          if (this.isbusareaarray) {
+              var buspointlist = [];
+              for (var i in bus_area) {
+                  var style = `top: ${bus_area[i].y * zoomScale}px;left: ${bus_area[i].x * zoomScale}px;background: ${discrepancycolor};`;
+                  buspointlist.push({ index: i, style: style });
+              }
+              this.setdiscrepancypoint = buspointlist;
+          }
+          else {/** This condition is to take care of historical Discrepancy point as object - can be removed from next release */
+              this.setdiscrepancypoint = `top: ${bus_area.y * zoomScale}px;left: ${bus_area.x * zoomScale}px;background: ${discrepancycolor};`;
+          }
           this.previewimageexist = true;
           this.showspinnerwithmodal = false;
       }
   
       hidepreviewimage(event){
           this.showpreviewimage = false;
+          this.previewimageexist = false;
       }
 
      navigatebacktoecard(event){
@@ -1364,7 +1436,9 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             ecardid : this.ecardid,
             busSequence : this.bussequence,
             busSeqavailable :this.busSeqavailable,
-            ChasisNumber : this.buschasisnumber
+            ChasisNumber : this.buschasisnumber,
+            scheduleflow : this.scheduleflow,
+            scheduledata : this.scheduledata,
             
         };
         var filterconditions = JSON.stringify(requireddata);

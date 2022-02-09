@@ -1,3 +1,2 @@
--- Contains the code of the E card app after teh initial pro release
-
--- Doesnot contain my changes(Sajith initial changes)
+- this is the BKP of the all Gillig Ecard app code from Stagging Org before the Gillig 1.1 Enhancement changes
+- Backedup on 31-10-2021

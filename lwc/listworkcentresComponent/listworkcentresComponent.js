@@ -4,8 +4,8 @@ import getWorkcentredata from '@salesforce/apex/masterDataController.getWorkcent
 
 const columns = [
     /* { label: 'Department Id', fieldName: 'department_id',sortable: true, type: 'number',initialWidth: 50, },*/
-    { label: 'Work Centre Code', fieldName: 'workcenter_code',sortable: true, type : 'text',}, 
-    { label: 'Work Centre Name', fieldName: 'workcenter_name',sortable: true, type : 'text',},
+    { label: 'Work Center Code', fieldName: 'workcenter_code',sortable: true, type : 'text',}, 
+    { label: 'Work Center Name', fieldName: 'workcenter_name',sortable: true, type : 'text',},
      {
          label: "Created Date",
          fieldName: "created_date",
@@ -53,6 +53,10 @@ export default class ListworkcentresComponent extends LightningElement {
     @track recordsToDisplay = []; //Records to be displayed on the page
     @track rowNumberOffset; //Row number
     //@track customerlist = ['Ajay','Arjun','Abhiraj','Ben','Alan','Navaneeth'];
+    get tableheight() {
+        var height = window.innerHeight * 0.82 - 247.59; //184.64;
+        return `height: ${height}px;`;
+    }
 
     connectedCallback(){
         //alert('connectedCallback');

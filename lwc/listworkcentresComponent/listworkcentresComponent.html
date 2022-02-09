@@ -4,10 +4,10 @@
         <template if:true={showTable}>
         <div class="slds-clearfix slds-p-bottom_x-small">
             <div class="slds-float_left">
-             <div class="slds-m-left_x-small"> <span class="slds-page-header__title slds-truncate" title="Work Centres"> <lightning-icon class="slds-m-right_x-small" icon-name="custom:custom67" alternative-text="Work Centre" title="Work Centre"></lightning-icon> Work Centres ({workcentreList.length})</span></div>
+             <div class="slds-m-left_x-small"> <span class="slds-page-header__title slds-truncate" title="Work Centers"> <lightning-icon class="slds-m-right_x-small" icon-name="custom:custom67" alternative-text="Work Center" title="Work Center"></lightning-icon> Work Centers ({workcentreList.length})</span></div>
             </div>
             <div class="slds-float_right">
-               <!-- <lightning-button variant="brand" label="Add New Work Centre" title="Add New Work Centre" onclick={addnewWorkCentre} icon-name="utility:add" class="slds-m-right_x-small"></lightning-button> -->
+               <!-- <lightning-button variant="brand" label="Add New Work Center" title="Add New Work Center" onclick={addnewWorkCentre} icon-name="utility:add" class="slds-m-right_x-small"></lightning-button> -->
             </div>
           </div>
      
@@ -17,20 +17,22 @@
                    show-search-box="true" 
                    onpaginatorchange={handlePaginatorChange}>
        </c-paginator>
-       <lightning-datatable
-         key-field="guid"
-         columns={columns}
-         data={recordsToDisplay}
-         hide-checkbox-column="true"
-         show-row-number-column
-         row-number-offset={rowNumberOffset}
-         suppress-bottom-bar
-         default-sort-direction={defaultSortDirection}
-         sorted-direction={sortDirection}
-         sorted-by={sortedBy}
-         onrowaction={handleRowAction}
-         onsort={onHandleSort}>
-  </lightning-datatable>
+      <div id="wctable" style={tableheight}>
+         <lightning-datatable 
+            key-field="guid" 
+            columns={columns} 
+            data={recordsToDisplay} 
+            hide-checkbox-column="true"
+            show-row-number-column 
+            row-number-offset={rowNumberOffset} 
+            suppress-bottom-bar
+            default-sort-direction={defaultSortDirection} 
+            sorted-direction={sortDirection} 
+            sorted-by={sortedBy}
+            onrowaction={handleRowAction} 
+            onsort={onHandleSort}>
+         </lightning-datatable>
+      </div>
      <!--  <lightning-datatable key-field="Id" 
                            data={recordsToDisplay} 
                            columns={columns}
@@ -66,14 +68,14 @@
               <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
               </button>
-              <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Work Centre Detail</h2>
+              <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Work Center Detail</h2>
            </header>
            <!-- modal body start -->
            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
              <div class="slds-grid slds-wrap slds-gutters">
                 <div class="slds-col slds-size_1-of-2">
                     <div class="slds-form-element slds-form-element_readonly">
-                        <span class="slds-form-element__label">Work Centre Id</span>
+                        <span class="slds-form-element__label">Work Center Id</span>
                         <div class="slds-form-element__control">
                          <div class="slds-form-element__static">{record.workcenter_id}</div>
                         </div>
@@ -92,7 +94,7 @@
                  </div>
                  <div class="slds-col slds-size_1-of-2">
                     <div class="slds-form-element slds-form-element_readonly">
-                        <span class="slds-form-element__label">Work Centre Code</span>
+                        <span class="slds-form-element__label">Work Center Code</span>
                         <div class="slds-form-element__control">
                          <div class="slds-form-element__static">{record.workcenter_code}</div>
                         </div>
@@ -100,7 +102,7 @@
                     <!--<lightning-input type="number" name="department_id" disabled value={record.department_id} label="Department Id" ></lightning-input>-->
                 </div>
                 <div class="slds-col slds-size_1-of-2">
-                    <lightning-input type="text" name="workcenter_name"  value={record.workcenter_name} label="Work Centre Name" ></lightning-input>
+                    <lightning-input type="text" name="workcenter_name"  value={record.workcenter_name} label="Work Center Name" ></lightning-input>
                  </div>
                  <!--<div class="slds-col slds-size_1-of-2">
                     <lightning-input type="text" name="department_name"  value={record.department_name} label="Department Name" ></lightning-input>
@@ -135,7 +137,7 @@
                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAddModal}>
                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
                 </button>
-                <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New Work Centre</h2>
+                <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New Work Center</h2>
              </header>
              <!-- modal body start -->
              <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
@@ -147,10 +149,10 @@
                     <lightning-combobox name="department" label="Department" value={defaultDepartment} placeholder="Department" options={departmentoptions} ></lightning-combobox>
                  </div>  
                 <div class="slds-col slds-size_1-of-2">
-                    <lightning-input type="text" name="workcenter_code"   label="Work Centre Code" ></lightning-input>
+                    <lightning-input type="text" name="workcenter_code"   label="Work Center Code" ></lightning-input>
                  </div>
                  <div class="slds-col slds-size_1-of-2">
-                    <lightning-input type="text" name="workcenter_name"   label="Work Centre Name" ></lightning-input>
+                    <lightning-input type="text" name="workcenter_name"   label="Work Center Name" ></lightning-input>
                  </div>
                  
                  
