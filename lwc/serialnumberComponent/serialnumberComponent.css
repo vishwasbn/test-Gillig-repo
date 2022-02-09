@@ -97,3 +97,14 @@
   font-weight: bold;
   text-align: center;
 }
+
+.pageheader{
+  height:500px;/*550px*/
+  overflow-y:auto;
+}
+
+.tableheader{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}

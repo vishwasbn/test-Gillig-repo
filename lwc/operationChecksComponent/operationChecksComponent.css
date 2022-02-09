@@ -112,3 +112,34 @@
   counter-increment: Serial;      /* Increment the Serial counter */
   content: counter(Serial); /* Display the counter */
 }
+
+.zoomcheckbox{
+  zoom: 200%;
+}
+
+.greytitle{
+  color: grey;
+}
+
+.pageheader{
+  height:500px;/*550px*/
+  overflow-y:auto;
+}
+
+.tableheader{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.setapplicablewidth{
+  width: 180px;
+}
+
+.setactionbtnewidth{
+  min-width: 230px;
+}
+
+.setvaluefieldwidth{
+  min-width: 170px;
+}

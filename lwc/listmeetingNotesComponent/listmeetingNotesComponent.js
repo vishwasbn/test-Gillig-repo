@@ -81,6 +81,12 @@ export default class ListmeetingNotesComponent extends LightningElement {
 		return true;
 	}
 
+	//To dynamically height to the meeting note data-table
+	get tableHeight() {
+        var height = window.innerHeight * 0.82 - 247.59;
+        return `height: ${height}px;`;
+    }
+
 	connectedCallback() {
 		this.loaddata();
 		//this.getAllEcarddetails();

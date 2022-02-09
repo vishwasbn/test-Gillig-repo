@@ -53,7 +53,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="Open"> <span class="open"></span>OPEN </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.operation_log.open}/{overviewdata.operation_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.operation_log.open}/{overviewdata.operation_log.total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -80,7 +80,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span class="verified"></span>VERIFIED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.operation_log.approve}/{overviewdata.operation_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.operation_log.approve}/{overviewdata.operation_log.total}</span>
                                                 </div>
                                              </div>
                                             <!--<div class="slds-m-top_x-small">
@@ -93,7 +93,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="DISC./SHORT."> <span class="rejected"></span>DISC./SHORT. </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.operation_log.reject}/{overviewdata.operation_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.operation_log.reject}/{overviewdata.operation_log.total}</span>
                                                 </div>
                                              </div>
                                             <!--<div class="slds-m-top_x-small">
@@ -112,7 +112,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="Open"> <span class="open"></span>OPEN </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.open}/{overviewdata.discrepancy_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Open}/{overviewdata.discrepancy_log.Total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -126,7 +126,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span class="resolve"></span>RESOLVED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.resolve}/{overviewdata.discrepancy_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Resolve}/{overviewdata.discrepancy_log.Total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -139,7 +139,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span class="verified"></span>VERIFIED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.approve}/{overviewdata.discrepancy_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Approve}/{overviewdata.discrepancy_log.Total}</span>
                                                 </div>
                                              </div>
                                             <!--<div class="slds-m-top_x-small">
@@ -159,7 +159,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="Open"> <span class="open"></span>OPEN </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.open}/{overviewdata.shortage_discrepancy_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Open}/{overviewdata.shortage_discrepancy_log.Total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -173,7 +173,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span class="resolve"></span>RESOLVED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.resolve}/{overviewdata.shortage_discrepancy_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Resolve}/{overviewdata.shortage_discrepancy_log.Total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -186,7 +186,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span class="verified"></span>VERIFIED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.approve}/{overviewdata.shortage_discrepancy_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Approve}/{overviewdata.shortage_discrepancy_log.Total}</span>
                                                 </div>
                                              </div>
                                             <!--<div class="slds-m-top_x-small">
@@ -206,7 +206,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span class="verified"></span>FILLED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.serail_no_log.filled}/{overviewdata.serail_no_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.serail_no_log.filled}/{overviewdata.serail_no_log.total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -220,7 +220,7 @@
                                              <div class="slds-media__body">
                                                 <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span class="rejected"></span>NOT FILLED </h3>
                                                 <div class="slds-tile__detail">
-                                                   <span class=" slds-truncate mediumheading">{overviewdata.serail_no_log.not_filled}/{overviewdata.serail_no_log.total}</span>
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.serail_no_log.not_filled}/{overviewdata.serail_no_log.total}</span>
                                                 </div>
                                              </div>
                                              <!--<div class="slds-m-top_x-small">
@@ -240,7 +240,7 @@
                                            <div class="slds-media__body">
                                               <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span class="verified"></span>VERIFIED</h3>
                                               <div class="slds-tile__detail">
-                                                 <span class=" slds-truncate mediumheading">{overviewdata.atp_log.verified}/{overviewdata.atp_log.total}</span>
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.atp_log.verified}/{overviewdata.atp_log.total}</span>
                                               </div>
                                            </div>
                                         </article>
@@ -251,7 +251,7 @@
                                            <div class="slds-media__body">
                                               <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span class="rejected"></span>NOT VERIFIED</h3>
                                               <div class="slds-tile__detail">
-                                                 <span class=" slds-truncate mediumheading">{overviewdata.atp_log.not_verified}/{overviewdata.atp_log.total}</span>
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.atp_log.not_verified}/{overviewdata.atp_log.total}</span>
                                               </div>
                                            </div>
                                         </article>
@@ -267,7 +267,7 @@
                                            <div class="slds-media__body">
                                               <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span class="verified"></span>VERIFIED</h3>
                                               <div class="slds-tile__detail">
-                                                 <span class=" slds-truncate mediumheading">{overviewdata.op_check_log.verified}/{overviewdata.op_check_log.total}</span>
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.op_check_log.verified}/{overviewdata.op_check_log.total}</span>
                                               </div>
                                            </div>
                                         </article>
@@ -278,7 +278,7 @@
                                            <div class="slds-media__body">
                                               <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span class="rejected"></span>NOT VERIFIED</h3>
                                               <div class="slds-tile__detail">
-                                                 <span class=" slds-truncate mediumheading">{overviewdata.op_check_log.not_verified}/{overviewdata.op_check_log.total}</span>
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.op_check_log.not_verified}/{overviewdata.op_check_log.total}</span>
                                               </div>
                                            </div>
                                         </article>
@@ -299,7 +299,8 @@
                               <lightning-input type="text" label="Customer Name" name="customer_name" value={ecarddetails.customer_name} readonly></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Chassis Serial No" name="chassis_no" value={ecarddetails.chassis_no} readonly></lightning-input>
+                              <!-- <lightning-input type="text" label="Chassis Serial No" name="chassis_no" value={ecarddetails.chassis_no} readonly></lightning-input> -->
+                              <lightning-input type="text" label="Chassis Serial No / Fleet Base No" name="chassis_no" value={ecarddetails.chassis_no_with_basefleet_no} readonly></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
                               <lightning-input type="date" label="Chassis Start Date" name="bus_start_date" value={ecarddetails.bus_start_date} readonly></lightning-input>
@@ -322,25 +323,26 @@
                         </div>
                         <div class="slds-grid slds-wrap slds-gutters">
                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Air Condition System PDI" name="ac_system_pdi" value={ecarddetails.ac_system_pdi} onblur={updateecarddetail}></lightning-input>
+                              <!-- <lightning-input type="text" max-length="20" label="Air Condition System PDI" name="ac_system_pdi" value={ecarddetails.ac_system_pdi} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input> -->
+                              <lightning-input type="text" max-length="20" label="Function & Programming A/C System PDI" name="ac_system_pdi" value={ecarddetails.ac_system_pdi} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="date" label="Complete Date" name="completed_date" value={ecarddetails.completed_date} onblur={updateecarddetail}></lightning-input>
+                              <lightning-input type="date" label="Complete Date" name="completed_date" value={ecarddetails.completed_date} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Coach Weight - Unladen" name="coach_weight_unladen" value={ecarddetails.coach_weight_unladen} onblur={updateecarddetail}></lightning-input>
+                              <lightning-input type="text" max-length="20" label="Coach Weight - Unladen" name="coach_weight_unladen" value={ecarddetails.coach_weight_unladen} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Front Axle Weight" name="front_axle_weight" value={ecarddetails.front_axle_weight} onblur={updateecarddetail}></lightning-input>
+                              <lightning-input type="text" max-length="20" label="Front Axle Weight" name="front_axle_weight" value={ecarddetails.front_axle_weight} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Odometer/ Hub Odometer" name="odometer" value={ecarddetails.odometer} onblur={updateecarddetail}></lightning-input>
+                              <lightning-input type="text" max-length="20" label="Odometer/ Hub Odometer" name="odometer" value={ecarddetails.odometer} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="I/O Program" name="io_program" value={ecarddetails.io_program} onblur={updateecarddetail}></lightning-input>
+                              <lightning-input type="text" max-length="20" label="I/O Program" name="io_program" value={ecarddetails.io_program} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Coach Number" name="coach_no" value={ecarddetails.coach_no} onblur={updateecarddetail}></lightning-input>
+                              <lightning-input type="text" max-length="20" label="Coach Number" name="coach_no" value={ecarddetails.coach_no} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
                             </div>
                         </div>
                      </template>
@@ -365,7 +367,7 @@
                            <article class="slds-card cardborder">
                               <div class="cardfooter">
                                  VIN Label
-                                 <lightning-button-icon if:true={hasvinpicture} variant="bare-inverse" size="small" onclick={deletevinpicturelabel} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete"></lightning-button-icon>
+                                 <lightning-button-icon if:true={hasvinpicture} variant="bare-inverse" size="small" onclick={deletevinpicturelabel} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete" disabled={disablebusinfoedit}></lightning-button-icon>
                               </div>
                               <div class="">
                                  <div if:false={hasvinpicture} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
@@ -373,6 +375,7 @@
                                                             label="Upload VIN Label"
                                                             accept={acceptedFormats}
                                                             onchange={handlevinlabelupload}
+                                                            disabled={disablebusinfoedit}
                                                             >
                                                             </lightning-input>
                                  </div>
@@ -386,7 +389,7 @@
                            <article class="slds-card cardborder" >
                               <div class="cardfooter">
                                  Emissions Label
-                                    <lightning-button-icon if:true={hasemissionpicture} variant="bare-inverse" size="small" onclick={deleteemissionpicture} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete"></lightning-button-icon>
+                                    <lightning-button-icon if:true={hasemissionpicture} variant="bare-inverse" size="small" onclick={deleteemissionpicture} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete" disabled={disablebusinfoedit}></lightning-button-icon>
                                  </div>
                               <div class="">
                                  <div if:false={hasemissionpicture} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
@@ -394,6 +397,7 @@
                                                             label="Upload EMISSIONS Label"
                                                             accept={acceptedFormats}
                                                             onchange={handleemissionslabelupload}
+                                                            disabled={disablebusinfoedit}
                                                             >
                                                             </lightning-input>
                                  </div>
@@ -409,7 +413,7 @@
 
                     <div id="tab-default-5" class="tab-default-5 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-5__item">
                         <!--Attachments Start-->
-                        <c-attachments-section-component type="busdetail" ecardid={ecardid}></c-attachments-section-component>
+                        <c-attachments-section-component type="busdetail" ecardid={ecardid} permissionset={permissionset}></c-attachments-section-component>
                         <!--<div class="slds-m-bottom_small">
                            <lightning-combobox label="Department"   name="department"  value={selecteddepartment}  placeholder="Departments" options={departmentlist} onchange={handleDepartmentchange}></lightning-combobox>
                         </div>

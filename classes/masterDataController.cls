@@ -325,6 +325,18 @@ public class masterDataController {
             return fawrap;
         }
     }
+
+    @AuraEnabled
+    public static List<Operation_Check_Master_Data__c> getOperationCheckList() {
+        try{
+
+            List<Operation_Check_Master_Data__c> opcklist = [SELECT Id, Name, Department_ID__c, Build_Station_ID__c, isActive__c, Operation_Description__c, Customer_Name__c, Value_Required_Indicator__c, Value_Description__c, Bus_Mode__c, Operation_Sequence_Number__c, Transmission__c FROM Operation_Check_Master_Data__c ORDER BY Name asc];
+            return opcklist;
+        }
+        catch(Exception ex){
+            return null;
+        }
+    }
     
     public class DataWrapper{
         @auraEnabled

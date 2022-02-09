@@ -72,7 +72,7 @@
                     </thead>
                     <tbody>
                         <template for:each={filteredecards} for:item='ecard'>
-                            <tr  key={ecard.ecard_id} data-label={ecard.customer_name} data-sequence={ecard.bus_relative_seq} data-id={ecard.chassis_no} data-value={ecard.ecard_id} class="slds-hint-parent" onclick={showOperations}>
+                            <tr  key={ecard.ecard_id} data-label={ecard.customer_name} data-sequence={ecard.bus_relative_seq} data-id={ecard.chassis_no} data-value={ecard.ecard_id} data-department={ecard.department_name} class="slds-hint-parent" onclick={showOperations}>
                                 <td data-label="Status" style="width:170px;">
                                     <div class="slds-truncate" title={ecard.busstatus_name}><span class="slds-align_absolute-center  statuswidth statusbadge">{ecard.busstatus_name}</span></div>
                                 </td>
@@ -142,7 +142,7 @@
                 <div class="slds-grid">
                     <div class="slds-col slds-size_3-of-12 slds-p-top_x-small">
                          <lightning-button onclick={showEcardList} label="Back" title="Back" icon-name="utility:left" class="slds-text-heading_small slds-m-left_x-small"></lightning-button>
-                         <c-busdetail-component selected-bus-label={selectedBusLabel} ecardid={selectedEcardId} bussequence={sequence}></c-busdetail-component>
+                         <c-busdetail-component selected-bus-label={selectedBusLabel} ecardid={selectedEcardId} bussequence={sequence} permissionset={permissionset}></c-busdetail-component>
                          <label if:true={sequanceavailable} class="slds-truncate slds-text-color_weak slds-text-body_regular" title={sequence}>({sequence})</label>
                          <!--<span onclick={showbusDetails} class="busdetail slds-text-heading_small slds-m-left_x-small"><a href="javascript:void(0);">{selectedBusLabel}</a></span> -->
                          
@@ -171,7 +171,7 @@
             <div class="opcontentbody">
                
                     <div class="slds-m-top_x-small slds-border_top">
-                        <c-operations-component ecardid={selectedEcardId} selectedoperation={selectedview} busname={selectedBusName} buschasisnumber={selectedBusChasis} bseqence={sequence} permissionset={permissionset}></c-operations-component>
+                        <c-operations-component ecardid={selectedEcardId} selectedoperation={selectedview} busname={selectedBusName} buschasisnumber={selectedBusChasis} bseqence={sequence} permissionset={permissionset} currentbusdepartment={currentDepartment}></c-operations-component>
                     </div>
                 <!--<template if:true={isSelectedOperations}>    
                 </template>

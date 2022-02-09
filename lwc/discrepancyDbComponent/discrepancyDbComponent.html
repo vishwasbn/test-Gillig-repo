@@ -1,922 +1,997 @@
 <template>
-<!--Show spinner start-->
-<div if:true={showSpinner}>
-  <div class="slds-spinner_container">
-    <div
-      class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative"
-      role="alert"
-    >
-      <span class="slds-assistive-text">Loading</span>
-      <div class="slds-spinner__dot-a"></div>
-      <div class="slds-spinner__dot-b"></div>
-    </div>
-  </div>
-</div>
-<!--Show spinner end-->
-
-<section class="main">
-  <div class="discrepancyhead">
-    <div class="slds-p-top_x-small filterdiv">
+  <!--Show spinner start-->
+  <div if:true={showSpinner}>
+    <div class="slds-spinner_container">
       <div
-        class="slds-grid slds-grid_align-spread slds-m-top_x-small slds-m-bottom_x-small"
+        class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative"
+        role="alert"
       >
-        <div class="slds-col">
-          <div class="slds-float_none slds-p-around_x-small">
-            <span class="slds-text-heading_medium headstyle"
-              >DISCREPANCY DB</span
-            >
-          </div>
-        </div>
-        <div class="slds-col"></div>
-        <div class="slds-col alignbutton">
-          <lightning-button
-            label="New Discrepancy"
-            variant="brand-outline"
-            title="New Discrepancy"
-            onclick={addnewdiscrepancymodal}
-            class="slds-m-right_x-small"
-          ></lightning-button>
-        </div>
-      </div>
-      <div class="slds-grid slds-gutters slds-m-top_x-small">
-        <div class="slds-col slds-size_2-of-12">
-          <c-custom-search-component
-            showicon={returntrue}
-            showlabel={returnfalse}
-            placeholdertext="Search Customer, Chasis Number"
-            -icon-name="custom:custom98"
-            listto-search={customernamechasislist}
-            label="Customer"
-            onselect={oncustomerselection}
-            onclear={onclearcustomer}
-          ></c-custom-search-component>
-        </div>
-        <div class="slds-col slds-size_2-of-12">
-          <!--onfocus={loadpicklistvalues}-->
-          <lightning-combobox
-            onfocus={loadpicklistvalues}
-            variant="label-hidden"
-            name="departments"
-            value={selecteddepartement}
-            placeholder="Departments"
-            options={departmentlist}
-            onchange={handledepartmentchange}
-          ></lightning-combobox>
-        </div>
-        <div class="slds-col slds-size_2-of-12">
-          <lightning-combobox
-            onfocus={fetchcompletedefectList}
-            variant="label-hidden"
-            name="defectstatus"
-            value={selecteddefect}
-            placeholder="Defect Options"
-            options={defectlist}
-            onchange={handledefectchange}
-          ></lightning-combobox>
-        </div>
-        <div class="slds-col slds-size_2-of-12">
-          <lightning-combobox
-            variant="label-hidden"
-            name="discrepancytype"
-            value={selecteddisctype}
-            placeholder="Discrepancy Type"
-            options={discrepancytypelist}
-            onchange={handledisctypechange}
-          ></lightning-combobox>
-        </div>
-        <div class="slds-col slds-size_2-of-12">
-          <lightning-input
-            type="date"
-            variant="label-hidden"
-            name="dateselected"
-            placeholder="Filter by Created Date"
-            onchange={handlecreateddatechange}
-          ></lightning-input>
-        </div>
-        <div class="slds-col slds-size_2-of-12">
-          <c-custom-search-component
-            showicon={returntrue}
-            showlabel={returnfalse}
-            placeholdertext="Search Assigned User"
-            -icon-name="standard:user"
-            listto-search={assigneduserslist}
-            label="Created By"
-            onselect={oncreatedbyselect}
-            onclear={onclearcreatedby}
-          ></c-custom-search-component>
-        </div>
+        <span class="slds-assistive-text">Loading</span>
+        <div class="slds-spinner__dot-a"></div>
+        <div class="slds-spinner__dot-b"></div>
       </div>
     </div>
   </div>
-
-  <div class="opcontentbody slds-m-top_x-small">
-      <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered tableouterborder">
-        <thead>
-          <tr class="slds-line-height_reset slds-text-title_caps">
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="ecard_discrepancy_log_id"
-                label="VIEW IMAGE"
-                title="VIEW IMAGE"
-                icon-position="right"
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="ecard_discrepancy_log_id"
-                label="DEFECT ID"
-                title="NO."
-                icon-position="right"
-                onclick={sortdiscrepancytable}
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="raised_date"
-                label="DESCRIPTION"
-                title="DESCRIPTION"
-                icon-position="right"
-                onclick={sortdiscrepancytable}
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="discrepancy_status"
-                label="DEFECT STATUS"
-                title="DEFECT STATUS"
-                icon-position="right"
-                onclick={sortdiscrepancytable}
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="chassis_no"
-                label="BUS"
-                title="BUS"
-                icon-position="right"
-                onclick={sortdiscrepancytable}
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="department_name"
-                label="DEPARTMENT"
-                title="DEPARTMENT"
-                icon-position="right"
-                onclick={sortdiscrepancytable}
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="defect_code"
-                label="DEFECT CODE"
-                title="DEFECT CODE"
-                icon-position="right"
-                onclick={sortdiscrepancytable}
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-            <th class="fixedheader" scope="col">
-              <lightning-button
-                variant="base"
-                data-id="assignedto"
-                label="ASSIGNED TO"
-                title="ASSIGNED TO"
-                icon-position="right"
-                class="slds-truncate"
-              ></lightning-button>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- <template if:false={disclistempty}> -->
-          <template for:each={filtereddiscrepancy} for:item="disc">
-            <tr
-              key={disc.ecard_discrepancy_log_id}
-              
-            >
-            <td><div class="">
-              <lightning-button if:true={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} onclick={previewimage} label="Preview" title="Preview" icon-name="utility:preview" icon-position="right" ></lightning-button>
-              <lightning-button if:false={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} disabled label="No Preview" title="No Preview" icon-name="utility:hide" icon-position="right" ></lightning-button>
-            </div></td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails}>
-                <div style="width: 86px;">
-                  <!--{disc.ecard_discrepancy_log_id}-->
-                  {disc.ecard_discrepancy_log_number}
-                </div>
-              </td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails} title={disc.description} class="slds-truncate">
-                <!--setdescriptionwidth-->
-                <div class="slds-grid">
-                  <div class="allignbadge">
-                    <span
-                      if:true={disc.isdepartmentdiscrepancy}
-                      class="deptbadge"
-                      >DEPT</span
-                    >
-                    <span
-                      if:false={disc.isdepartmentdiscrepancy}
-                      class="normalbadge"
-                      >NOR</span
-                    >
-                  </div>
-                  <div class="slds-col">
-                    <div
-                      style="
-                        font-weight: 600;
-                        width: 230px;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      "
-                    >
-                      {disc.description}
-                    </div>
-                    <div>
-                      <lightning-formatted-date-time
-                        value={disc.raised_date}
-                        year="numeric"
-                        month="short"
-                        day="numeric"
-                        hour="2-digit"
-                        minute="2-digit"
-                        hour12="true"
-                      ></lightning-formatted-date-time>
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails}>
-                <div
-                  class="slds-text-heading_small slds-align_absolute-center"
-                >
-                  <span class="statusbadge">{disc.discrepancy_statusdisplay}</span>
-                </div>
-              </td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails}>
-                <div>{disc.customername},</div>
-                <div>{disc.chassis_no}</div>
-              </td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails}><div>{disc.department_name}</div></td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails}><div>{disc.defect_code}, {disc.defect_name}</div></td>
-              <td  data-id={disc.ecard_discrepancy_log_id}
-              onclick={showdetails}>
-                <div class="">
-                  <c-userlist-icon-component
-                    type="Assigned User"
-                    buildstationid={disc.ecard_discrepancy_log_id}
-                    userlist={disc.assigneduser}
-                  ></c-userlist-icon-component>
-                </div>
-              </td>
-            </tr>
-          </template>
-          <!-- </template> -->
-        </tbody>
-      </table>
-
-      <template if:true={disclistempty}>
-        <div class="slds-align_absolute-center">
-          <div class="empty-state-container slds-text-align_center">
-            <img
-              src={nodatadessert}
-              width="500px"
-              aria-hidden="true"
-              alt=" No data matching the applied filters to display."
-            />
-            <div class="emptymessage">
-              No data matching the applied filters to display.
+  <!--Show spinner end-->
+  
+  <section class="main">
+    <div class="discrepancyhead">
+      <div class="slds-p-top_x-small filterdiv">
+        <div
+          class="slds-grid slds-wrap slds-grid_align-spread slds-m-top_x-small slds-m-bottom_x-small"
+        >
+          <div class="slds-col slds-size_2-of-6">
+            <div class="slds-float_none slds-p-around_x-small">
+              <span class="slds-text-heading_medium headstyle"
+                >DISCREPANCY DB</span
+              >
+            </div>
+          </div>
+          <div class="slds-col slds-size_4-of-6">
+            <div class="slds-grid slds-grid_align-end">
+              <div class="slds-col slds-size_3-of-12 slds-p-horizontal_small">
+                <lightning-input type="date" variant="label-hidden" name="dateselected" placeholder="Filter by Created Date"
+                  onchange={handlecreateddatechange}></lightning-input>
+              </div>
+              <div class="slds-col slds-size_3-of-12 slds-p-horizontal_small">
+                <c-custom-search-component showicon={returntrue} showlabel={returnfalse} placeholdertext="Search Created User"
+                  -icon-name="standard:user" listto-search={createdbyuserslist} label="Created By" onselect={oncreatedbyselect}
+                  onclear={onclearcreatedby}></c-custom-search-component>
+              </div>
+              <div class="slds-col slds-size_5-of-24 slds-p-horizontal_small">
+                <c-new-discrepancy-component buttonlabel="New Discrepancy" modalheading="New Discrepancy" type="buildstation"
+                  page="discrepancyDB" department-id-map={departmentIdMap} onoperationrefresh={refreshDiscrepancy} permissionset={permissionset}>
+                </c-new-discrepancy-component>
+              </div>
+              <!--lightning-button
+                label="New Discrepancy"
+                variant="brand-outline"
+                title="New Discrepancy"
+                onclick={addnewdiscrepancymodal}
+                class="slds-m-right_x-small"
+              ></lightning-button-->
             </div>
           </div>
         </div>
-      </template>
-
-  </div>
-</section>
-
-<!--Add Descrepancy for Department Modal Start-->
-<template if:true={newdiscrepancymodal}>
-  <section
-    role="dialog"
-    tabindex="-1"
-    aria-labelledby="modal-heading-02"
-    aria-modal="true"
-    aria-describedby="modal-content-id-2"
-    class="slds-modal slds-fade-in-open slds-modal_small"
-  >
-    <div class="slds-modal__container">
-      <!-- modal header start -->
-      <header class="slds-modal__header">
-        <button
-          class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-          title="Close"
-          onclick={hidenewdiscrepancymodal}
-        >
-          <lightning-icon
-            icon-name="utility:close"
-            alternative-text="close"
-            variant="inverse"
-            size="small"
-          ></lightning-icon>
-        </button>
-        <h2
-          id="modal-heading-02"
-          class="slds-text-heading_medium slds-hyphenate"
-        >
-          New Discrepancy
-        </h2>
-      </header>
-      <!-- modal body start -->
-      <div
-        class="slds-modal__content slds-p-around_medium"
-        id="modal-content-id-2"
-      >
-        <div class="slds-grid slds-wrap slds-gutters">
-          <div class="slds-col slds-size_1-of-1">
-            <lightning-textarea
-              required
-              maxlength="2000"
-              class="newdiscvalidation"
-              name="description"
-              label="Description"
-              onchange={modifynewdiscrepancyvalues}
-              value={newdiscrepancy.description}
-              placeholder="Enter discrepancy details here..."
-            ></lightning-textarea>
-          </div>
-          <div class="slds-col slds-size_1-of-1">
+        <div class="slds-grid slds-gutters slds-grid_align-spread slds-m-top_x-small">
+          <div class="slds-col slds-size_2-of-12">
             <c-custom-search-component
-              isrequired={returntrue}
               showicon={returntrue}
-              showlabel={returntrue}
-              placeholdertext="Search for Chasis Number"
+              showlabel={returnfalse}
+              placeholdertext="Search Customer, Chasis Number"
               -icon-name="custom:custom98"
-              listto-search={ecardnamechasislist}
-              label="Select a Bus"
-              onselect={onbusselection}
-              onclear={onclearbus}
+              listto-search={customernamechasislist}
+              label="Customer"
+              onselect={oncustomerselection}
+              onclear={onclearcustomer}
             ></c-custom-search-component>
           </div>
-          <div class="slds-col slds-size_1-of-2">
-            <lightning-input
-              type="text"
-              name="date"
-              label="Date"
-              value={newdiscrepancy.date}
-              disabled
-            ></lightning-input>
-          </div>
-          <div class="slds-col slds-size_1-of-2">
+          <div class="slds-col slds-size_2-of-12">
+            <!--onfocus={loadpicklistvalues}-->
             <lightning-combobox
-              required
-              name="type"
-              class="newdiscvalidation"
-              label="Type"
-              onchange={modifynewdiscrepancyvalues}
-              value={newdiscrepancy.type}
+              onfocus={loadpicklistvalues}
+              variant="label-hidden"
+              name="departments"
+              value={selecteddepartement}
+              placeholder="Departments"
+              options={departmentlist}
+              onchange={handledepartmentchange}
+            ></lightning-combobox>
+          </div>
+          <div class="slds-col slds-size_2-of-12">
+            <lightning-combobox
+              onfocus={fetchcompletedefectList}
+              variant="label-hidden"
+              name="defectstatus"
+              value={selecteddefect}
+              placeholder="All Defect Code"
+              options={defectlist}
+              onchange={handledefectchange}
+            ></lightning-combobox>
+          </div>
+        <div class="slds-col slds-size_2-of-12">
+            <lightning-combobox 
+              variant="label-hidden" 
+              name="defectstatus"
+              value={selectedstatus} 
+              placeholder="Discrepancy Status" 
+              options={statuslistfiltervalue}
+              onchange={handlediscrepancystatuschange}
+              ></lightning-combobox>
+          </div>
+          <div class="slds-col slds-size_2-of-12">
+            <lightning-combobox
+              variant="label-hidden"
+              name="discrepancytype"
+              value={selecteddisctype}
               placeholder="Discrepancy Type"
-              options={disctype}
+              options={discrepancytypelist}
+              onchange={handledisctypechange}
             ></lightning-combobox>
           </div>
-          <div class="slds-col slds-size_1-of-2">
-            <lightning-combobox
-              required
-              disabled={ecardnotselected}
-              name="departmentid"
-              class="newdiscvalidation"
-              onfocus={getdepartmentPicklist}
-              label="Department"
-              onchange={modifynewdiscrepancyvalues}
-              value={newdiscrepancy.departmentid}
-              placeholder="Select Department"
-              options={departmentoptions}
-            ></lightning-combobox>
-          </div>
-          <div class="slds-col slds-size_1-of-2">
-            <div if:true={buildstationrequired}>
-              <lightning-combobox
-                required
-                disabled={departmentnotselected}
-                name="buildstation_id"
-                class="newdiscvalidation"
-                label="Build Station (BS)"
-                onchange={modifynewdiscrepancyvalues}
-                value={newdiscrepancy.buildstation_id}
-                placeholder="Select BuildStation"
-                options={buildstationoptions}
-              ></lightning-combobox>
-            </div>
-            <div if:false={buildstationrequired}>
-              <lightning-combobox
-                disabled={departmentnotselected}
-                name="buildstation_id"
-                class="newdiscvalidation"
-                label="Build Station (BS)"
-                onchange={modifynewdiscrepancyvalues}
-                value={newdiscrepancy.buildstation_id}
-                placeholder="Select BuildStation"
-                options={buildstationoptions}
-              ></lightning-combobox>
-            </div>
-          </div>
-          <div class="slds-col slds-size_1-of-2">
-            <lightning-combobox
-              name="priority"
-              label="Priority"
-              class="newdiscvalidation"
-              onchange={modifynewdiscrepancyvalues}
-              value={newdiscrepancy.priority}
-              placeholder="Select Priority"
-              options={priorityoptions}
-            ></lightning-combobox>
-          </div>
-          <div class="slds-col slds-size_1-of-2">
-            <lightning-combobox
-              required
-              disabled={departmentnotselected}
-              name="defectcode"
-              label="Defect Code (DC)"
-              class="newdiscvalidation"
-              onchange={modifynewdiscrepancyvalues}
-              value={newdiscrepancy.defectcode}
-              placeholder="Enter a Defect Code"
-              options={defectoptions}
-            ></lightning-combobox>
-          </div>
-          <!--div class="slds-col slds-size_1-of-2">
-            <c-re-usable-multi-select-lookup
-              onitemselected={updateuserselectonnewdesc}
-              limittoone={returntrue}
-              selectedrecords={newdiscrepancy.qclist}
-              label="QC"
-              -icon-name="standard:user"
-              placeholdertext="Search for QC users"
-              listtosearch={newdiscrepancy.allQClist}
-            ></c-re-usable-multi-select-lookup>
-          </div-->
-          <div class="slds-col slds-size_1-of-2">
-            <c-re-usable-multi-select-lookup
-              onitemselected={updateuserselectonnewdesc}
-              limittoone={returnfalse}
-              selectedrecords={newdiscrepancy.prodlist}
-              label="PROD"
-              -icon-name="standard:user"
-              placeholdertext="Search for PROD users"
-              listtosearch={newdiscrepancy.allPRODlist}
-            ></c-re-usable-multi-select-lookup>
+          <div class="slds-col slds-size_2-of-12">
+            <lightning-combobox name="busstatus" onfocus={loadstatuspicklistvalues} variant="label-hidden" value={selectedBusStatus}
+              placeholder="Bus Status" options={busstatuslist} onchange={handlebusstatuschange}></lightning-combobox>
           </div>
         </div>
-        <div class="slds-m-top_x-small slds-border_top">
-          <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+        <div class="slds-grid slds-gutters slds-m-top_x-small">
+          <div class="slds-col slds-size_1-of-1">
+            <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh"
+              class="slds-m-left_xx-small slds-float_right" title="Refresh" onclick={loaddataforview}></lightning-button-icon>
+          </div>
+        </div>
       </div>
-      </div>
-      <!-- modal footer start-->
-      <footer class="slds-modal__footer">
-        <lightning-button
-          label="Cancel"
-          title="Cancel"
-          onclick={hidenewdiscrepancymodal}
-          class="slds-m-right_x-small"
-        ></lightning-button>
-        <lightning-button
-          variant="brand"
-          label="Add"
-          onclick={addnewdiscrepancytoserver}
-          title="Add"
-          icon-position="right"
-          icon-name="utility:add"
-        ></lightning-button>
-      </footer>
+    </div>
+  
+    <div class="opcontentbody slds-m-top_x-small">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered tableouterborder">
+          <thead>
+            <tr class="slds-line-height_reset slds-text-title_caps">
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="chassis_no"
+                  label="BUS"
+                  title="BUS"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="raised_date"
+                  label="DESCRIPTION"
+                  title="DESCRIPTION"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="discrepancy_status"
+                  label="DEFECT STATUS"
+                  title="DEFECT STATUS"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="department_name"
+                  label="DEPARTMENT"
+                  title="DEPARTMENT"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="createdby"
+                  label="CREATED BY"
+                  title="CREATED BY"
+                  icon-position="right"
+                  class="slds-truncate"
+                  onclick={sortdiscrepancytable}
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="defect_type"
+                  label="DEFECT TYPE"
+                  title="DEFECT TYPE"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                   ></lightning-button>
+                </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="defect_code"
+                  label="DEFECT CODE"
+                  title="DEFECT CODE"
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col">
+                <lightning-button
+                  variant="base"
+                  data-id="ecard_discrepancy_log_id"
+                  label="DEFECT ID"
+                  title="NO."
+                  icon-position="right"
+                  onclick={sortdiscrepancytable}
+                  class="slds-truncate"
+                ></lightning-button>
+              </th>
+              <th class="fixedheader" scope="col" if:true={isdepartmentPaint}>
+                <lightning-button
+                  variant="base"
+                  data-id="ecard_discrepancy_log_id"
+                  label="VIEW IMAGE"
+                  title="VIEW IMAGE"
+                  icon-position="right"
+                  class="slds-truncate"
+                ></lightning-button>
+              </th> 
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <template if:false={disclistempty}> -->
+            <template for:each={filtereddiscrepancy} for:item="disc">
+              <tr
+                key={disc.ecard_discrepancy_log_id}>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                  <div>{disc.customername},</div>
+                  <div>{disc.chassis_no}</div>
+                </td>
+               
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails} title={disc.description} class="slds-truncate">
+                  <!--setdescriptionwidth-->
+                  <div class="slds-grid">
+                    <div class="allignbadge">
+                      <span
+                        if:true={disc.isdepartmentdiscrepancy}
+                        class="deptbadge"
+                        >DEPT</span
+                      >
+                      <!-- <span
+                        if:false={disc.isdepartmentdiscrepancy}
+                        class="normalbadge"
+                        >NOR</span
+                      > -->
+                      <template if:false={disc.isdepartmentdiscrepancy}>
+                        <span if:true={disc.isdownstreamdiscrepancy} class="normalbadge">
+                          DOW
+                        </span>
+                        <span if:false={disc.isdownstreamdiscrepancy} class="normalbadge">
+                          NOR
+                        </span>
+                      </template>
+                    </div>
+                    <div class="slds-col">
+                      <div
+                        style="
+                          font-weight: 600;
+                          width: 230px;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                        "
+                      >
+                        {disc.description}
+                      </div>
+                      <div>
+                        <lightning-formatted-date-time
+                          value={disc.raised_date}
+                          year="numeric"
+                          month="short"
+                          day="numeric"
+                          hour="2-digit"
+                          minute="2-digit"
+                          hour12="true"
+                        ></lightning-formatted-date-time>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                  <div
+                    class="slds-text-heading_small slds-align_absolute-center"
+                  >
+                    <span class="statusbadge" style={disc.status_bgcolor}>{disc.discrepancy_statusdisplay}</span>
+                  </div>
+                </td>
+               
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}><div>{disc.department_name}</div></td>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                  <div class="">
+                    <c-userlist-icon-component
+                    type="Created User"
+                    buildstationid={disc.ecard_discrepancy_log_id}
+                    userlist={disc.created_by}
+                    ></c-userlist-icon-component>
+                  </div>
+                </td>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                <!-- <div>{disc.defect_type}</div> -->
+                <div>{disc.discrepancy_type}</div> 
+                </td>
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}><div>{disc.defect_code}, {disc.defect_name}</div></td>
+                
+                <td  data-id={disc.ecard_discrepancy_log_id}
+                onclick={showdetails}>
+                  <div style="width: 86px;">
+                    <!--{disc.ecard_discrepancy_log_id}-->
+                    {disc.ecard_discrepancy_log_number}
+                  </div>
+                </td>
+                <td if:true={isdepartmentPaint}><div class="">
+                  <lightning-button if:true={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} onclick={previewimage} label="Preview" title="Preview" icon-name="utility:preview" icon-position="right" ></lightning-button>
+                  <lightning-button if:false={disc.hasbusareapicture} variant="base" data-id={disc.ecard_discrepancy_log_id} disabled label="No Preview" title="No Preview" icon-name="utility:hide" icon-position="right" ></lightning-button>
+                </div></td>
+              </tr>
+            </template>
+            <!-- </template> -->
+          </tbody>
+        </table>
+  
+        <template if:true={disclistempty}>
+          <div class="slds-align_absolute-center">
+            <div class="empty-state-container slds-text-align_center">
+              <img
+                src={nodatadessert}
+                width="500px"
+                aria-hidden="true"
+                alt=" No data matching the applied filters to display."
+              />
+              <div class="emptymessage">
+                No data matching the applied filters to display.
+              </div>
+            </div>
+          </div>
+        </template>
+  
     </div>
   </section>
-  <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!--Add Descrepancy for Department Modal End-->
-
-<!--Show  Descrepancy Detail Modal Start-->
-<template if:true={detailsmodal}>
-  <section
-    role="dialog"
-    tabindex="-1"
-    aria-labelledby="modal-heading-01"
-    aria-modal="true"
-    aria-describedby="modal-content-id-1"
-    class="slds-modal slds-fade-in-open slds-modal_medium"
-  >
-    <div class="slds-modal__container">
-      <!-- modal header start -->
-      <header class="slds-modal__header">
-        <button
-          class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-          title="Close"
-          onclick={hidediscrepancydetail}
-        >
-          <lightning-icon
-            icon-name="utility:close"
-            alternative-text="close"
-            variant="inverse"
-            size="small"
-          ></lightning-icon>
-        </button>
-        <h2
-          id="modal-heading-01"
-          class="slds-text-heading_medium slds-hyphenate"
-        >
-          Defect Id: {selecteddiscrepancy.ecard_discrepancy_log_number}
-        </h2>
-      </header>
-      <!-- modal body start -->
-      <div
-        class="slds-modal__content slds-p-around_medium"
-        id="modal-content-id-1"
-      >
-        <!--<lightning-accordion allow-multiple-sections-open
-                        onsectiontoggle={togglesection}
-                        active-section-name={activeSections}>
-      <lightning-accordion-section name="Details" label="Details"> -->
+  
+  <!--Add Descrepancy for Department Modal Start-->
+  <template if:true={newdiscrepancymodal}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-labelledby="modal-heading-02"
+      aria-modal="true"
+      aria-describedby="modal-content-id-2"
+      class="slds-modal slds-fade-in-open slds-modal_small"
+    >
+      <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+          <button
+            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+            title="Close"
+            onclick={hidenewdiscrepancymodal}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              alternative-text="close"
+              variant="inverse"
+              size="small"
+            ></lightning-icon>
+          </button>
+          <h2
+            id="modal-heading-02"
+            class="slds-text-heading_medium slds-hyphenate"
+          >
+            New Discrepancy
+          </h2>
+        </header>
+        <!-- modal body start -->
         <div
-          class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom"
+          class="slds-modal__content slds-p-around_medium"
+          id="modal-content-id-2"
         >
-          <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
-            <div class="slds-form-element">
-              <label class="slds-form-element__label">Description</label>
-              <div
-                title={selecteddiscrepancy.description}
-                class="slds-form-element__static descriptiondetail"
-              >
-                {selecteddiscrepancy.description}
-              </div>
-            </div>
-            <!--<lightning-textarea name="description" disabled value={selecteddiscrepancy.description} label="Description" ></lightning-textarea> -->
-          </div>
-
-          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-            <div class="slds-form-element">
-              <label class="slds-form-element__label">Created By</label>
-              <div
-                title={selecteddiscrepancy.description}
-                class="slds-form-element__static"
-              >
-                <c-userlist-icon-component
-                  type="Created User"
-                  userlist={selecteddiscrepancy.created_by}
-                ></c-userlist-icon-component>
-              </div>
-            </div>
-          </div>
-
-          <!--<lightning-input type="text" label="Created By" name="displaycreatedbyname" value={selecteddiscrepancy.displaycreatedbyname} readonly></lightning-input> -->
-
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.raised_date_display}
-          >
-            <lightning-input
-              type="text"
-              label="Created On"
-              name="raised_date_display"
-              value={selecteddiscrepancy.raised_date_display}
-              readonly
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.customername}
-          >
-            <lightning-input
-              type="text"
-              label="Customer Name"
-              name="customername"
-              value={selecteddiscrepancy.customername}
-              readonly
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.chassis_no}
-          >
-            <lightning-input
-              type="text"
-              label="Chassis Sl No"
-              value={selecteddiscrepancy.chassis_no}
-              readonly
-            ></lightning-input>
-          </div>
-
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.busstatus_name}
-          >
-            <lightning-input
-              type="text"
-              label="Bus Status"
-              name="busstatus_name"
-              value={selecteddiscrepancy.busstatus_name}
-              readonly
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.department_name}
-          >
-            <lightning-input
-              type="text"
-              label="Department"
-              name="department_name"
-              value={selecteddiscrepancy.department_name}
-              readonly
-            ></lightning-input>
-          </div>
-          <div if:true={selecteddiscrepancy.disc_bsavailable}
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.buildstation_code}
-          >
-            <lightning-input
-              type="text"
-              label="Build Station"
-              name="buildstation_code"
-              value={selecteddiscrepancy.buildstation_code}
-              readonly
-            ></lightning-input>
-          </div>
-          <div if:false={selecteddiscrepancy.disc_bsavailable}
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.buildstation_code}
-          >
-            <lightning-input
-              type="text"
-              label="Build Station"
-              name="buildstation_code"
-              value=""
-              readonly
-            ></lightning-input>
-          </div>
-          <div if:true={selecteddiscrepancy.disc_bsavailable}
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.workcenter_name}
-          >
-            <lightning-input
-              type="text"
-              label="Work Centre"
-              name="workcenter_name"
-              value={selecteddiscrepancy.workcenter_name}
-              readonly
-            ></lightning-input>
-          </div>
-          <div if:false={selecteddiscrepancy.disc_bsavailable}
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.workcenter_name}
-          >
-            <lightning-input
-              type="text"
-              label="Work Centre"
-              name="workcenter_name"
-              value=""
-              readonly
-            ></lightning-input>
-          </div>
-
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.discrepancy_type}
-          >
-            <!--discrepancy_type-->
-            <lightning-input
-              type="text"
-              label="Defect Type"
-              name="discrepancy_type"
-              value={selecteddiscrepancy.discrepancy_type}
-              readonly
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.defect_codename}
-          >
-            <lightning-input
-              type="text"
-              label="Defect Code"
-              name="defect_codename"
-              value={selecteddiscrepancy.defect_codename}
-              readonly
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.discrepancy_priority}
-          >
-            <lightning-input
-              type="text"
-              label="Priority"
-              name="discrepancy_priority"
-              value={selecteddiscrepancy.discrepancy_priority}
-              readonly
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-            title={selecteddiscrepancy.discrepancy_statusdisplay}
-          >
-            <lightning-input
-              type="text"
-              label="Defect Status"
-              name="discrepancy_statusdisplay"
-              value={selecteddiscrepancy.discrepancy_statusdisplay}
-              onchange={updateselecteddiscrepancy}
-              readonly
-            ></lightning-input>
-          </div>
-        </div>
-        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small">
-          <template if:true={selecteddiscrepancy.isdepartmentdiscrepancy}>
+          <div class="slds-grid slds-wrap slds-gutters">
             <div class="slds-col slds-size_1-of-1">
               <lightning-textarea
-                disabled={disablecomponentdates}
                 required
-                class="checkvalid"
-                name="root_cause"
-                field-level-help="Please fill when resolving a Discrepancy"
-                value={selecteddiscrepancy.root_cause}
-                label="Root Cause"
-                onchange={updateselecteddiscrepancy}
+                maxlength="2000"
+                class="newdiscvalidation"
+                name="description"
+                label="Description"
+                onchange={modifynewdiscrepancyvalues}
+                value={newdiscrepancy.description}
+                placeholder="Enter discrepancy details here..."
               ></lightning-textarea>
+            </div>
+            <div class="slds-col slds-size_1-of-1">
+              <c-custom-search-component
+                isrequired={returntrue}
+                showicon={returntrue}
+                showlabel={returntrue}
+                placeholdertext="Search for Chasis Number"
+                -icon-name="custom:custom98"
+                listto-search={ecardnamechasislist}
+                label="Select a Bus"
+                onselect={onbusselection}
+                onclear={onclearbus}
+              ></c-custom-search-component>
             </div>
             <div class="slds-col slds-size_1-of-2">
               <lightning-input
-                disabled={disablecomponentdates}
-                required
-                class="checkvalid"
                 type="text"
-                label="Component"
-                name="component"
-                field-level-help="Please fill when resolving a Discrepancy"
-                value={selecteddiscrepancy.component}
-                onchange={updateselecteddiscrepancy}
+                name="date"
+                label="Date"
+                value={newdiscrepancy.date}
+                disabled
+              ></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox
+                required
+                name="type"
+                class="newdiscvalidation"
+                label="Type"
+                onchange={modifynewdiscrepancyvalues}
+                value={newdiscrepancy.type}
+                placeholder="Discrepancy Type"
+                options={disctype}
+              ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox
+                required
+                disabled={ecardnotselected}
+                name="departmentid"
+                class="newdiscvalidation"
+                onfocus={getdepartmentPicklist}
+                label="Department"
+                onchange={modifynewdiscrepancyvalues}
+                value={newdiscrepancy.departmentid}
+                placeholder="Select Department"
+                options={departmentoptions}
+              ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <div if:true={buildstationrequired}>  
+                <lightning-combobox
+                  required
+                  disabled={departmentnotselected}
+                  name="buildstation_id"
+                  class="newdiscvalidation"
+                  label="Build Station (BS)"
+                  onchange={modifynewdiscrepancyvalues}
+                  value={newdiscrepancy.buildstation_id}
+                  placeholder="Select BuildStation"
+                  options={buildstationoptions}
+                ></lightning-combobox>
+              </div>
+              <div if:false={buildstationrequired}>
+                <lightning-combobox
+                  disabled={departmentnotselected}
+                  name="buildstation_id"
+                  class="newdiscvalidation"
+                  label="Build Station (BS)"
+                  onchange={modifynewdiscrepancyvalues}
+                  value={newdiscrepancy.buildstation_id}
+                  placeholder="Select BuildStation"
+                  options={buildstationoptions}
+                ></lightning-combobox>
+              </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox
+                name="priority"
+                label="Priority"
+                class="newdiscvalidation"
+                onchange={modifynewdiscrepancyvalues}
+                value={newdiscrepancy.priority}
+                placeholder="Select Priority"
+                options={priorityoptions}
+              ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox
+                required
+                disabled={departmentnotselected}
+                name="defectcode"
+                label="Defect Code (DC)"
+                class="newdiscvalidation"
+                onchange={modifynewdiscrepancyvalues}
+                value={newdiscrepancy.defectcode}
+                placeholder="Enter a Defect Code"
+                options={defectoptions}
+              ></lightning-combobox>
+            </div>
+            <!--div class="slds-col slds-size_1-of-2">
+              <c-re-usable-multi-select-lookup
+                onitemselected={updateuserselectonnewdesc}
+                limittoone={returntrue}
+                selectedrecords={newdiscrepancy.qclist}
+                label="QC"
+                -icon-name="standard:user"
+                placeholdertext="Search for QC users"
+                listtosearch={newdiscrepancy.allQClist}
+              ></c-re-usable-multi-select-lookup>
+            </div-->
+            <div class="slds-col slds-size_1-of-2">
+              <c-re-usable-multi-select-lookup
+                disablecomponent={disableprodforupdate}
+                onitemselected={updateuserselectonnewdesc}
+                limittoone={returnfalse}
+                selectedrecords={newdiscrepancy.prodlist}
+                label="PROD"
+                -icon-name="standard:user"
+                placeholdertext="Search for PROD users"
+                listtosearch={newdiscrepancy.allPRODlist}
+              ></c-re-usable-multi-select-lookup>
+            </div>
+          </div>
+          <div class="slds-m-top_x-small slds-border_top">
+            <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+        </div>
+        </div>
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+          <lightning-button
+            label="Cancel"
+            title="Cancel"
+            onclick={hidenewdiscrepancymodal}
+            class="slds-m-right_x-small"
+          ></lightning-button>
+          <lightning-button
+            variant="brand"
+            label="Add"
+            onclick={addnewdiscrepancytoserver}
+            title="Add"
+            icon-position="right"
+            icon-name="utility:add"
+          ></lightning-button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+  <!--Add Descrepancy for Department Modal End-->
+  
+  <!--Show  Descrepancy Detail Modal Start-->
+  <template if:true={detailsmodal}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-labelledby="modal-heading-01"
+      aria-modal="true"
+      aria-describedby="modal-content-id-1"
+      class="slds-modal slds-fade-in-open slds-modal_medium"
+    >
+      <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+          <button
+            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+            title="Close"
+            onclick={hidediscrepancydetail}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              alternative-text="close"
+              variant="inverse"
+              size="small"
+            ></lightning-icon>
+          </button>
+          <h2
+            id="modal-heading-01"
+            class="slds-text-heading_medium slds-hyphenate"
+          >
+            Defect Id: {selecteddiscrepancy.ecard_discrepancy_log_number}
+          </h2>
+        </header>
+        <!-- modal body start -->
+        <div
+          class="slds-modal__content slds-p-around_medium"
+          id="modal-content-id-1"
+        >
+          <!--<lightning-accordion allow-multiple-sections-open
+                          onsectiontoggle={togglesection}
+                          active-section-name={activeSections}>
+        <lightning-accordion-section name="Details" label="Details"> -->
+          <div
+            class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom"
+          >
+            <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+              <div class="slds-form-element">
+                <label class="slds-form-element__label">Description</label>
+                <div
+                  title={selecteddiscrepancy.description}
+                  class="slds-form-element__static descriptiondetail"
+                >
+                  {selecteddiscrepancy.description}
+                </div>
+              </div>
+              <!--<lightning-textarea name="description" disabled value={selecteddiscrepancy.description} label="Description" ></lightning-textarea> -->
+            </div>
+  
+            <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+              <div class="slds-form-element">
+                <label class="slds-form-element__label">Created By</label>
+                <div
+                  title={selecteddiscrepancy.description}
+                  class="slds-form-element__static"
+                >
+                  <c-userlist-icon-component
+                    type="Created User"
+                    userlist={selecteddiscrepancy.created_by}
+                  ></c-userlist-icon-component>
+                </div>
+              </div>
+            </div>
+  
+            <!--<lightning-input type="text" label="Created By" name="displaycreatedbyname" value={selecteddiscrepancy.displaycreatedbyname} readonly></lightning-input> -->
+  
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.raised_date_display}
+            >
+              <lightning-input
+                type="text"
+                label="Created On"
+                name="raised_date_display"
+                value={selecteddiscrepancy.raised_date_display}
+                readonly
               ></lightning-input>
             </div>
             <div
-              class="slds-col slds-size_1-of-2"
-              title={selecteddiscrepancy.cut_off_date}
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.customername}
             >
               <lightning-input
-                disabled={disablecomponentdates}
-                required
-                class="checkvalid"
-                type="date"
-                label="Cut In Date"
-                name="cut_off_date"
-                field-level-help="Please fill when resolving a Discrepancy"
-                value={selecteddiscrepancy.cut_off_date}
-                onchange={updateselecteddiscrepancy}
+                type="text"
+                label="Customer Name"
+                name="customername"
+                value={selecteddiscrepancy.customername}
+                readonly
               ></lightning-input>
             </div>
-          </template>
-          <!--div class="slds-col slds-size_1-of-2">
-            <c-re-usable-multi-select-lookup
-              disablecomponent={disableqcforupdate}
-              limittoone={returntrue}
-              selectedrecords={selecteddiscrepancy.assigend_qc_id}
-              label="QC"
-              -icon-name="standard:user"
-              placeholdertext="Search for QC users"
-              onitemselected={updateuserselection}
-              listtosearch={selecteddiscrepancy.allqclist}
-            ></c-re-usable-multi-select-lookup>
-          </div-->
-          <div class="slds-col slds-size_1-of-2">
-            <c-re-usable-multi-select-lookup
-              disablecomponent={disableprodforupdate}
-              limittoone={returnfalse}
-              selectedrecords={selecteddiscrepancy.selectedprodlist}
-              label="PROD"
-              -icon-name="standard:user"
-              placeholdertext="Search for PROD users"
-              onitemselected={updateuserselection}
-              listtosearch={selecteddiscrepancy.allprodlist}
-            ></c-re-usable-multi-select-lookup>
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.chassis_no}
+            >
+              <lightning-input
+                type="text"
+                label="Chassis Sl No"
+                value={selecteddiscrepancy.chassis_no}
+                readonly
+              ></lightning-input>
+            </div>
+  
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.busstatus_name}
+            >
+              <lightning-input
+                type="text"
+                label="Bus Status"
+                name="busstatus_name"
+                value={selecteddiscrepancy.busstatus_name}
+                readonly
+              ></lightning-input>
+            </div>
+            <div if:false={enablediscdepartmentedit}
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.department_name}
+            >
+              <lightning-input
+                type="text"
+                label="Department"
+                name="department_name"
+                value={selecteddiscrepancy.department_name}
+                readonly
+              ></lightning-input>
+            </div>
+            <!--New added department start-->
+            <div if:true={enablediscdepartmentedit} class="slds-col slds-size_1-of-4 slds-m-bottom_medium" title={selecteddiscrepancy.department_name}>
+              <lightning-combobox required name="department_id" class="deptchangevalidation" label="Department"
+                onchange={modifyselecteddiscrepancy} value={departmentid} placeholder="Select Department"
+                options={departmentoptions}>
+              </lightning-combobox>
+            </div>
+            <!--New added End-->
+
+            <!--New added buildstation start-->
+            <template if:true={enablediscbsedit}>
+              <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium" title={selecteddiscrepancy.department_name}>
+                <lightning-combobox required={isbsrequired} name="buildstation_id" class="deptchangevalidation" label="Build Station (BS)"
+                  onchange={modifyselecteddiscrepancy} value={selecteddiscrepancy.buildstation_id} placeholder="Select BuildStation"
+                  options={buildstationoptions}></lightning-combobox>
+              </div>
+            </template>            
+            <!--New added End-->
+            <template if:false={enablediscbsedit}>
+              <div if:true={selecteddiscrepancy.disc_bsavailable}
+                class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+                title={selecteddiscrepancy.buildstation_code}
+              >
+                <lightning-input
+                  type="text"
+                  label="Build Station"
+                  name="buildstation_code"
+                  value={selecteddiscrepancy.buildstation_code}
+                  readonly
+                ></lightning-input>
+              </div>
+              <div if:false={selecteddiscrepancy.disc_bsavailable}
+                class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+                title={selecteddiscrepancy.buildstation_code}
+              >
+                <lightning-input
+                  type="text"
+                  label="Build Station"
+                  name="buildstation_code"
+                  value=""
+                  readonly
+                ></lightning-input>
+              </div>
+            </template>
+            <div if:true={selecteddiscrepancy.disc_bsavailable}
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.workcenter_name}
+            >
+              <lightning-input
+                type="text"
+                label="Work Center"
+                name="workcenter_name"
+                value={selecteddiscrepancy.workcenter_name}
+                readonly
+              ></lightning-input>
+            </div>
+            <div if:false={selecteddiscrepancy.disc_bsavailable}
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.workcenter_name}
+            >
+              <lightning-input
+                type="text"
+                label="Work Center"
+                name="workcenter_name"
+                value=""
+                readonly
+              ></lightning-input>
+            </div>
+  
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.discrepancy_type}
+            >
+              <!--discrepancy_type-->
+              <lightning-input
+                type="text"
+                label="Defect Type"
+                name="discrepancy_type"
+                value={selecteddiscrepancy.discrepancy_type}
+                readonly
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.defect_codename}
+            >
+              <lightning-input
+                type="text"
+                label="Defect Code"
+                name="defect_codename"
+                value={selecteddiscrepancy.defect_codename}
+                readonly
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.discrepancy_priority}
+            >
+              <lightning-input
+                type="text"
+                label="Priority"
+                name="discrepancy_priority"
+                value={selecteddiscrepancy.discrepancy_priority}
+                readonly
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+              title={selecteddiscrepancy.discrepancy_statusdisplay}
+            >
+              <lightning-input
+                type="text"
+                label="Defect Status"
+                name="discrepancy_statusdisplay"
+                value={selecteddiscrepancy.discrepancy_statusdisplay}
+                onchange={updateselecteddiscrepancy}
+                readonly
+              ></lightning-input>
+            </div>
+          </div>
+          <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small">
+            <template if:true={selecteddiscrepancy.isdepartmentdiscrepancy}>
+              <div class="slds-col slds-size_1-of-1">
+                <lightning-textarea
+                  disabled={disablecomponentdates}
+                  required
+                  class="checkvalid"
+                  name="root_cause"
+                  field-level-help="Please fill when resolving a Discrepancy"
+                  value={selecteddiscrepancy.root_cause}
+                  label="Root Cause"
+                  onchange={updateselecteddiscrepancy}
+                ></lightning-textarea>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input
+                  disabled={disablecomponentdates}
+                  required
+                  class="checkvalid"
+                  type="text"
+                  label="Component"
+                  name="component"
+                  field-level-help="Please fill when resolving a Discrepancy"
+                  value={selecteddiscrepancy.component}
+                  onchange={updateselecteddiscrepancy}
+                ></lightning-input>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2"
+                title={selecteddiscrepancy.cut_off_date}
+              >
+                <lightning-input
+                  disabled={disablecomponentdates}
+                  required
+                  class="checkvalid"
+                  type="date"
+                  label="Cut In Date"
+                  name="cut_off_date"
+                  field-level-help="Please fill when resolving a Discrepancy"
+                  value={selecteddiscrepancy.cut_off_date}
+                  onchange={updateselecteddiscrepancy}
+                ></lightning-input>
+              </div>
+            </template>
+            <!--div class="slds-col slds-size_1-of-2">
+              <c-re-usable-multi-select-lookup
+                disablecomponent={disableqcforupdate}
+                limittoone={returntrue}
+                selectedrecords={selecteddiscrepancy.assigend_qc_id}
+                label="QC"
+                -icon-name="standard:user"
+                placeholdertext="Search for QC users"
+                onitemselected={updateuserselection}
+                listtosearch={selecteddiscrepancy.allqclist}
+              ></c-re-usable-multi-select-lookup>
+            </div-->
+            <div class="slds-col slds-size_1-of-2">
+              <c-re-usable-multi-select-lookup
+                disablecomponent={disableprodforupdate}
+                limittoone={returnfalse}
+                selectedrecords={selecteddiscrepancy.selectedprodlist}
+                label="PROD"
+                -icon-name="standard:user"
+                placeholdertext="Search for PROD users"
+                onitemselected={updateuserselection}
+                listtosearch={selecteddiscrepancy.allprodlist}
+              ></c-re-usable-multi-select-lookup>
+            </div>
+          </div>
+          <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1">
+              <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" permissionset={permissionset}></c-attachments-section-component>
+            </div>
+            <div class="slds-col slds-size_1-of-1">
+                <c-comments-section-component unique-id={selecteddiscrepancy.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
+            </div>
+            </div>
+          <!--</lightning-accordion-section>
+  
+        <lightning-accordion-section name="Comments" label="Comments"> -->
+          
+          <!--</lightning-accordion-section>  
+        </lightning-accordion>      -->
+        </div>
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+          <lightning-button if:true={isdeletable} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" name={selecteddiscrepancy.ecard_discrepancy_log_id} onclick={deletediscrepancy}></lightning-button>   
+          <lightning-button if:true={enablediscupdate} variant="brand" label="Update" title="Update" onclick={handlediscdeptupdateaction} class="slds-m-right_x-small">
+          </lightning-button>
+          <lightning-button
+            label="Cancel"
+            title="Cancel"
+            onclick={hidediscrepancydetail}
+            class="slds-m-right_x-small"
+          ></lightning-button>
+          <c-status-operations-component
+            permissionset={permissionset}
+            discrepancytype={selecteddiscrepancy.discrepancy_type} 
+            type="discrepancy"
+            prodlist={selecteddiscrepancy.selectedprodlist}
+            qclist={selecteddiscrepancy.assigend_qc_id}
+            data-id={selecteddiscrepancy.ecard_discrepancy_log_id}
+            buildstationid={selecteddiscrepancy.ecard_discrepancy_log_id}
+            ecardid={selecteddiscrepancy.ecard_id}
+            status={selecteddiscrepancy.discrepancy_status}
+            onsubmitchange={handlediscrepancyactions}
+          ></c-status-operations-component>
+          <!--onsubmitchange={discrepancyactionshandler} -->
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+  <!--Show Descrepancy for Department Modal End-->
+  
+  <!--Show Preview image Modal Start-->
+  <template if:true={showpreviewimage}>
+    <section role="dialog" tabindex="-1"
+          aria-labelledby="modal-heading-08"
+          aria-modal="true"
+          aria-describedby="modal-content-id-8"
+        class="slds-modal slds-fade-in-open slds-modal_large">
+    <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+          <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidepreviewimage}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+          </button>
+          <h2 id="modal-heading-08" class="slds-text-heading_medium slds-hyphenate">Discrepancy Image</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-8">
+        <!--Show spinner start-->
+    <div if:true={showspinnerwithmodal}>
+      <!--  <div class="slds-align_absolute-center">
+          <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+      </div>-->
+      <div class="slds-align_absolute-center">
+          <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+            <span class="slds-assistive-text">Loading</span>
+            <div class="slds-spinner__dot-a"></div>
+          <div class="slds-spinner__dot-b"></div>
+      </div>
+      </div> 
+    </div>
+    <!--Show spinner end-->
+        <template if:true={previewimageexist}>
+        <div class="slds-align_absolute-center" >
+          <div class="referenceimage" style="max-height:380px;max-width:1200px;"> <!--style={parentdivdimensions}-->
+            <img src={discrepancyimage} style={parentdivdimensions} alt="Discrepancy Image"/>
+            <!--take care of historical Discrepancy point as object - can be removed from next release START-->
+            <!-- <span if:false={isbusareaarray} style={setdiscrepancypoint} class="discrepancypoint">
+              {selecteddiscrepancy.ecard_discrepancy_log_number}
+            </span> -->
+            <span if:false={isbusareaarray} style={setdiscrepancypoint} class="discrepancypoint">
+              {selecteddiscrepancy.ecard_discrepancy_log_number}
+            </span>
+            <!--take care of historical Discrepancy point as object - can be removed from next release START-->
+            <!--this is to consider the array of the paint discrepancy point - new implementation START-->
+            <template if:true={isbusareaarray} for:each={setdiscrepancypoint} for:item='discrepancypoint'>
+              <span style={discrepancypoint.style} key={discrepancypoint.index} class="discrepancypoint">
+                {selecteddiscrepancy.ecard_discrepancy_log_number}
+              </span>
+            </template>
+            <!--this is to consider the array of the paint discrepancy point - new implementation END-->
           </div>
         </div>
-        <div class="slds-grid slds-wrap slds-gutters">
-          <div class="slds-col slds-size_1-of-1">
-            <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" ></c-attachments-section-component>
+      </template>
+      <template if:false={previewimageexist}>
+        <div class="slds-align_absolute-center">
+          <div class="empty-state-container slds-text-align_center">
+            <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+            <div class="emptymessage">
+              No image to display.
+            </div>
           </div>
-          <div class="slds-col slds-size_1-of-1">
-              <c-comments-section-component unique-id={selecteddiscrepancy.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
-          </div>
-          </div>
-        <!--</lightning-accordion-section>
-
-      <lightning-accordion-section name="Comments" label="Comments"> -->
-        
-        <!--</lightning-accordion-section>  
-      </lightning-accordion>      -->
+      </div>
+      </template>
       </div>
       <!-- modal footer start-->
       <footer class="slds-modal__footer">
-        <lightning-button if:true={isdeletable} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" name={selecteddiscrepancy.ecard_discrepancy_log_id} onclick={deletediscrepancy}></lightning-button>   
-        <lightning-button
-          label="Cancel"
-          title="Cancel"
-          onclick={hidediscrepancydetail}
-          class="slds-m-right_x-small"
-        ></lightning-button>
-        <c-status-operations-component
-          permissionset={permissionset}
-          discrepancytype={selecteddiscrepancy.discrepancy_type} 
-          type="discrepancy"
-          prodlist={selecteddiscrepancy.selectedprodlist}
-          qclist={selecteddiscrepancy.assigend_qc_id}
-          data-id={selecteddiscrepancy.ecard_discrepancy_log_id}
-          buildstationid={selecteddiscrepancy.ecard_discrepancy_log_id}
-          ecardid={selecteddiscrepancy.ecard_id}
-          status={selecteddiscrepancy.discrepancy_status}
-          onsubmitchange={handlediscrepancyactions}
-        ></c-status-operations-component>
-        <!--onsubmitchange={discrepancyactionshandler} -->
-      </footer>
+        <lightning-button label="Cancel" title="Cancel" onclick={hidepreviewimage} class="slds-m-right_x-small"></lightning-button>
+        </footer>
     </div>
-  </section>
+    </section>
   <div class="slds-backdrop slds-backdrop_open"></div>
-</template>
-<!--Show Descrepancy for Department Modal End-->
-
-<!--Show Preview image Modal Start-->
-<template if:true={showpreviewimage}>
-  <section role="dialog" tabindex="-1"
-        aria-labelledby="modal-heading-08"
-        aria-modal="true"
-        aria-describedby="modal-content-id-8"
-      class="slds-modal slds-fade-in-open slds-modal_large">
-  <div class="slds-modal__container">
-    <!-- modal header start -->
-    <header class="slds-modal__header">
-        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidepreviewimage}>
-          <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
-        </button>
-        <h2 id="modal-heading-08" class="slds-text-heading_medium slds-hyphenate">Discrepancy Image</h2>
-    </header>
-    <!-- modal body start -->
-    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-8">
-      <!--Show spinner start-->
-  <div if:true={showspinnerwithmodal}>
-    <!--  <div class="slds-align_absolute-center">
-        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
-    </div>-->
-    <div class="slds-align_absolute-center">
-        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
-          <span class="slds-assistive-text">Loading</span>
-          <div class="slds-spinner__dot-a"></div>
-        <div class="slds-spinner__dot-b"></div>
-    </div>
-    </div> 
-  </div>
-  <!--Show spinner end-->
-      <template if:true={previewimageexist}>
-      <div class="slds-align_absolute-center" >
-        <div class="referenceimage" style="max-height:380px;max-width:1200px;"> <!--style={parentdivdimensions}-->
-          <img src={discrepancyimage} style={parentdivdimensions} alt="Discrepancy Image"/>
-          <span style={setdiscrepancypoint} class="discrepancypoint">
-            {selecteddiscrepancy.ecard_discrepancy_log_number}
-          </span>                                            
-        </div>
-      </div>
     </template>
-    <template if:false={previewimageexist}>
-      <div class="slds-align_absolute-center">
-        <div class="empty-state-container slds-text-align_center">
-          <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
-          <div class="emptymessage">
-            No image to display.
-          </div>
-        </div>
-    </div>
-    </template>
-    </div>
-    <!-- modal footer start-->
-    <footer class="slds-modal__footer">
-      <lightning-button label="Cancel" title="Cancel" onclick={hidepreviewimage} class="slds-m-right_x-small"></lightning-button>
-      </footer>
-  </div>
-  </section>
-<div class="slds-backdrop slds-backdrop_open"></div>
+    <!--Show Preview Image End-->
   </template>
-  <!--Show Preview Image End-->
-</template>

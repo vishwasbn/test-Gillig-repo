@@ -16,6 +16,7 @@
     <tabs>User_Management</tabs>
     <tabs>E_Cards</tabs>
     <tabs>Discrepancy</tabs>
+    <tabs>Shortage_DB</tabs>
     <tabs>Schedules_Board</tabs>
     <tabs>Part_Number_Validation</tabs>
     <tabs>Master_Data</tabs>

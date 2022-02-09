@@ -118,3 +118,19 @@
 .greytitle{
   color: grey;
 }
+
+.pageheader{
+  height:500px;/*550px*/
+  overflow-y:auto;
+  scroll-behavior: smooth;
+}
+
+.tableheader{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.setactionbtnewidth{
+  min-width: 230px;
+}

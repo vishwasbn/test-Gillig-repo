@@ -1,0 +1,94 @@
+<template>
+  <lightning-button disabled={disablebutton} label={buttonlabel} variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
+  <template if:true={newdiscrepancymodal}>
+    <section role="dialog" tabindex="-1"
+      aria-labelledby="modal-heading-17"
+      aria-modal="true"
+      aria-describedby="modal-content-id-17"
+      class="slds-modal slds-fade-in-open slds-modal_small vsmodal">
+      <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+          <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidenewdiscrepancymodal}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+          </button>
+          <h2 id="modal-heading-17" class="slds-text-heading_medium slds-hyphenate">{modalheading}</h2>
+        </header>
+        <!-- modal header End -->
+        <!-- modal body start -->
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-17">
+          <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1">
+              <lightning-textarea required maxlength="2000" class="newdiscvalidation" name="description" label="Description"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.description} placeholder="Enter discrepancy details here..."></lightning-textarea>
+            </div>
+            <div class="slds-col slds-size_1-of-1" if:false={discrepancyDB}>
+              <lightning-input type="text" name="selectedbus"   label="Selected Bus"  value={newdiscrepancy.selectedbus} disabled></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1" if:true={discrepancyDB}>
+              <c-custom-search-component isrequired=true showicon=true showlabel=true placeholdertext="Search for Chasis Number" -icon-name="custom:custom98" listto-search={ecardnamechasislist}
+                label="Select a Bus" onselect={onbusselection} onclear={onclearbus}></c-custom-search-component>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <lightning-input type="text" name="date"   label="Date"  value={newdiscrepancy.date} disabled></lightning-input> 
+            </div>
+            <div if:true={showtypeselection} class="slds-col slds-size_1-of-2">
+              <lightning-combobox required name="type" class="newdiscvalidation" label="Type"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.type}  placeholder="Discrepancy Type" options={disctype} ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2" if:false={discrepancyDB}>
+              <lightning-combobox required name="departmentid" class="newdiscvalidation" label="Department"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.departmentid}  placeholder="Select Department" options={departmentoptions} onfocus={getdepartmentPicklist}></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2" if:true={discrepancyDB}>
+              <lightning-combobox required disabled={ecardnotselected} name="departmentid" class="newdiscvalidation"
+                onfocus={getdepartmentPicklist} label="Department" onchange={modifynewdiscrepancyvalues}
+                value={newdiscrepancy.departmentid} placeholder="Select Department" options={departmentoptions}></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2" if:false={discrepancyDB}>
+              <div if:true={buildstationrequired}>
+                <lightning-combobox  required name="buildstation_id" class="newdiscvalidation" label="Build Station (BS)" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.buildstation_id}  placeholder="Select BuildStation" options={buildstationoptions} ></lightning-combobox>  
+              </div> 
+              <div if:false={buildstationrequired}>
+                <lightning-combobox name="buildstation_id" class="newdiscvalidation" label="Build Station (BS)" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.buildstation_id}  placeholder="Select BuildStation" options={buildstationoptions} ></lightning-combobox>
+              </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2" if:true={discrepancyDB}>
+              <div if:true={buildstationrequired}>
+                <lightning-combobox required disabled={departmentnotselected} name="buildstation_id" class="newdiscvalidation"
+                  label="Build Station (BS)" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.buildstation_id}
+                  placeholder="Select BuildStation" options={buildstationoptions}></lightning-combobox>
+              </div> 
+              <div if:false={buildstationrequired}>
+                <lightning-combobox disabled={departmentnotselected} name="buildstation_id" class="newdiscvalidation"
+                  label="Build Station (BS)" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.buildstation_id}
+                  placeholder="Select BuildStation" options={buildstationoptions}></lightning-combobox>
+              </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox  name="priority" label="Priority" class="newdiscvalidation"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2" if:false={discrepancyDB}> 
+              <lightning-combobox required name="defectcode" label="Defect Code (DC)" class="newdiscvalidation"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.defectcode} placeholder="Select a Defect Code" options={defectoptions}></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2" if:true={discrepancyDB}> 
+              <lightning-combobox required disabled={departmentnotselected} name="defectcode" label="Defect Code (DC)"
+                class="newdiscvalidation" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.defectcode}
+                placeholder="Enter a Defect Code" options={defectoptions}></lightning-combobox>
+            </div>
+            <div  class="slds-col slds-size_1-of-2">
+              <c-re-usable-multi-select-lookup onitemselected={updateuserselectonnewdesc} limittoone={returnfalse} selectedrecords={newdiscrepancy.prodlist} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users"  listtosearch={allPRODlist}></c-re-usable-multi-select-lookup>
+            </div>
+          </div>
+          <div class="slds-m-top_x-small slds-border_top">
+            <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+          </div>
+        </div>
+        <!-- modal body End -->
+        <!-- modal footer End -->
+        <footer class="slds-modal__footer">
+          <lightning-button label="Cancel" title="Cancel" onclick={hidenewdiscrepancymodal} class="slds-m-right_x-small"></lightning-button>
+          <lightning-button variant="brand" label="Add" onclick={addnewdiscrepancytoserver} title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open bg-blur"></div>
+  </template>
+</template>

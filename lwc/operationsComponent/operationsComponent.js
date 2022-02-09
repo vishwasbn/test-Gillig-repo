@@ -14,6 +14,7 @@ export default class OperationsComponent extends LightningElement {
     @api selectedoperation;
     @api ecardid;
     @api permissionset;
+    @api currentbusdepartment ; // Phase 1.1 : To get the Current Department of the Selected Bus
 
     @track authorisationdata;
     @track departmentlist = [];
@@ -25,7 +26,7 @@ export default class OperationsComponent extends LightningElement {
     @track departmentnameidMap;
 
     @track showSpinner;
-
+    
 
     @track showoperations;
 
@@ -99,7 +100,7 @@ export default class OperationsComponent extends LightningElement {
     }
 
     setdepartmentvalues(event){
-        
+        var busdepartment = this.currentbusdepartment ; // Phase 1.1 : To trcak current department of the selected Bus
         let authorisationdata = this.authorisationdata;
         
         getDepartmentdata({authdata:authorisationdata})
@@ -131,11 +132,34 @@ export default class OperationsComponent extends LightningElement {
                     i++;
                 }
                 localStorage.removeItem('opsecardid');
-            }else{
+            } /*else{
                 this.selecteddepartment = this.departmentnameidMap[1].label;
                 this.selecteddepartmentid = this.departmentnameidMap[1].value; // 1 for 1st department
                 this.nextdepartment = this.departmentnameidMap[2].value; 
-            }
+            }*/ // Phase 1.1 : End - To get the department id 
+            else if(busdepartment != undefined && busdepartment!=null){ 
+                this.selecteddepartment = busdepartment;
+                
+                var i=0;
+                for(var dept in this.departmentnameidMap){
+                    
+                   if(this.selecteddepartment == this.departmentnameidMap[dept].label){
+                        this.selecteddepartmentid = this.departmentnameidMap[dept].value ;
+                        this.selecteddepartment = this.departmentnameidMap[dept].label;  
+                        if ([i + 1] != this.departmentnameidMap.length) {
+                            this.nextdepartment = this.departmentnameidMap[i + 1].value;
+                        }
+                        break;
+                    } 
+                     i++ ;
+                }
+            }else {
+                this.selecteddepartment = this.departmentnameidMap[13].label;
+                this.selecteddepartmentid = this.departmentnameidMap[13].value; 
+            } 
+              // Phase 1.1 : Start - To get the department id 
+  
+
             for(var dept in result.objectdata){
                 departmentlistvalues.push(result.objectdata[dept].department_name);
             }
@@ -174,9 +198,7 @@ export default class OperationsComponent extends LightningElement {
             });
             this.dispatchEvent(alertmessage);
         });
-
-
-        
+   
     }
 
     
@@ -239,7 +261,7 @@ export default class OperationsComponent extends LightningElement {
         for(var dept in this.departmentnameidMap){
             var thisdept = this.departmentnameidMap[dept];
             if(this.selecteddepartment == thisdept.label){
-                this.selecteddepartmentid =  thisdept.value;
+                this.selecteddepartmentid =  thisdept.value ;
             }
         }
         this.departmentchanged(event);

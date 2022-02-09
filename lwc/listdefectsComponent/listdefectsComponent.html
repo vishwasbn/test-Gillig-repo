@@ -17,20 +17,22 @@
                show-search-box="true" 
                onpaginatorchange={handlePaginatorChange}>
    </c-paginator>
-   <lightning-datatable
-     key-field="guid"
-     columns={columns}
-     data={recordsToDisplay}
-     hide-checkbox-column="true"
-     show-row-number-column
-     row-number-offset={rowNumberOffset}
-     suppress-bottom-bar
-     default-sort-direction={defaultSortDirection}
-     sorted-direction={sortDirection}
-     sorted-by={sortedBy}
-     onrowaction={handleRowAction}
-     onsort={onHandleSort}>
-</lightning-datatable>
+   <div style={tableHeight}>
+      <lightning-datatable
+         key-field="guid"
+         columns={columns}
+         data={recordsToDisplay}
+         hide-checkbox-column="true"
+         show-row-number-column
+         row-number-offset={rowNumberOffset}
+         suppress-bottom-bar
+         default-sort-direction={defaultSortDirection}
+         sorted-direction={sortDirection}
+         sorted-by={sortedBy}
+         onrowaction={handleRowAction}
+         onsort={onHandleSort}>
+      </lightning-datatable>
+   </div>
  
 </template>
 
@@ -66,7 +68,7 @@
        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
          <div class="slds-grid slds-wrap slds-gutters">
             <div class="slds-col slds-size_1-of-2">
-                <lightning-input class="newdefectvalidation" required type="text" name="defect_code"  value={record.defect_code} label="Defect Code" onchange={updatechangesfordefect}></lightning-input>
+                <lightning-input class="newdefectvalidation" required type="number" name="defect_code"  value={record.defect_code} label="Defect Code" onchange={updatechangesfordefect}></lightning-input>
             </div>
             <div class="slds-col slds-size_1-of-2">
                 <lightning-input class="newdefectvalidation" required type="text" name="defect_name"  value={record.defect_name} label="Defect Title" onchange={updatechangesfordefect}></lightning-input>
@@ -112,7 +114,7 @@
          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
            <div class="slds-grid slds-wrap slds-gutters">
             <div class="slds-col slds-size_1-of-1">
-                <lightning-input class="newdefectvalidation" required type="text" name="defect_code" value={newdefect.defect_code} label="Defect Code " onchange={tracknewdefectvalue}></lightning-input>
+                <lightning-input class="newdefectvalidation" required type="number" name="defect_code" value={newdefect.defect_code} label="Defect Code " onchange={tracknewdefectvalue}></lightning-input>
              </div>   
             <div class="slds-col slds-size_1-of-1">
                 <lightning-input class="newdefectvalidation" required type="text" name="defect_name" value={newdefect.defect_name} label="Defect Title" onchange={tracknewdefectvalue} ></lightning-input>

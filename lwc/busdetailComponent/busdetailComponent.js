@@ -23,6 +23,7 @@ export default class BusdetailComponent extends LightningElement {
   @api selectedBusLabel;
   @api ecardid;
   @api bussequence;
+  @api permissionset;
 
   @track showbusoverview = false;
   @track selectedview = "busstatus";
@@ -61,6 +62,14 @@ export default class BusdetailComponent extends LightningElement {
   //Sajith
   get acceptedFormats() {
     return ['.png','.jpg','.jpeg'];
+  }
+
+  get disablebusinfoedit() {
+    return !this.permissionset.bus_informations_details.write;
+  }
+
+  get isoverviewdatapresent() {
+    return this.overviewdata != undefined && this.overviewdata != null;
   }
 
   uploadvintoserver(){
@@ -541,6 +550,7 @@ export default class BusdetailComponent extends LightningElement {
           this.dispatchEvent(alertmessage);
         } else {
           var ecarddetails = JSON.parse(data.responsebody).data.ecard;
+          ecarddetails['chassis_no_with_basefleet_no'] = ecarddetails.chassis_no +' / '+ecarddetails.base_serial_fleet;
           this.ecarddetails = ecarddetails;
           if(ecarddetails.workcenter_name ==='9999' || ecarddetails.workcenter_name==='0'){
             this.ecarddetails.workcenter_name='';

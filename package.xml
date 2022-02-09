@@ -1,164 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>AtpChecklistsController</members>
-        <members>AuthorisationData</members>
-        <members>BuildStationMappingWrapper</members>
-        <members>CrewingScheduleController</members>
-        <members>DataWrapperEcard</members>
-        <members>DepartmentData</members>
-        <members>DiscrepancyDatabaseController</members>
-        <members>EcardAppTestDataFactory</members>
-        <members>MultiRequestMock</members>
-        <members>SingleRequestMock</members>
-        <members>UserListingController</members>
-        <members>ecardListController</members>
-        <members>ecardOperationsController</members>
+        <members>EcardPdfAutomationController</members>
+        <members>InspectionResponseWrapper</members>
+        <members>ShortagesDatabaseController</members>
+        <members>UploadBusPdf</members>
         <members>masterDataController</members>
-        <members>partnumberValidationsController</members>
-        <members>scheduleBoardController</members>
-        <members>userAuthentication</members>
+		<members>EcardAppTestDataFactory</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>logo_for_web</members>
-        <name>ContentAsset</name>
-    </types>
-    <types>
-        <members>E_Card_App</members>
-        <name>CustomApplication</name>
-    </types>
-    <types>
-        <members>Ecard_Configs__mdt.Ecard_App_Key__c</members>
-        <members>Ecard_Configs__mdt.Ecard_App_Secret__c</members>
-        <members>Operation_Check_Master_Data__c.Build_Station_ID__c</members>
-        <members>Operation_Check_Master_Data__c.Bus_Mode__c</members>
-        <members>Operation_Check_Master_Data__c.Customer_Name__c</members>
-        <members>Operation_Check_Master_Data__c.Department_ID__c</members>
-        <members>Operation_Check_Master_Data__c.Operation_Description__c</members>
-        <members>Operation_Check_Master_Data__c.Operation_Sequence_Number__c</members>
-        <members>Operation_Check_Master_Data__c.Transmission__c</members>
-        <members>Operation_Check_Master_Data__c.Value_Description__c</members>
-        <members>Operation_Check_Master_Data__c.Value_Required_Indicator__c</members>
-        <members>User.Ecard_Access_Time__c</members>
-        <members>User.Ecard_Access_Token__c</members>
-        <name>CustomField</name>
-    </types>
-    <types>
-        <members>EcardAppendpoint</members>
-        <members>EcardDocraptorkey</members>
+        <members>EcardGenericUserId</members>
         <name>CustomLabel</name>
     </types>
     <types>
-        <members>Ecard_Configs.Don_t_create_or_Duplicate</members>
-        <name>CustomMetadata</name>
+        <members>Export_Bus_Pdf</members>
+        <name>Flow</name>
     </types>
     <types>
-        <members>Ecard_Configs__mdt</members>
-        <members>Operation_Check_Master_Data__c</members>
-        <name>CustomObject</name>
-    </types>
-    <types>
-        <members>Crewing_Schedule</members>
-        <members>Discrepancy</members>
-        <members>E_Cards</members>
-        <members>Master_Data</members>
-        <members>Part_Number_Validation</members>
-        <members>Schedules_Board</members>
-        <members>Selected_Discrepancies</members>
-        <members>User_Management</members>
-        <name>CustomTab</name>
-    </types>
-    <types>
-        <members>Configure_Work_Centres</members>
-        <members>Crewing_Schedule</members>
-        <members>Discrepancy</members>
-        <members>E_Card_App_UtilityBar</members>
-        <members>E_Cards</members>
-        <members>Master_Data</members>
-        <members>Part_Number_Validation</members>
-        <members>Schedules</members>
-        <members>Selected_Discrepancies</members>
-        <members>Serial_Number</members>
-        <members>User_Management</members>
-        <members>undefined_UtilityBar</members>
-        <name>FlexiPage</name>
-    </types>
-    <types>
-        <members>Transmission</members>
-        <name>GlobalValueSet</name>
-    </types>
-    <types>
-        <members>Operation_Check_Master_Data__c-Operation Check Master Data Layout</members>
-        <name>Layout</name>
-    </types>
-    <types>
-        <members>atpActions</members>
         <members>atpChecklistsComponent</members>
-        <members>attachmentsSectionComponent</members>
-        <members>attachmenttempComponent</members>
         <members>busdetailComponent</members>
         <members>busscheduleBoardComponent</members>
-        <members>commentsSectionComponent</members>
-        <members>configureworkcentresComponent</members>
-        <members>customSearchComponent</members>
-        <members>customSearchResultComponent</members>
         <members>discrepancyDbComponent</members>
-        <members>ecardListComponent</members>
-        <members>listbuildStationsComponent</members>
-        <members>listbusPropulsionComponent</members>
-        <members>listbusStatusComponent</members>
-        <members>listbusTypeComponent</members>
-        <members>listbusimageComponent</members>
-        <members>listdefectsComponent</members>
-        <members>listdepartmentsComponent</members>
-        <members>listfleetsComponent</members>
-        <members>listhelpDocumentsComponent</members>
-        <members>listmeetingNotesComponent</members>
-        <members>listqcChecklistComponent</members>
-        <members>listworkcentresComponent</members>
-        <members>manageCrewingScheduleComponent</members>
+        <members>listoperationchecksComponent</members>
         <members>masterDataComponent</members>
+        <members>newShortageComponent</members>
         <members>operationActionsComponent</members>
         <members>operationChecksComponent</members>
         <members>operationalDiscrepanciesComponent</members>
-        <members>operationsComponent</members>
         <members>opreationActionPaintComponent</members>
-        <members>paginator</members>
-        <members>partnumberValidationComponent</members>
-        <members>pubsub</members>
-        <members>reUsableMultiSelectLookup</members>
-        <members>reUsableMultiSelectLookupResult</members>
-        <members>serialnumberComponent</members>
+        <members>shortageDbComponent</members>
+        <members>shortageDbGilligPurchaseComponent</members>
         <members>showValidationiconsComponent</members>
-        <members>statusOperationsComponent</members>
-        <members>userManagmentComponent</members>
-        <members>userPermissionsComponent</members>
-        <members>userlistIconComponent</members>
         <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>Ecard_Prod</members>
-        <members>Ecard_QC</members>
-        <members>Ecard_Superuser</members>
-        <members>Ecard_Supervisor</members>
-        <name>PermissionSet</name>
-    </types>
-    <types>
-        <members>E_Card_Service</members>
-        <members>Ecardservicedev</members>
-        <name>RemoteSiteSetting</name>
-    </types>
-    <types>
-        <members>BusImage</members>
-        <members>DefaultEcardImage</members>
-        <members>EcardConfigureWorkCenter</members>
-        <members>Factorylayout</members>
-        <members>HideLightningHeader</members>
-        <members>PictureValidationSample</members>
-        <members>noSchedulesImage</members>
-        <members>nodatadessert</members>
-        <name>StaticResource</name>
     </types>
     <version>49.0</version>
 </Package>

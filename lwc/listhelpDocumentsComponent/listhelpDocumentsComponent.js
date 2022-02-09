@@ -67,6 +67,10 @@ export default class ListhelpDocumentsComponent extends LightningElement {
 	@track recordsToDisplay = []; //Records to be displayed on the page
 	@track rowNumberOffset = 1; //Row number
 	@track error;
+	get tableHeight() {
+        var height = window.innerHeight * 0.82 - 247.59;
+        return `height: ${height}px;`;
+    }
 
 	newhelpdoc;
 	departmentlistoptions = [];

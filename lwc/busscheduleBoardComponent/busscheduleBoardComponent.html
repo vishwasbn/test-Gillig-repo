@@ -19,10 +19,11 @@
           </div>
           <div class="slds-grid slds-gutters slds-m-top_small">
             <div class="slds-col slds-size_1-of-7 ">
-              <c-custom-search-component placeholdertext="Search Customer, Chasis Number" showicon={returntrue} showlabel={returnfalse}  -icon-name="custom:custom98" listto-search={itemstosearch} label="Customer" onselect={handleFilter} onclear={onclearcustomer}></c-custom-search-component>
+              <!--c-custom-search-component placeholdertext="Search Customer, Chasis Number" showicon={returntrue} showlabel={returnfalse}  -icon-name="custom:custom98" listto-search={itemstosearch} label="Customer" onselect={handleFilter} onclear={onclearcustomer}></c-custom-search-component-->
+              <c-custom-search-component placeholdertext="Search Customer, Chasis Number" showicon={returntrue} showlabel={returnfalse}  -icon-name="custom:custom98" listto-search={itemstosearch} label="Customer" selectedcustomer={selectedCustomer} onselect={handleFilter} onclear={onclearcustomer}></c-custom-search-component>
             </div>
             <div class="slds-col ">
-              <lightning-combobox variant="label-hidden" name="department"   value={selecteddepartment} placeholder="Department" options={departmentlistoptions} onchange={handledepartmentchange}></lightning-combobox>
+              <lightning-combobox variant="label-hidden" name="department"   value={selecteddepartmentid} placeholder="Department" options={departmentlistoptions} onchange={handledepartmentchange}></lightning-combobox>
             </div>
             <div class="slds-col ">   <!--onfocus={loadpicklistvalues}-->
                <lightning-combobox onfocus={loadpicklistvalues} variant="label-hidden" name="bustype"   value={selectedBusType} placeholder="Bus Type" options={bustypelist} onchange={handlebustypechange}></lightning-combobox>

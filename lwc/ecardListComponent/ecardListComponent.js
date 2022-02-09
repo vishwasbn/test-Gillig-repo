@@ -13,8 +13,9 @@ import docraptorkey from '@salesforce/label/c.EcardDocraptorkey';
 
 import {permissions}  from 'c/userPermissionsComponent';
 import getPermissions from "@salesforce/apex/userAuthentication.getPermissions";
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class EcardListComponent extends LightningElement {
+export default class EcardListComponent extends NavigationMixin(LightningElement) { //implemented navigation
     busImage = BusImage;
     nodatadessert = noDatadessert;
     @track error; // to track the error occuring 
@@ -50,6 +51,8 @@ export default class EcardListComponent extends LightningElement {
     @track selectedview='Operations';
     @track previousview = 'Operations';
     @track status = 'WIP';
+    @track scheduleview = false;
+    @track scheduledata;
 
 
     @track showbusoverview;
@@ -82,12 +85,12 @@ export default class EcardListComponent extends LightningElement {
       //alert(this.filteredecards.length);
       return this.filteredecards.length == 0;
     }
-
+    
     // To get the app permissions from server to handle access within the component.
     wiredPermissions;
     permissionset;
-    getPermissionsfromserver(event){
-        getPermissions()
+    async getPermissionsfromserver(event){
+        await getPermissions()
           .then((data) => {
             this.wiredPermissions = JSON.parse(data.responsebody);
             this.permissionset = permissions(this.wiredPermissions);
@@ -103,7 +106,7 @@ export default class EcardListComponent extends LightningElement {
     connectedCallback(){
       loadStyle(this, HideLightningHeader);
       this.register();
-      this.getPermissionsfromserver();
+      //this.getPermissionsfromserver();
       this.decideview(event);
       }
 
@@ -111,6 +114,7 @@ export default class EcardListComponent extends LightningElement {
     decideview(event){
       // Show List or Operations
       //debugger
+      this.getPermissionsfromserver();
       var ecardid = JSON.parse(localStorage.getItem('ecardid'));
       if(ecardid == undefined || ecardid == null){
           this.showops = false;
@@ -118,6 +122,13 @@ export default class EcardListComponent extends LightningElement {
           this.loaddata();
       }
       else{
+        if (ecardid.scheduleboard != undefined || ecardid.scheduleboard != null || ecardid.scheduleflow) {
+          var data = (ecardid.scheduleboard != undefined || ecardid.scheduleboard != null) ? ecardid : ecardid.scheduledata;
+          this.scheduledata = data;
+          this.scheduleview = true;
+          localStorage.setItem('scheduleflowdata', JSON.stringify(data));
+          ecardid = (ecardid.scheduleboard != undefined || ecardid.scheduleboard != null) ? ecardid.ecardid : ecardid;
+        }
           this.showops = true;
           this.showTable = false;
           this.selectedEcardId = ecardid.ecardid;
@@ -450,6 +461,8 @@ export default class EcardListComponent extends LightningElement {
     // To show the operations/details tab of a Selected Ecard.
     @track sequence;
     @track sequanceavailable;
+    @track currentDepartment ; //Phase 1.1: To set the current Department 
+
     showOperations(event){
       this.showops = true;
       this.showTable = false;
@@ -462,6 +475,7 @@ export default class EcardListComponent extends LightningElement {
       this.selectedBusChasis = chasis;
       this.selectedBusName = customer;
       this.selectedBusLabel = `${customer}, ${chasis}`;
+      this.currentDepartment = event.currentTarget.dataset.department ; //Phase 1.1: Getting the Department Name
     }
 
     // To show the Ecard list when redirecting back from a detail of an Ecard.
@@ -470,14 +484,19 @@ export default class EcardListComponent extends LightningElement {
         this.showTable = true;
         this.selectedview='Operations';
         this.previousview = 'Operations';
-        if(this.filteredecards.length!=0){
-          this.fromshowEcardList=true;
-          this.handleallFilterchanges(event);
+        if(this.scheduleview){
+          this.scheduleview = false;
+          this.navigatetoscheduleboard();
         }
         else{
-          this.connectedCallback();
+          if(this.filteredecards.length!=0){
+            this.fromshowEcardList=true;
+            this.handleallFilterchanges(event);
+          }
+          else{
+            this.connectedCallback();
+          }
         }
-        
       }
 
     async downloadecard(event){
@@ -551,5 +570,22 @@ export default class EcardListComponent extends LightningElement {
           document.body.appendChild(form);
           form.submit()
         }
+  //Added to enable navigation back to schedule board page
+  navigatetoscheduleboard() {
+    localStorage.setItem('scheduledata', JSON.stringify(this.scheduledata)); 
+    this[NavigationMixin.Navigate]({
+      type: 'standard__navItemPage',
+      attributes: {
+        // CustomTabs from managed packages are identified by their
+        // namespace prefix followed by two underscores followed by the
+        // developer name. E.g. 'namespace__TabName'
+        apiName: 'Schedules_Board'
+      }
+      /*,
+      state: {
+          ecardSelected: this.selectedBus
+      }*/
+    });
+  }
 
 }
