@@ -64,9 +64,14 @@ export default class OpertaionChecksComponent extends LightningElement {
       return this.permissionset.dept_discrepancy_new.write;
     }
 
-    get disablerequired(){
-      return !this.permissionset.atp.write;
+  //   get disablerequired(){
+  //     return !this.permissionset.atp.write;
+  // }vishwas
+
+  get disablerequired() {
+    return !this.permissionset.operation_check.write;
   }
+  
     get filterapplied(){
       return this.filterlocal!=undefined;
     }
@@ -196,38 +201,74 @@ export default class OpertaionChecksComponent extends LightningElement {
     @track selectedopchek=[];
     @track selectedopcheckid;
     existingrowstatuschange(event){
-        this.selectedopcheckid = event.detail.uniqueid;
-        for(var i in this.opckdetails){
-          for(var j in this.opckdetails[i].op_check)
-            if(this.opckdetails[i].op_check[j].operation_check_id==this.selectedopcheckid){
-                this.selectedopchek=this.opckdetails[i].op_check[j];
-                this.selectedopchek.op_check_status=event.detail.status;
+      this.selectedopcheckid = event.target.name == 'applicable' ? event.target.dataset.id : event.detail.uniqueid;
+      for (var i in this.opckdetails) {
+        for (var j in this.opckdetails[i].op_check) {
+          if (this.opckdetails[i].op_check[j].operation_check_id == this.selectedopcheckid) {
+            this.selectedopchek = this.opckdetails[i].op_check[j];
+            if (event.target.type != "checkbox") {
+              this.selectedopchek.op_check_status = event.detail.status;
+            } else {
+              this.selectedopchek.is_required = event.target.checked;
             }
+          }
         }
-        if(this.selectedopchek.value_required && 
-           (this.selectedopchek.op_check_value==null || this.selectedopchek.op_check_value=="") &&
-           this.selectedopchek.op_check_status){
-            const alertmessage = new ShowToastEvent({
-            title : 'Value Required.',
-            message : 'Value required to update status, Please enter a value',
-            variant : 'warning'
-            });
-            this.dispatchEvent(alertmessage);
-            this.getopcheckdeatils(this.ecardid,this.departmentId,this.filterlocal);
+      }
+        
+      if (this.selectedopchek.value_required &&
+        (this.selectedopchek.op_check_value == null || this.selectedopchek.op_check_value == "") &&
+        this.selectedopchek.op_check_status) {
+        const alertmessage = new ShowToastEvent({
+          title: 'Value Required.',
+          message: 'Value required to update status, Please enter a value',
+          variant: 'warning'
+        });
+        this.dispatchEvent(alertmessage);
+        this.getopcheckdeatils(this.ecardid, this.departmentId, this.filterlocal);
+
+      } else {
+        this.uploadopchecktoserver(this.selectedopchek);
+      }
+        // this.selectedopcheckid = event.detail.uniqueid;
+        // for(var i in this.opckdetails){
+        //   for(var j in this.opckdetails[i].op_check)
+        //     if(this.opckdetails[i].op_check[j].operation_check_id==this.selectedopcheckid){
+        //         this.selectedopchek=this.opckdetails[i].op_check[j];
+        //         this.selectedopchek.op_check_status=event.detail.status;
+        //     }
+        // }
+        // if(this.selectedopchek.value_required && 
+        //    (this.selectedopchek.op_check_value==null || this.selectedopchek.op_check_value=="") &&
+        //    this.selectedopchek.op_check_status){
+        //     const alertmessage = new ShowToastEvent({
+        //     title : 'Value Required.',
+        //     message : 'Value required to update status, Please enter a value',
+        //     variant : 'warning'
+        //     });
+        //     this.dispatchEvent(alertmessage);
+        //     this.getopcheckdeatils(this.ecardid,this.departmentId,this.filterlocal);
     
-        }else{
-            this.uploadopchecktoserver(this.selectedopchek);
-        }
+        // }else{
+        //     this.uploadopchecktoserver(this.selectedopchek);
+        // }
     }
 
     uploadopchecktoserver(opck){
-        var opcheckrecord = {
-			"ecard_id":this.ecardid,
-			"buildstation_id": opck.buildstation_id,
-			"operation_check_id": opck.operation_check_id,
-			"op_check_value": opck.op_check_value,
-      "op_check_status": opck.op_check_status
-        };
+      //   var opcheckrecord = {
+			// "ecard_id":this.ecardid,
+			// "buildstation_id": opck.buildstation_id,
+			// "operation_check_id": opck.operation_check_id,
+			// "op_check_value": opck.op_check_value,
+      // "op_check_status": opck.op_check_status
+      //   };
+      var opcheckrecord = {
+        "ecard_id": this.ecardid,
+        "buildstation_id": opck.buildstation_id,
+        "operation_check_id": opck.operation_check_id,
+        "op_check_value": opck.op_check_value,
+        "op_check_status": opck.op_check_status,
+        "is_required": opck.is_required
+      };
         //alert(JSON.stringify(opcheckrecord));
         this.showSpinner = true;
         updateopchecks({requestbody:JSON.stringify(opcheckrecord)})
@@ -242,11 +283,16 @@ export default class OpertaionChecksComponent extends LightningElement {
                     this.showSpinner = false;
                   }
                   else{
-                      const alertmessage = new ShowToastEvent({
-                        title: 'Update Succcessful',
-                        message: 'Operation Check updated successfully.',
-                        variant: 'success'
-                    });
+                    //   const alertmessage = new ShowToastEvent({
+                    //       title : 'Upload Succcessfull',
+                    //       message : 'Operation Check uploaded successfully.',
+                    //      variant : 'success'
+                    // });
+                    const alertmessage = new ShowToastEvent({
+                      title : 'Updated Succcessfull',
+                      message : 'Operation Check updated successfully.',
+                     variant : 'success'
+                });
                     this.dispatchEvent(alertmessage);
                     this.showSpinner = false;
                     this.refreshtheoperationlist();
@@ -270,7 +316,10 @@ export default class OpertaionChecksComponent extends LightningElement {
         var modopcklist=[];
         for(var j in opcklist[i].op_check){
           var opck=opcklist[i].op_check[j];
-          if(opck.op_check_status==opckstatus){
+          // if(opck.op_check_status==opckstatus){
+          //   modopcklist.push(opck);
+          // }
+          if (opck.op_check_status == opckstatus && opck.is_required) {
             modopcklist.push(opck);
           }
         }

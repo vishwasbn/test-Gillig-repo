@@ -68,6 +68,10 @@ export default class BusdetailComponent extends LightningElement {
     return !this.permissionset.bus_informations_details.write;
   }
 
+  get isoverviewdatapresent() {
+    return this.overviewdata != undefined && this.overviewdata != null;
+  }
+
   uploadvintoserver(){
     var requestbody = {
       "ecard_id" : this.ecardid,
@@ -546,6 +550,7 @@ export default class BusdetailComponent extends LightningElement {
           this.dispatchEvent(alertmessage);
         } else {
           var ecarddetails = JSON.parse(data.responsebody).data.ecard;
+          ecarddetails['chassis_no_with_basefleet_no'] = ecarddetails.chassis_no +' / '+ecarddetails.base_serial_fleet;
           this.ecarddetails = ecarddetails;
           if(ecarddetails.workcenter_name ==='9999' || ecarddetails.workcenter_name==='0'){
             this.ecarddetails.workcenter_name='';

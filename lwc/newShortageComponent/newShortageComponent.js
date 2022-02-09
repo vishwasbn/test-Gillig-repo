@@ -1,4 +1,4 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import getDepartmentOperations from "@salesforce/apex/ecardOperationsController.getDepartmentOperations";
 import getcrewingsuserslist from "@salesforce/apex/CrewingScheduleController.getcrewingsuserslist";
@@ -70,6 +70,49 @@ export default class NewShortageComponent extends LightningElement {
     @track buildstationoptions; 
     @track thisdepartmentbuildstations = [];
     @track priorityoptions = [{"label":"High", "value":"High"}, {"label":"Normal", "value":"Normal"}, {"label":"Low", "value":"Low"}] ;
+    // @track carrieroptions = []; //to get the carrier picklist from
+    @track carrieroptions = [
+        {
+            "label": "UPS",
+            "value": "UPS"
+        },
+        {
+            "label": "UPS 2ND DAY",
+            "value": "UPS 2ND DAY"
+        },
+        {
+            "label": "UPS NDA",
+            "value": "UPS NDA"
+        },
+        {
+            "label": "UPS NDA EARLY AM",
+            "value": "UPS NDA EARLY AM"
+        },
+        {
+            "label": "FEDEX",
+            "value": "FEDEX"
+        },
+        {
+            "label": "FEDEX 2ND DAY",
+            "value": "FEDEX 2ND DAY"
+        },
+        {
+            "label": "FEDEX NDA",
+            "value": "FEDEX NDA"
+        },
+        {
+            "label": "COURIER",
+            "value": "COURIER"
+        },
+        {
+            "label": "VENDOR TRUCK",
+            "value": "VENDOR TRUCK"
+        },
+        {
+            "label": "OTHER",
+            "value": "OTHER"
+        }
+    ];
     // Use whenever a false attribute is required in Component.html
     get returnfalse(){
         return false;
@@ -640,7 +683,7 @@ export default class NewShortageComponent extends LightningElement {
             }, true);
         if (allValid && this.newpartshortage.buspart_no != undefined) {
          //Submit information on Server
-         event.target.disabled = true;
+        //  event.target.disabled = true;
          var partshortageaddmodalvalues = this.newpartshortage;
          var ispartavailable = true;
          var part_shortage;
@@ -713,18 +756,27 @@ export default class NewShortageComponent extends LightningElement {
               .then(data => {
                   if(data.isError){
                     this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
-                    event.target.disabled = false;
+                    // event.target.disabled = false;
                   }
-                  else{
-                    this.showmessage('Added new Shortage.','A new shortage was successfully raised.','success');
-                    this.partshortageaddmodal = false;
-                    pubsub.fire('refreshdata', undefined );
+                  else {
+                      //   var response = JSON.parse(data.operationlogresponse).data;
+                      var err_msg = JSON.parse(data.operationlogresponse).data.msg;
+                      //   if (typeof (response) == 'string'){
+                      if (err_msg != undefined) {
+                          this.showmessage('Can\'t create a record.', `${err_msg}`, 'warning');
+                        //   event.target.disabled = false;
+                      }
+                      else {
+                          this.showmessage('Added new Shortage.', 'A new shortage was successfully raised.', 'success');
+                          this.partshortageaddmodal = false;
+                          pubsub.fire('refreshdata', undefined);
+                      }                    
                   }
                     
               }).catch(error => {
               this.error = error;
               this.showmessage('Sorry we could not complete the operation.','Something unexpected occured. Please try again or contact your Administrator.','error');
-              event.target.disabled = false;
+            //   event.target.disabled = false;
               });
            
         }

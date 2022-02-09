@@ -78,10 +78,12 @@
                 </div>
                 <div class="slds-col slds-size_1-of-1"><br /></div>
                 <div class="slds-col slds-size_4-of-12">
-                    <lightning-input type="text" name="carrier_text" label="Carrier" value={newpartshortage.carrier_text} onchange={updatenewpartshortage}></lightning-input>
+                    <!-- <lightning-input type="text" name="carrier_text" label="Carrier" value={newpartshortage.carrier_text} onchange={updatenewpartshortage}></lightning-input> -->
+                    <lightning-combobox name="carrier_text" label="Carrier" placeholder="Select Carrier" value={newpartshortage.carrier_text} options={carrieroptions} onchange={updatenewpartshortage}></lightning-combobox>
                 </div>
                 <div class="slds-col slds-size_3-of-12">
-                    <lightning-input type="text" name="carrier_arrival_text" label="Carrier Arrival Time" value={newpartshortage.carrier_arrival_text} onchange={updatenewpartshortage}></lightning-input>
+                    <!-- <lightning-input type="text" name="carrier_arrival_text" label="Carrier Arrival Time" value={newpartshortage.carrier_arrival_text} onchange={updatenewpartshortage}></lightning-input> -->
+                    <lightning-input type="time" name="carrier_arrival_text" label="Carrier Arrival Time" value={newpartshortage.carrier_arrival_text} min="05:00:00.000" max="22:00:00.000" onchange={updatenewpartshortage}></lightning-input>
                 </div>
                 <div class="slds-col slds-size_4-of-12">
                     <lightning-input type="text" name="tracking" label="Tracking #" value={newpartshortage.tracking} onchange={updatenewpartshortage}></lightning-input>

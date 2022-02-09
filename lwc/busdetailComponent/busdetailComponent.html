@@ -1,440 +1,354 @@
 <template>
 
-   <span onclick={showbusDetails} class="busdetail slds-text-heading_small slds-m-left_x-small"><a
-         href="javascript:void(0);">{selectedBusLabel}</a></span>
+    <span onclick={showbusDetails} class="busdetail slds-text-heading_small slds-m-left_x-small"><a href="javascript:void(0);">{selectedBusLabel}</a></span>
+    
 
-
-   <!--Bus Overview Modal Start-->
-   <template if:true={showbusoverview}>
-      <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-         aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
-         <div class="slds-modal__container">
+    <!--Bus Overview Modal Start-->
+<template if:true={showbusoverview}>
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
             <!-- modal header start -->
             <header class="slds-modal__header">
-               <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
-                  onclick={hidebusDetails}>
-                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small">
-                  </lightning-icon>
-               </button>
-               <h2 if:true={sequenceavailable} id="modal-heading-01" class="mediumheading slds-hyphenate">
-                  {selectedBusLabel} <span class="slds-text-color_weak slds-text-heading_medium">({bussequence})</span>
-               </h2>
-               <h2 if:false={sequenceavailable} id="modal-heading-01a" class="mediumheading slds-hyphenate ">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidebusDetails}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                </button>
+                <h2 if:true={sequenceavailable} id="modal-heading-01" class="mediumheading slds-hyphenate">
+                    {selectedBusLabel} <span class="slds-text-color_weak slds-text-heading_medium">({bussequence})</span>
+                </h2>
+                <h2 if:false={sequenceavailable} id="modal-heading-01a" class="mediumheading slds-hyphenate ">
                   {selectedBusLabel}
-               </h2>
+                </h2>
             </header>
             <!-- modal body start -->
             <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-
-               <div class="slds-tabs_default">
-                  <ul class="slds-grid slds-gutters slds-tabs_default__nav tab-container" role="tablist">
-                     <li class="slds-border_top slds-col slds-tabs_default__item slds-is-active activetab"
-                        data-id="busstatus" title="BUS STATUS" role="presentation" onclick={tabClick}>
-                        <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);"
-                           role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1"
-                           id="tab-default-1__item">BUS STATUS</a>
-                     </li>
-                     <li class="slds-border_top slds-col slds-tabs_default__item" title="OVERVIEW" role="presentation"
-                        data-id="overview" onclick={tabClick}>
-                        <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);"
-                           role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-2"
-                           id="tab-default-2__item">FRONT PAGE</a>
-                     </li>
-                     <li class="slds-border_top slds-col slds-tabs_default__item" title="VIN/EMISSION"
-                        role="presentation" data-id="vinemission" onclick={tabClick}>
-                        <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);"
-                           role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-3"
-                           id="tab-default-3__item">VIN / EMISSIONS</a>
-                     </li>
-                     <!--li class="slds-border_top slds-col slds-tabs_default__item" title="MEETING NOTES" role="presentation" data-id="meetingnotes" onclick={tabClick}>
-                           <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-3" id="tab-default-4__item">MEETING NOTES</a>
-                       </li-->
-                     <li class="slds-border_top slds-col slds-tabs_default__item" title="ATTACHMENTS"
-                        role="presentation" data-id="attachments" onclick={tabClick}>
-                        <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);"
-                           role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-4"
-                           id="tab-default-5__item">ATTACHMENTS</a>
-                     </li>
-                  </ul>
-                  <div id="tab-default-1" class="tab-default-1 slds-tabs_default__content slds-show" role="tabpanel"
-                     aria-labelledby="tab-default-1__item">
-                     <!-- Bus Overview Start-->
-                     <div class="slds-card" style="margin:-16px 0px 0px 0px;">
+            
+                <div class="slds-tabs_default">
+                    <ul class="slds-grid slds-gutters slds-tabs_default__nav tab-container" role="tablist">
+                        <li class="slds-border_top slds-col slds-tabs_default__item slds-is-active activetab" data-id="busstatus" title="BUS STATUS" role="presentation" onclick={tabClick}>
+                            <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">BUS STATUS</a>
+                        </li>
+                        <li class="slds-border_top slds-col slds-tabs_default__item" title="OVERVIEW" role="presentation" data-id="overview" onclick={tabClick}>
+                            <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">FRONT PAGE</a>
+                        </li>
+                        <li class="slds-border_top slds-col slds-tabs_default__item" title="VIN/EMISSION" role="presentation" data-id="vinemission" onclick={tabClick}>
+                           <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">VIN / EMISSIONS</a>
+                        </li> 
+                        <!--li class="slds-border_top slds-col slds-tabs_default__item" title="MEETING NOTES" role="presentation" data-id="meetingnotes" onclick={tabClick}>
+                            <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-3" id="tab-default-4__item">MEETING NOTES</a>
+                        </li-->
+                        <li class="slds-border_top slds-col slds-tabs_default__item" title="ATTACHMENTS" role="presentation" data-id="attachments" onclick={tabClick}>
+                            <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-4" id="tab-default-5__item">ATTACHMENTS</a>
+                        </li>
+                    </ul>
+                    <div id="tab-default-1" class="tab-default-1 slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                       <!-- Bus Overview Start-->
+                       <div class="slds-card" style="margin:-16px 0px 0px 0px;">
                         <!--<div class="slds-align_absolute-center mediumheading">OVERVIEW</div> -->
                         <div class="slds-grid slds-wrap slds-gutters">
-                           <div class="slds-col slds-size_1-of-1  slds-border_bottom">
-                              <lightning-card variant="Narrow" title="OPERATIONS">
-                                 <div class="slds-grid slds-p-bottom_x-small ">
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="open" data-label="Operations" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="Open"> <span
-                                                   class="open"></span>OPEN </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.operation_log.open}/{overviewdata.operation_log.total}</span>
+                            <div class="slds-col slds-size_1-of-1  slds-border_bottom">
+                                <lightning-card  variant="Narrow"  title="OPERATIONS" >
+                                    <div class="slds-grid slds-p-bottom_x-small ">
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="open" data-label="Operations" onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="Open"> <span class="open"></span>OPEN </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.operation_log.open}/{overviewdata.operation_log.total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
-                                    </div>
-
-                                    <!--div class="slds-col slds-border_right">
-                                         <article data-id="resolve" data-label="Operations"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                            <div class="slds-media__body">
-                                               <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span class="resolve"></span>RESOLVED </h3>
-                                               <div class="slds-tile__detail">
-                                                  <span class=" slds-truncate mediumheading">{overviewdata.operation_log.resolve}/{overviewdata.operation_log.total}</span>
-                                               </div>
-                                            </div>
-                                            <div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div>
-                                         </article>
-                                      </div-->
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="approve" data-label="Operations" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span
-                                                   class="verified"></span>VERIFIED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.operation_log.approve}/{overviewdata.operation_log.total}</span>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                              
+                                       <!--div class="slds-col slds-border_right">
+                                          <article data-id="resolve" data-label="Operations"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span class="resolve"></span>RESOLVED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span class=" slds-truncate mediumheading">{overviewdata.operation_log.resolve}/{overviewdata.operation_log.total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div>-->
-                                       </article>
-                                    </div>
-                                    <div class="slds-col">
-                                       <article data-id="reject" data-label="Operations" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="DISC./SHORT."> <span
-                                                   class="rejected"></span>DISC./SHORT. </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.operation_log.reject}/{overviewdata.operation_log.total}</span>
+                                             <div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div>-->
-                                       </article>
-                                    </div>
-                                 </div>
-                              </lightning-card>
-                           </div>
-                           <div class="slds-col slds-size_1-of-1 slds-border_bottom">
-                              <lightning-card variant="Narrow" title="DISCREPANCIES">
-                                 <div class="slds-grid slds-p-bottom_x-small">
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="open" data-label="Discrepancies" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="Open"> <span
-                                                   class="open"></span>OPEN </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Open}/{overviewdata.discrepancy_log.Total}</span>
+                                          </article>
+                                       </div-->
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="approve" data-label="Operations"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span class="verified"></span>VERIFIED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.operation_log.approve}/{overviewdata.operation_log.total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
-                                    </div>
-
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="resolve" data-label="Discrepancies" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span
-                                                   class="resolve"></span>RESOLVED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Resolve}/{overviewdata.discrepancy_log.Total}</span>
+                                            <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div>-->
+                                          </article>
+                                       </div>
+                                       <div class="slds-col">
+                                          <article data-id="reject" data-label="Operations"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="DISC./SHORT."> <span class="rejected"></span>DISC./SHORT. </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.operation_log.reject}/{overviewdata.operation_log.total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
+                                            <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div>-->
+                                          </article>
+                                       </div>
                                     </div>
-                                    <div class="slds-col">
-                                       <article data-id="approve" data-label="Discrepancies" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span
-                                                   class="verified"></span>VERIFIED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Approve}/{overviewdata.discrepancy_log.Total}</span>
+                                 </lightning-card>
+                            </div>   
+                            <div class="slds-col slds-size_1-of-1 slds-border_bottom">
+                                <lightning-card  variant="Narrow"  title="DISCREPANCIES" >
+                                    <div class="slds-grid slds-p-bottom_x-small">
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="open" data-label="Discrepancies" onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="Open"> <span class="open"></span>OPEN </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Open}/{overviewdata.discrepancy_log.Total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
-                                    </div>
-
-                                 </div>
-                              </lightning-card>
-                           </div>
-                           <div class="slds-col slds-size_1-of-1  slds-border_bottom">
-                              <lightning-card variant="Narrow" title="SHORTAGES">
-                                 <div class="slds-grid slds-p-bottom_x-small ">
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="open" data-label="Shortages" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="Open"> <span
-                                                   class="open"></span>OPEN </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Open}/{overviewdata.shortage_discrepancy_log.Total}</span>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                              
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="resolve" data-label="Discrepancies"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span class="resolve"></span>RESOLVED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Resolve}/{overviewdata.discrepancy_log.Total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
-                                    </div>
-
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="resolve" data-label="Shortages" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span
-                                                   class="resolve"></span>RESOLVED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Resolve}/{overviewdata.shortage_discrepancy_log.Total}</span>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                                       <div class="slds-col">
+                                          <article data-id="approve" data-label="Discrepancies"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span class="verified"></span>VERIFIED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.discrepancy_log.Approve}/{overviewdata.discrepancy_log.Total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
+                                            <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                                       
                                     </div>
-                                    <div class="slds-col">
-                                       <article data-id="approve" data-label="Shortages" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span
-                                                   class="verified"></span>VERIFIED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Approve}/{overviewdata.shortage_discrepancy_log.Total}</span>
+                                 </lightning-card>
+                            </div> 
+                            <div class="slds-col slds-size_1-of-1  slds-border_bottom">
+                                <lightning-card  variant="Narrow"  title="SHORTAGES" >
+                                    <div class="slds-grid slds-p-bottom_x-small ">
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="open" data-label="Shortages"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="Open"> <span class="open"></span>OPEN </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Open}/{overviewdata.shortage_discrepancy_log.Total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
-                                    </div>
-
-                                 </div>
-                              </lightning-card>
-                           </div>
-                           <div class="slds-col slds-size_1-of-1 slds-border_bottom">
-                              <lightning-card variant="Narrow" title="SERIAL NO.LOGS ">
-                                 <div class="slds-grid slds-p-bottom_x-small ">
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="filled" data-label="Serial No. Logs" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span
-                                                   class="verified"></span>FILLED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.serail_no_log.filled}/{overviewdata.serail_no_log.total}</span>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                              
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="resolve" data-label="Shortages"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="RESOLVED"> <span class="resolve"></span>RESOLVED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Resolve}/{overviewdata.shortage_discrepancy_log.Total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
-                                    </div>
-
-                                    <div class="slds-col">
-                                       <article data-id="notfilled" data-label="Serial No. Logs"
-                                          onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span
-                                                   class="rejected"></span>NOT FILLED </h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.serail_no_log.not_filled}/{overviewdata.serail_no_log.total}</span>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                                       <div class="slds-col">
+                                          <article data-id="approve" data-label="Shortages"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="VERIFIED"> <span class="verified"></span>VERIFIED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.shortage_discrepancy_log.Approve}/{overviewdata.shortage_discrepancy_log.Total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                          <!--<div class="slds-m-top_x-small">
-                                             <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
-                                            </div> -->
-                                       </article>
+                                            <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="100" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                                       
                                     </div>
-
-                                 </div>
-                              </lightning-card>
-                           </div>
-                           <div class="slds-col slds-size_1-of-1 slds-border_bottom">
-                              <lightning-card variant="Narrow" title="ATP">
-                                 <div class="slds-grid slds-p-bottom_x-small ">
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="approve" data-label="ATP" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span
-                                                   class="verified"></span>VERIFIED</h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.atp_log.verified}/{overviewdata.atp_log.total}</span>
+                                 </lightning-card>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-border_bottom">
+                                <lightning-card  variant="Narrow"  title="SERIAL NO.LOGS " >
+                                    <div class="slds-grid slds-p-bottom_x-small ">
+                                       <div class="slds-col slds-border_right">
+                                          <article data-id="filled" data-label="Serial No. Logs"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span class="verified"></span>FILLED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.serail_no_log.filled}/{overviewdata.serail_no_log.total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                       </article>
-                                    </div>
-
-                                    <div class="slds-col">
-                                       <article data-id="open" data-label="ATP" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span
-                                                   class="rejected"></span>NOT VERIFIED</h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.atp_log.not_verified}/{overviewdata.atp_log.total}</span>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="55" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                              
+                                       <div class="slds-col">
+                                          <article data-id="notfilled" data-label="Serial No. Logs"   onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                             <div class="slds-media__body">
+                                                <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span class="rejected"></span>NOT FILLED </h3>
+                                                <div class="slds-tile__detail">
+                                                   <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.serail_no_log.not_filled}/{overviewdata.serail_no_log.total}</span>
+                                                </div>
                                              </div>
-                                          </div>
-                                       </article>
+                                             <!--<div class="slds-m-top_x-small">
+                                              <lightning-progress-ring value="25" size="large" variant="base-autocomplete"></lightning-progress-ring>
+                                             </div> -->
+                                          </article>
+                                       </div>
+                                       
                                     </div>
-                                 </div>
-                              </lightning-card>
-                           </div>
-                           <div class="slds-col slds-size_1-of-1 slds-border_bottom">
-                              <lightning-card variant="Narrow" title="OPERATION CHECKS">
-                                 <div class="slds-grid slds-p-bottom_x-small ">
-                                    <div class="slds-col slds-border_right">
-                                       <article data-id="approve" data-label="Operation Checks"
-                                          onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span
-                                                   class="verified"></span>VERIFIED</h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.op_check_log.verified}/{overviewdata.op_check_log.total}</span>
-                                             </div>
-                                          </div>
-                                       </article>
-                                    </div>
-
-                                    <div class="slds-col">
-                                       <article data-id="open" data-label="Operation Checks" onclick={showfiltereddata}
-                                          class="busstatus slds-tile slds-media slds-p-horizontal_small">
-                                          <div class="slds-media__body">
-                                             <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span
-                                                   class="rejected"></span>NOT VERIFIED</h3>
-                                             <div class="slds-tile__detail">
-                                                <span
-                                                   class=" slds-truncate mediumheading">{overviewdata.op_check_log.not_verified}/{overviewdata.op_check_log.total}</span>
-                                             </div>
-                                          </div>
-                                       </article>
-                                    </div>
-
-                                 </div>
-                              </lightning-card>
-                           </div>
-                        </div>
-                     </div>
-                     <!-- Bus Overview End-->
-                  </div>
-                  <div id="tab-default-2" class="tab-default-2 slds-tabs_default__content slds-hide" role="tabpanel"
-                     aria-labelledby="tab-default-2__item">
-                     <!--More Info Start-->
-                     <template if:true={isselectedmoreinfo}>
+                                 </lightning-card>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-border_bottom">
+                              <lightning-card  variant="Narrow"  title="ATP" >
+                                  <div class="slds-grid slds-p-bottom_x-small ">
+                                     <div class="slds-col slds-border_right">
+                                        <article data-id="approve" data-label="ATP"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                           <div class="slds-media__body">
+                                              <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span class="verified"></span>VERIFIED</h3>
+                                              <div class="slds-tile__detail">
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.atp_log.verified}/{overviewdata.atp_log.total}</span>
+                                              </div>
+                                           </div>
+                                        </article>
+                                     </div>
+                            
+                                     <div class="slds-col">
+                                        <article data-id="open" data-label="ATP"   onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                           <div class="slds-media__body">
+                                              <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span class="rejected"></span>NOT VERIFIED</h3>
+                                              <div class="slds-tile__detail">
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.atp_log.not_verified}/{overviewdata.atp_log.total}</span>
+                                              </div>
+                                           </div>
+                                        </article>
+                                     </div>
+                                  </div>
+                               </lightning-card>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-border_bottom">
+                              <lightning-card  variant="Narrow"  title="OPERATION CHECKS" >
+                                  <div class="slds-grid slds-p-bottom_x-small ">
+                                     <div class="slds-col slds-border_right">
+                                        <article data-id="approve" data-label="Operation Checks"  onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                           <div class="slds-media__body">
+                                              <h3 class="slds-tile__title  slds-truncate" title="FILLED"> <span class="verified"></span>VERIFIED</h3>
+                                              <div class="slds-tile__detail">
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.op_check_log.verified}/{overviewdata.op_check_log.total}</span>
+                                              </div>
+                                           </div>
+                                        </article>
+                                     </div>
+                            
+                                     <div class="slds-col">
+                                        <article data-id="open" data-label="Operation Checks"   onclick={showfiltereddata} class="busstatus slds-tile slds-media slds-p-horizontal_small">
+                                           <div class="slds-media__body">
+                                              <h3 class="slds-tile__title  slds-truncate" title="NOT FILLED"> <span class="rejected"></span>NOT VERIFIED</h3>
+                                              <div class="slds-tile__detail">
+                                                 <span if:true={isoverviewdatapresent} class=" slds-truncate mediumheading">{overviewdata.op_check_log.not_verified}/{overviewdata.op_check_log.total}</span>
+                                              </div>
+                                           </div>
+                                        </article>
+                                     </div>
+                                     
+                                  </div>
+                               </lightning-card>
+                            </div>
+                       </div>
+                       </div>
+                      <!-- Bus Overview End-->
+                    </div> 
+                    <div id="tab-default-2" class="tab-default-2 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                        <!--More Info Start-->
+                        <template if:true={isselectedmoreinfo}>
                         <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Customer Name" name="customer_name"
-                                 value={ecarddetails.customer_name} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Chassis Serial No" name="chassis_no"
-                                 value={ecarddetails.chassis_no} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="date" label="Chassis Start Date" name="bus_start_date"
-                                 value={ecarddetails.bus_start_date} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Bus Type" name="bustype_name"
-                                 value={ecarddetails.bustype_name} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Propulsion" name="buspropulsion_name"
-                                 value={ecarddetails.buspropulsion_name} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Bus Status" name="busstatus_name"
-                                 value={ecarddetails.busstatus_name} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Work Center" name="workcenter_name"
-                                 value={ecarddetails.workcenter_name} readonly></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" label="Department" name="department_name"
-                                 value={ecarddetails.department_name} readonly></lightning-input>
-                           </div>
+                              <lightning-input type="text" label="Customer Name" name="customer_name" value={ecarddetails.customer_name} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <!-- <lightning-input type="text" label="Chassis Serial No" name="chassis_no" value={ecarddetails.chassis_no} readonly></lightning-input> -->
+                              <lightning-input type="text" label="Chassis Serial No / Fleet Base No" name="chassis_no" value={ecarddetails.chassis_no_with_basefleet_no} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="date" label="Chassis Start Date" name="bus_start_date" value={ecarddetails.bus_start_date} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" label="Bus Type" name="bustype_name" value={ecarddetails.bustype_name} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" label="Propulsion" name="buspropulsion_name" value={ecarddetails.buspropulsion_name} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" label="Bus Status" name="busstatus_name" value={ecarddetails.busstatus_name} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" label="Work Center" name="workcenter_name" value={ecarddetails.workcenter_name} readonly></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" label="Department" name="department_name" value={ecarddetails.department_name} readonly></lightning-input>
+                            </div>
                         </div>
                         <div class="slds-grid slds-wrap slds-gutters">
                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Air Condition System PDI"
-                                 name="ac_system_pdi" value={ecarddetails.ac_system_pdi} onblur={updateecarddetail}
-                                 disabled={disablebusinfoedit}></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="date" label="Complete Date" name="completed_date"
-                                 value={ecarddetails.completed_date} onblur={updateecarddetail}
-                                 disabled={disablebusinfoedit}></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Coach Weight - Unladen"
-                                 name="coach_weight_unladen" value={ecarddetails.coach_weight_unladen}
-                                 onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Front Axle Weight"
-                                 name="front_axle_weight" value={ecarddetails.front_axle_weight}
-                                 onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Odometer/ Hub Odometer"
-                                 name="odometer" value={ecarddetails.odometer} onblur={updateecarddetail}
-                                 disabled={disablebusinfoedit}></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="I/O Program" name="io_program"
-                                 value={ecarddetails.io_program} onblur={updateecarddetail}
-                                 disabled={disablebusinfoedit}></lightning-input>
-                           </div>
-                           <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
-                              <lightning-input type="text" max-length="20" label="Coach Number" name="coach_no"
-                                 value={ecarddetails.coach_no} onblur={updateecarddetail} disabled={disablebusinfoedit}>
-                              </lightning-input>
-                           </div>
+                              <!-- <lightning-input type="text" max-length="20" label="Air Condition System PDI" name="ac_system_pdi" value={ecarddetails.ac_system_pdi} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input> -->
+                              <lightning-input type="text" max-length="20" label="Function & Programming A/C System PDI" name="ac_system_pdi" value={ecarddetails.ac_system_pdi} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="date" label="Complete Date" name="completed_date" value={ecarddetails.completed_date} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" max-length="20" label="Coach Weight - Unladen" name="coach_weight_unladen" value={ecarddetails.coach_weight_unladen} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" max-length="20" label="Front Axle Weight" name="front_axle_weight" value={ecarddetails.front_axle_weight} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" max-length="20" label="Odometer/ Hub Odometer" name="odometer" value={ecarddetails.odometer} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" max-length="20" label="I/O Program" name="io_program" value={ecarddetails.io_program} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_medium">
+                              <lightning-input type="text" max-length="20" label="Coach Number" name="coach_no" value={ecarddetails.coach_no} onblur={updateecarddetail} disabled={disablebusinfoedit}></lightning-input>
+                            </div>
                         </div>
                      </template>
-                     <!--More Info End-->
-                  </div>
-                  <div id="tab-default-3" class="tab-default-3 slds-tabs_default__content slds-hide" role="tabpanel"
-                     aria-labelledby="tab-default-3__item">
+                          <!--More Info End-->
+                    </div>
+                  <div id="tab-default-3" class="tab-default-3 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
                      <!--Show spinner start-->
                      <div if:true={showSpinnerwinlabel}>
                         <div class="slds-align_absolute-center">
@@ -443,98 +357,93 @@
                               <div class="slds-spinner__dot-a"></div>
                               <div class="slds-spinner__dot-b"></div>
                            </div>
-                        </div>
+                        </div> 
                         <div style="height:100px;"></div>
                      </div>
                      <!--Show spinner end-->
                      <div if:false={showSpinnerwinlabel}>
-                        <div class="slds-grid">
-                           <div class="slds-col slds-size_1-of-2">
-                              <article class="slds-card cardborder">
-                                 <div class="cardfooter">
-                                    VIN Label
-                                    <lightning-button-icon if:true={hasvinpicture} variant="bare-inverse" size="small"
-                                       onclick={deletevinpicturelabel} icon-name="utility:delete"
-                                       alternative-text="Delete" class="slds-float_right slds-m-right_x-small"
-                                       title="Delete" disabled={disablebusinfoedit}></lightning-button-icon>
+                     <div class="slds-grid">
+                        <div class="slds-col slds-size_1-of-2">
+                           <article class="slds-card cardborder">
+                              <div class="cardfooter">
+                                 VIN Label
+                                 <lightning-button-icon if:true={hasvinpicture} variant="bare-inverse" size="small" onclick={deletevinpicturelabel} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete" disabled={disablebusinfoedit}></lightning-button-icon>
+                              </div>
+                              <div class="">
+                                 <div if:false={hasvinpicture} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
+                                                            <lightning-input type="file"
+                                                            label="Upload VIN Label"
+                                                            accept={acceptedFormats}
+                                                            onchange={handlevinlabelupload}
+                                                            disabled={disablebusinfoedit}
+                                                            >
+                                                            </lightning-input>
                                  </div>
-                                 <div class="">
-                                    <div if:false={hasvinpicture} style="height:385px;background:#f3f2f2;"
-                                       class="slds-align_absolute-center">
-                                       <lightning-input type="file" label="Upload VIN Label" accept={acceptedFormats}
-                                          onchange={handlevinlabelupload} disabled={disablebusinfoedit}>
-                                       </lightning-input>
-                                    </div>
-                                    <div if:true={hasvinpicture} style="height:385px; " class="side_bar">
-                                       <img src={vinurl} alt="VIN." />
-                                    </div>
+                                 <div if:true={hasvinpicture} style="height:385px; " class="side_bar">
+                                    <img src={vinurl} alt="VIN." />
                                  </div>
-                              </article>
-                           </div>
-                           <div class="slds-col slds-size_1-of-2">
-                              <article class="slds-card cardborder">
-                                 <div class="cardfooter">
-                                    Emissions Label
-                                    <lightning-button-icon if:true={hasemissionpicture} variant="bare-inverse"
-                                       size="small" onclick={deleteemissionpicture} icon-name="utility:delete"
-                                       alternative-text="Delete" class="slds-float_right slds-m-right_x-small"
-                                       title="Delete" disabled={disablebusinfoedit}></lightning-button-icon>
+                              </div>
+                           </article>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                           <article class="slds-card cardborder" >
+                              <div class="cardfooter">
+                                 Emissions Label
+                                    <lightning-button-icon if:true={hasemissionpicture} variant="bare-inverse" size="small" onclick={deleteemissionpicture} icon-name="utility:delete"  alternative-text="Delete" class="slds-float_right slds-m-right_x-small" title="Delete" disabled={disablebusinfoedit}></lightning-button-icon>
                                  </div>
-                                 <div class="">
-                                    <div if:false={hasemissionpicture} style="height:385px;background:#f3f2f2;"
-                                       class="slds-align_absolute-center">
-                                       <lightning-input type="file" label="Upload EMISSIONS Label"
-                                          accept={acceptedFormats} onchange={handleemissionslabelupload}
-                                          disabled={disablebusinfoedit}>
-                                       </lightning-input>
-                                    </div>
-                                    <div if:true={hasemissionpicture} style="height:385px;" class="side_bar">
-                                       <img data-id="imagepreview" class="imagepreview" src={emissionurl}
-                                          alt="emissionurl Image" />
-                                    </div>
+                              <div class="">
+                                 <div if:false={hasemissionpicture} style="height:385px;background:#f3f2f2;" class="slds-align_absolute-center">
+                                                            <lightning-input type="file"
+                                                            label="Upload EMISSIONS Label"
+                                                            accept={acceptedFormats}
+                                                            onchange={handleemissionslabelupload}
+                                                            disabled={disablebusinfoedit}
+                                                            >
+                                                            </lightning-input>
                                  </div>
-                              </article>
-                           </div>
+                                 <div if:true={hasemissionpicture} style="height:385px;" class="side_bar">
+                                    <img data-id="imagepreview" class="imagepreview" src={emissionurl} alt="emissionurl Image" />
+                                 </div>
+                              </div>
+                           </article>
                         </div>
                      </div>
-                  </div>
+                     </div>
+                     </div>
 
-                  <div id="tab-default-5" class="tab-default-5 slds-tabs_default__content slds-hide" role="tabpanel"
-                     aria-labelledby="tab-default-5__item">
-                     <!--Attachments Start-->
-                     <c-attachments-section-component type="busdetail" ecardid={ecardid} permissionset={permissionset}>
-                     </c-attachments-section-component>
-                     <!--<div class="slds-m-bottom_small">
-                          <lightning-combobox label="Department"   name="department"  value={selecteddepartment}  placeholder="Departments" options={departmentlist} onchange={handleDepartmentchange}></lightning-combobox>
-                       </div>
-                       <template if:false={isattachmentpresent}>
+                    <div id="tab-default-5" class="tab-default-5 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-5__item">
+                        <!--Attachments Start-->
+                        <c-attachments-section-component type="busdetail" ecardid={ecardid} permissionset={permissionset}></c-attachments-section-component>
+                        <!--<div class="slds-m-bottom_small">
+                           <lightning-combobox label="Department"   name="department"  value={selecteddepartment}  placeholder="Departments" options={departmentlist} onchange={handleDepartmentchange}></lightning-combobox>
+                        </div>
+                        <template if:false={isattachmentpresent}>
 
-                       </template>
-                       <template if:true={isattachmentpresent}>
-                          <div class="slds-align_absolute-center">
-                              <div class="empty-state-container slds-text-align_center">
-                                <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
-                                <div class="emptymessage">
-                                  No Attachments yet.
-                                </div>
-                              </div>
-                          </div>
-                        </template> -->
-                     <!--Attachments End-->
-                  </div>
-               </div>
+                        </template>
+                        <template if:true={isattachmentpresent}>
+                           <div class="slds-align_absolute-center">
+                               <div class="empty-state-container slds-text-align_center">
+                                 <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                                 <div class="emptymessage">
+                                   No Attachments yet.
+                                 </div>
+                               </div>
+                           </div>
+                         </template> -->
+                         <!--Attachments End-->
+                    </div>    
+                </div>   
 
-
-            </div>
-
+            
+          </div>
+            
             <!-- modal footer start-->
             <footer class="slds-modal__footer">
-               <lightning-button label="Cancel" title="Cancel" onclick={hidebusDetails} class="slds-m-right_x-small">
-               </lightning-button>
+                <lightning-button label="Cancel" title="Cancel" onclick={hidebusDetails} class="slds-m-right_x-small"></lightning-button>
             </footer>
-         </div>
-      </section>
-      <div class="slds-backdrop slds-backdrop_open"></div>
-   </template>
-   <!--Bus Overview Modal End  -->
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Bus Overview Modal End  -->
 </template>

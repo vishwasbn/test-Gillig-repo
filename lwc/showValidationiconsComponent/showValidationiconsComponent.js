@@ -214,6 +214,10 @@ export default class ShowValidationiconsComponent extends LightningElement {
     get istargetdelete(){
         return this.istargetimagepresent && this.permissionset.target_image_delete.write;
     }
+
+    get disablerequired() {
+        return !this.permissionset.operation_check.write;
+    }
     
     /*connectedCallback(){
         
@@ -781,8 +785,15 @@ export default class ShowValidationiconsComponent extends LightningElement {
                     }	
                     else {
                         debugger;
-                        var opcheckdata = JSON.parse(data.responsebody).data.op_check;	
+                        var opcheckdata = JSON.parse(data.responsebody).data.op_check;
+                        // var modedOpcheckdata = [];
+                        // for (var item in opcheckdata) {
+                        //     if (opcheckdata[item].is_required) {
+                        //         modedOpcheckdata.push(opcheckdata[item]);
+                        //     }
+                        // }
                         this.opckdetails=opcheckdata;
+                        // this.opckdetails=modedOpcheckdata;
                         this.showSpinner = false;
                     } 	
                     	
@@ -802,11 +813,22 @@ export default class ShowValidationiconsComponent extends LightningElement {
     @track selectedopchek=[];
     @track selectedopcheckid;
     existingrowstatuschange(event){
-        this.selectedopcheckid = event.detail.uniqueid;
-        for(var i in this.opckdetails){
-            if(this.opckdetails[i].operation_check_id==this.selectedopcheckid){
-                this.selectedopchek=this.opckdetails[i];
-                this.selectedopchek.op_check_status=event.detail.status;
+        // this.selectedopcheckid = event.detail.uniqueid;
+        // for(var i in this.opckdetails){
+        //     if(this.opckdetails[i].operation_check_id==this.selectedopcheckid){
+        //         this.selectedopchek=this.opckdetails[i];
+        //         this.selectedopchek.op_check_status=event.detail.status;
+        //     }
+        // }
+        this.selectedopcheckid = event.target.name == 'applicable' ? event.target.dataset.id : event.detail.uniqueid;
+        for (var i in this.opckdetails) {
+            if (this.opckdetails[i].operation_check_id == this.selectedopcheckid) {
+                this.selectedopchek = this.opckdetails[i];
+                if (event.target.type != "checkbox") {
+                    this.selectedopchek.op_check_status = event.detail.status;
+                } else {
+                    this.selectedopchek.is_required = event.target.checked;
+                }
             }
         }
         if(this.selectedopchek.value_required && 
@@ -832,7 +854,8 @@ export default class ShowValidationiconsComponent extends LightningElement {
 			"buildstation_id": this.buildstationdata.buildstation_id,
 			"operation_check_id": opck.operation_check_id,
 			"op_check_value": opck.op_check_value,
-            "op_check_status": opck.op_check_status
+            "op_check_status": opck.op_check_status,
+            "is_required": opck.is_required
         };
         //alert(JSON.stringify(opcheckrecord));
         this.showSpinner = true;

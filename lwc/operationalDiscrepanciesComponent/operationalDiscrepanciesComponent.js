@@ -77,6 +77,18 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
     @track shortgecauselist = [];
     @track partsvendorslist = [];
     @track isupdated = false;
+    @track carrieroptions = [
+        { "label": "UPS", "value": "UPS" },
+        { "label": "UPS 2ND DAY", "value": "UPS 2ND DAY" },
+        { "label": "UPS NDA", "value": "UPS NDA"    },
+        { "label": "UPS NDA EARLY AM", "value": "UPS NDA EARLY AM" },
+        { "label": "FEDEX", "value": "FEDEX"    },
+        { "label": "FEDEX 2ND DAY", "value": "FEDEX 2ND DAY" },
+        { "label": "FEDEX NDA", "value": "FEDEX NDA" },
+        { "label": "COURIER", "value": "COURIER" },
+        { "label": "VENDOR TRUCK", "value": "VENDOR TRUCK" },
+        { "label": "OTHER", "value": "OTHER" }
+      ];
      
     // For Showing no data message when Discrepancy List is Empty.   
     get discrepancylistempty(){
@@ -375,6 +387,10 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                 moddedprod = prod_supervisor;
                 isdepartmentdiscrepancy = true;
             }
+            var isdownstreamdiscrepancy = false;
+            if (discrepancylogs[disc].discrepancy_type == "downstream") {
+                isdownstreamdiscrepancy = true;
+            }
             var hasbusareapicture = false;
             if(discrepancylogs[disc].bus_area_picture_id != undefined){
                 hasbusareapicture = true;
@@ -394,6 +410,7 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
                 ecard_discrepancy_log_id : discrepancylogs[disc].ecard_discrepancy_log_id,
                 ecard_discrepancy_log_number: discrepancylogs[disc].discrepancy_log_number,
                 isdepartmentdiscrepancy : isdepartmentdiscrepancy,
+                isdownstreamdiscrepancy: isdownstreamdiscrepancy,
                 isdeletable:is_deletable,
                 created_by : created_by,
                 createdbyname : createdbyname,
@@ -980,7 +997,8 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             "discrepancy_status" : discrepancytobeupdated.discrepancy_status,
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
             "discrepancy" : discrepancytobeupdated.discrepancy,
-            "modified_date" : discrepancytobeupdated.modified_date
+            "modified_date" : discrepancytobeupdated.modified_date,
+            "buildstation_id": discrepancytobeupdated.buildstation_id
         };
         /*if(discrepancytobeupdated.assigend_qc_id.length != 0){
             responsebody["assigend_qc_id"] =  discrepancytobeupdated.assigend_qc_id[0].Id;
@@ -1317,7 +1335,8 @@ export default class OperationalDiscrepanciesComponent extends NavigationMixin(L
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
             "discrepancy" : discrepancytobeupdated.discrepancy,
             "part_shortage" : part_shortage,
-            "modified_date" : discrepancytobeupdated.modified_date
+            "modified_date" : discrepancytobeupdated.modified_date,
+            "buildstation_id": discrepancytobeupdated.buildstation_id,
             //"has_part_shortage" : discrepancytobeupdated.has_part_shortage,
             //"part_avilable" : discrepancytobeupdated.part_avilable
         };

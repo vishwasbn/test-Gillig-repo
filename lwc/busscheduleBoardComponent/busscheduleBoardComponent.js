@@ -51,6 +51,7 @@ export default class BusscheduleBoardComponent extends NavigationMixin(Lightning
   @track departmentlistoptions;
   @track selecteddepartment;
   @track selecteddepartmentid = '1';
+  @track rawscheduledbusdata = [];
 
    // Use whenever a false attribute is required in Component.html
    get returnfalse(){
@@ -164,6 +165,7 @@ get returntrue(){
              var searchList = [];
              var dayslist = [];
              var scheduleboarddata = JSON.parse(result.responsebody).data.ecard;
+             this.rawscheduledbusdata = scheduleboarddata;//
              for(var i in scheduleboarddata){
                 var scheduledatelocal; 
                 var schedule_date_key;
@@ -915,12 +917,17 @@ get returntrue(){
     var filteredlist = this.builddummydata(thisweekdata);
     // Building dummy data
     //debugger
-    this.mapData = filteredlist;
+    this.mapData = filteredlist;      
+      if (event != undefined && event.detail.labelvalue == "Customer") {//this.mapData.length == 0 &&
+          if (!this.isdataexist(this.mapData)) {
+              this.getSearchedbusscheduledate(event);
+          }
+      }
     this.showSpinner = false;
 
     this.error = undefined;
     //
-}
+}   
 
 handlebuspropulsionchange(event){
     this.selectedBusPropulsion = event.detail.value;
@@ -1148,5 +1155,68 @@ async setdepartmentvalues(){
         //this.departmentchanged(event);
     }
 
+    //when searching for a bus under the filter conditions takes you directly to date of the bus schedule.
+    getSearchedbusscheduledate(event) {
+        for (var item in this.rawscheduledbusdata) {
+            if (this.rawscheduledbusdata[item].chassis_no == this.selectedCustomer) {
+                var busdetails = this.rawscheduledbusdata[item];
+                var selectedbustype = this.selectedBusType;
+                var selectedpropulsion = this.selectedBusPropulsion
+                var selectedbusstatus = this.selectedBusStatus;
+                var partShortageFilter = this.partShortageFilter;
+                var discrepancyFilter = this.discrepancyFilter;
+                var busdata = "";
+                if (selectedbustype != undefined && selectedbustype != 'All Bus Type') {
+                    if (busdetails.bustype_name != selectedbustype) {
+                        busdata = busdata + ' makeinvisible';
+                    }
+                }
+                if (selectedbusstatus != undefined && selectedbusstatus != 'All Bus Status') {
+                    if (busdetails.busstatus_name != selectedbusstatus) {
+                        busdata = busdata + ' makeinvisible';
+                    }
+                }
+                if (selectedpropulsion != undefined && selectedpropulsion != 'All Propulsion Types') {
+                    if (busdetails.buspropulsion_name != selectedpropulsion) {
+                        busdata = busdata + ' makeinvisible';
+                    }
+                }
+
+                if (partShortageFilter) {
+                    if (busdetails.has_part_shortage != partShortageFilter) {
+                        busdata = busdata + ' makeinvisible';
+                    }
+                }
+                if (discrepancyFilter) {
+                    if (busdetails.has_discrepancy != discrepancyFilter) {
+                        busdata = busdata + ' makeinvisible';
+                    }
+                }
+                if (partShortageFilter && discrepancyFilter) {
+                    if ((busdetails.has_part_shortage != partShortageFilter) && (busdata.has_discrepancy != discrepancyFilter)) {
+                        busdata = busdata + ' makeinvisible';
+                    }
+                }
+                if (!busdata.includes("makeinvisible")) {
+                    var scheduledatelocal = new Date(busdetails.department_schedule_time);//schedule_date
+                    var schedule_date_key = scheduledatelocal.getFullYear() + '-' + ((scheduledatelocal.getMonth() + 1) <= 9 ? "0" + (scheduledatelocal.getMonth() + 1) : (scheduledatelocal.getMonth() + 1)) + '-' + ((scheduledatelocal.getDate()) <= 9 ? "0" + (scheduledatelocal.getDate()) : (scheduledatelocal.getDate()));
+                    event.target.value = schedule_date_key;
+                    event.detail.labelvalue = "";
+                    this.todaysDate = schedule_date_key;
+                    this.handleDateChange(event);
+                }
+            }
+        }
+    }
+
+    //check if the bus data available withing the week data
+    isdataexist(scheduledata) {
+        for (var entry in scheduledata) {
+            if (scheduledata[entry].value.length != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

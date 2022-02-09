@@ -249,6 +249,10 @@ export default class OpreationActionPaintComponent extends LightningElement {
                 moddedprod = prod_supervisor;
                 isdepartmentdiscrepancy = true;
             }
+            var isdownstreamdiscrepancy = false;
+            if (discrepancylogs[disc].discrepancy_type == "downstream") {
+                isdownstreamdiscrepancy = true;
+            }
             moddedprod = this.updateprodlistwithforeman(assignedprod,moddedprod);
             var bsavailable=discrepancylogs[disc].buildstation_code=='9999'?false:true;
             var hasbusareapicture = false;
@@ -270,6 +274,7 @@ export default class OpreationActionPaintComponent extends LightningElement {
                 bus_area_picture_id : discrepancylogs[disc].bus_area_picture_id,
                 ecard_discrepancy_log_id : discrepancylogs[disc].ecard_discrepancy_log_id,
                 isdepartmentdiscrepancy : isdepartmentdiscrepancy,
+                isdownstreamdiscrepancy: isdownstreamdiscrepancy,
                 isdeletable:is_deletable,
                 created_by : created_by,
                 createdbyname : createdbyname,
@@ -722,7 +727,8 @@ export default class OpreationActionPaintComponent extends LightningElement {
             "discrepancy_status" : discrepancytobeupdated.discrepancy_status,
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
             "discrepancy" : discrepancytobeupdated.discrepancy,
-            "modified_date" : discrepancytobeupdated.modified_date
+            "modified_date" : discrepancytobeupdated.modified_date,
+            "buildstation_id": discrepancytobeupdated.buildstation_id
         };
         /*if(discrepancytobeupdated.assigend_qc_id.length != 0){
             responsebody["assigend_qc_id"] =  discrepancytobeupdated.assigend_qc_id[0].Id;
@@ -978,4 +984,5 @@ export default class OpreationActionPaintComponent extends LightningElement {
         console.log(newArray);
         return newArray;
     }
+
 }

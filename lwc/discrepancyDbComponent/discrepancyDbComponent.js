@@ -108,7 +108,9 @@ export default class DiscrepancyDbComponent extends LightningElement {
 
   @track statuslistfiltervalue = [{ label: "All Defect Status", value: "All Defect Status" }, { label: "Open", value: "open" }, { label: "Resolved", value: "resolve" }, { label: "Verified", value: "approve" }];
   @track selectedstatus = "All Defect Status";
-  
+  @track discdepartmentchanged = false;
+  @track enablediscupdate = false;
+    
 
   // Use whenever a false attribute is required in Component.html
   get returnfalse() {
@@ -139,23 +141,41 @@ export default class DiscrepancyDbComponent extends LightningElement {
     return this.filtereddepartmentdiscrepancy.length == 0;
   }
 
+  // get disableprodforupdate() {
+  //   var updatepermission=false;
+  //   if(this.selecteddiscrepancy.discrepancy_type=='department'){
+  //     updatepermission=this.permissionset.dept_discrepancy_update_prod.write;
+  //   }else if(this.selecteddiscrepancy.discrepancy_type=='busarea')
+  //   {
+  //     updatepermission=this.permissionset.busarea_discrepancy_update_prod.write;
+  //   }
+  //   else{
+  //     updatepermission=this.permissionset.discrepancy_update_prod.write;
+  //   }
+  //   // if (this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" && updatepermission ) {
+  //   //   return true;
+  //   // } else {
+  //   //   return false;
+  //   // }
+  //   return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !updatepermission;
+  // }
   get disableprodforupdate() {
-    var updatepermission=false;
-    if(this.selecteddiscrepancy.discrepancy_type=='department'){
-      updatepermission=this.permissionset.dept_discrepancy_update_prod.write;
-    }else if(this.selecteddiscrepancy.discrepancy_type=='busarea')
-    {
-      updatepermission=this.permissionset.busarea_discrepancy_update_prod.write;
+    var updatepermission = false;
+    var enablebutton = true;
+    if (this.selecteddiscrepancy.discrepancy_type == 'department') {
+      updatepermission = this.permissionset.dept_discrepancy_update_prod.write;
+    } else if (this.selecteddiscrepancy.discrepancy_type == 'busarea') {
+      updatepermission = this.permissionset.busarea_discrepancy_update_prod.write;
     }
-    else{
-      updatepermission=this.permissionset.discrepancy_update_prod.write;
+    else {
+      updatepermission = this.permissionset.discrepancy_update_prod.write;
     }
-    // if (this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" && updatepermission ) {
-    //   return true;
-    // } else {
-    //   return false;
-    // }
-    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !updatepermission;
+    if (this.discdepartmentchanged) {
+      if (this.isbsrequired && this.selecteddiscrepancy.buildstation_id == null) {
+        enablebutton = false;
+      }
+    }
+    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" || !updatepermission || !enablebutton;
   }
 
   get disableqcforupdate() {
@@ -193,6 +213,34 @@ export default class DiscrepancyDbComponent extends LightningElement {
     }
     return isdepartmentpaintortrim;
 }
+
+  get enablediscdepartmentedit() {
+    var updatepermission = false;
+    if (this.loggedinuser.approle_id == 2 || this.loggedinuser.approle_id == 4 || this.loggedinuser.approle_id == 1) {
+      updatepermission = true;
+    }
+    // if (this.selecteddiscrepancy.discrepancy_type == 'department') {
+    //   updatepermission = this.permissionset.dept_discrepancy_update_prod.write;
+    // } else if (this.selecteddiscrepancy.discrepancy_type == 'busarea') {
+    //   updatepermission = this.permissionset.busarea_discrepancy_update_prod.write;
+    // }
+    // else {
+    //   updatepermission = this.permissionset.discrepancy_update_prod.write;
+    // }
+    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() == "open" && this.selecteddiscrepancy.discrepancy_type != "Bus Area" && updatepermission;
+  }
+
+  get enablediscbsedit(){
+    return this.enablediscdepartmentedit && this.discdepartmentchanged;
+  }
+
+  get departmentid(){
+    return this.selecteddiscrepancy.department_id.toString();
+  }
+
+  get isbsrequired(){
+    return this.selecteddiscrepancy.discrepancy_type != 'Department';
+  }
 
   // //used to display/hide the shortage button
   // get disablediscbtn() {
@@ -431,7 +479,8 @@ export default class DiscrepancyDbComponent extends LightningElement {
               filtered: "",
               formatteddatetosearch: this.getformatedsearchformat(
                 discrepancy.raised_date
-              )
+              ),
+              status_bgcolor: this.getStatusColor(discrepancy.discrepancy_status)
             };
             if (modeddiscrepancy.createdbyname != undefined) {
               createdbyuserslist.push(modeddiscrepancy.createdbyname);
@@ -1181,28 +1230,37 @@ export default class DiscrepancyDbComponent extends LightningElement {
 
   // Get Department picklist from server
   getdepartmentPicklist(event) {
-    var authorisationdata = "Parameter to be removed from Apex Class";
-    getDepartmentdata({ authdata: authorisationdata })
-      .then((result) => {
-        var departmentlistvalues = result.departmentPickList;
-        var deptpickvalues = [];
-        for(var dept in departmentlistvalues){
-          var deprtmentopt = departmentlistvalues[dept];
-          if(deprtmentopt.value != 'None'){
-             deptpickvalues.push(deprtmentopt);
-          }
+    // var authorisationdata = "Parameter to be removed from Apex Class";
+    // getDepartmentdata({ authdata: authorisationdata })
+    //   .then((result) => {
+    //     var departmentlistvalues = result.departmentPickList;
+    //     var deptpickvalues = [];
+    //     for(var dept in departmentlistvalues){
+    //       var deprtmentopt = departmentlistvalues[dept];
+    //       if(deprtmentopt.value != 'None'){
+    //          deptpickvalues.push(deprtmentopt);
+    //       }
+    //     }
+    //     this.departmentoptions = deptpickvalues;
+    //   })
+    //   .catch((error) => {
+    //     const alertmessage = new ShowToastEvent({
+    //       title: "Department data fetch failed.",
+    //       message:
+    //         "Something unexpected occured. Please contact your Administrator",
+    //       variant: "error"
+    //     });
+    //     this.dispatchEvent(alertmessage);
+    //   });
+    var options = [];
+    for (var i in this.departmentIdMap) {
+      if (this.departmentIdMap[i].value != 'None' && this.departmentIdMap[i].label != 'ALL DEPARTMENTS' && this.departmentIdMap[i].label != 'All Departments') {
+        if (!this.departmentIdMap[i].bus_area_discrepancy_enabled) {
+          options.push(this.departmentIdMap[i]);
         }
-        this.departmentoptions = deptpickvalues;
-      })
-      .catch((error) => {
-        const alertmessage = new ShowToastEvent({
-          title: "Department data fetch failed.",
-          message:
-            "Something unexpected occured. Please contact your Administrator",
-          variant: "error"
-        });
-        this.dispatchEvent(alertmessage);
-      });
+      }
+    }
+    this.departmentoptions = options;
   }
 
   // To modify the userlist from API to shown in userlistIconComponent.(Will need to incorporate picture link.)
@@ -1355,6 +1413,8 @@ export default class DiscrepancyDbComponent extends LightningElement {
 
   // For Showing the Details Modal
   showdetails(event) {
+    this.enablediscupdate = false;
+    this.discdepartmentchanged = false;
     var selecteddiscrepancylogid = event.currentTarget.dataset.id;
     for (var i in this.alldiscrepancy) {
       if (
@@ -1384,6 +1444,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
     if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
     }
+    this.getdepartmentPicklist();
     this.detailsmodal = true;
   }
 
@@ -1622,40 +1683,44 @@ export default class DiscrepancyDbComponent extends LightningElement {
   // For toogle sections within modal
   togglesection(event) {}
 
-  // To update the discrepancy changes to server.
-  updatediscrepancytoserver(event) {
-    //alert(JSON.stringify(this.selecteddiscrepancy));
-    var discrepancytobeupdated = this.selecteddiscrepancy;
-    var responsebody = {
-      ecard_discrepancy_log_id: discrepancytobeupdated.ecard_discrepancy_log_id,
-      ecard_id: discrepancytobeupdated.ecard_id,
-      department_id: discrepancytobeupdated.department_id,
-      component: discrepancytobeupdated.component,
-      cut_off_date: new Date(discrepancytobeupdated.cut_off_date),
-      root_cause: discrepancytobeupdated.root_cause,
-      discrepancy_status: discrepancytobeupdated.discrepancy_status,
-      discrepancy_type: discrepancytobeupdated.discrepancy_type,
-      discrepancy: discrepancytobeupdated.description,
-      modified_date : discrepancytobeupdated.modified_date
-    };
-    /*if (discrepancytobeupdated.assigend_qc_id.length != 0) {
-      responsebody["assigend_qc_id"] =
-        discrepancytobeupdated.assigend_qc_id[0].Id;
-    }*/
-    if(this.qccaptureaction && this.qccapturerole){
-      responsebody["assigend_qc_id"] =  this.loggedinuser.appuser_id;
-      this.qccaqccaptureaction = false;
-  }
-    var requestwithforman = this.updateformans(
-      JSON.stringify(responsebody),
-      discrepancytobeupdated.selectedprodlist
-    );
+    // To update the discrepancy changes to server.
+    updatediscrepancytoserver(event) {
+      //alert(JSON.stringify(this.selecteddiscrepancy));    
+      var discrepancytobeupdated = this.selecteddiscrepancy;
+      if (discrepancytobeupdated.buildstation_id == 'Unknown') {
+        discrepancytobeupdated.buildstation_id = null;
+      }
+      var responsebody = {
+        ecard_discrepancy_log_id: discrepancytobeupdated.ecard_discrepancy_log_id,
+        ecard_id: discrepancytobeupdated.ecard_id,
+        department_id: discrepancytobeupdated.department_id,
+        component: discrepancytobeupdated.component,
+        cut_off_date: new Date(discrepancytobeupdated.cut_off_date),
+        root_cause: discrepancytobeupdated.root_cause,
+        discrepancy_status: discrepancytobeupdated.discrepancy_status,
+        discrepancy_type: discrepancytobeupdated.discrepancy_type,
+        discrepancy: discrepancytobeupdated.description,
+        modified_date: discrepancytobeupdated.modified_date,
+        buildstation_id: discrepancytobeupdated.buildstation_id
+      };
+      /*if (discrepancytobeupdated.assigend_qc_id.length != 0) {
+        responsebody["assigend_qc_id"] =
+          discrepancytobeupdated.assigend_qc_id[0].Id;
+      }*/
+      if (this.qccaptureaction && this.qccapturerole) {
+        responsebody["assigend_qc_id"] = this.loggedinuser.appuser_id;
+        this.qccaqccaptureaction = false;
+      }
+      var requestwithforman = this.updateformans(
+        JSON.stringify(responsebody),
+        discrepancytobeupdated.selectedprodlist
+      );
 
-    updateDiscrepancy({ requestbody: JSON.stringify(requestwithforman) })
-      .then((data) => {
-        if (data.isError) {
-          if(data.errorMessage == 202){
-            const alertmessage = new ShowToastEvent({
+      updateDiscrepancy({ requestbody: JSON.stringify(requestwithforman) })
+        .then((data) => {
+          if (data.isError) {
+            if (data.errorMessage == 202) {
+              const alertmessage = new ShowToastEvent({
                 title: "Sorry we could not complete the operation.",
                 message: JSON.parse(data.responsebody).data.validation_message,
                 variant: "error"
@@ -1663,46 +1728,48 @@ export default class DiscrepancyDbComponent extends LightningElement {
               this.dispatchEvent(alertmessage);
               this.detailsmodal = false;
               this.loaddataforview();
-          }
-          else{
+            }
+            else {
+              const alertmessage = new ShowToastEvent({
+                title: "Sorry we could not complete the operation.",
+                message:
+                  "Something unexpected occured. Please contact your Administrator",
+                variant: "error"
+              });
+              this.dispatchEvent(alertmessage);
+              this.detailsmodal = false;
+              this.loaddataforview();
+            }
+          } else {
             const alertmessage = new ShowToastEvent({
-              title: "Sorry we could not complete the operation.",
-              message:
-                "Something unexpected occured. Please contact your Administrator",
-              variant: "error"
+              title: "Record Update Successfull.",
+              message: "The Record was updated Successfully",
+              variant: "success"
             });
             this.dispatchEvent(alertmessage);
-            this.detailsmodal = false;
+            this.enablediscupdate = false;
+            this.discdepartmentchanged = false;
+            this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;
+            //this.detailsmodal = false;
+            if (this.statusascomment) {
+              this.statusascomment = false;
+              var response = JSON.parse(data.operationlogresponse).data;
+              this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+            }
             this.loaddataforview();
           }
-        } else {
+        })
+        .catch((error) => {
+          this.error = error;
           const alertmessage = new ShowToastEvent({
-            title: "Record Update Successful.",
-            message: "The Record was updated Successfully",
-            variant: "success"
+            title: "Sorry we could not complete the operation.",
+            message:
+              "Something unexpected occured. Please contact your Administrator",
+            variant: "error"
           });
           this.dispatchEvent(alertmessage);
-          this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;
-          //this.detailsmodal = false;
-          if (this.statusascomment) {
-            this.statusascomment = false;
-            var response = JSON.parse(data.operationlogresponse).data;
-            this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
-          }
-          this.loaddataforview();
-        }
-      })
-      .catch((error) => {
-        this.error = error;
-        const alertmessage = new ShowToastEvent({
-          title: "Sorry we could not complete the operation.",
-          message:
-            "Something unexpected occured. Please contact your Administrator",
-          variant: "error"
         });
-        this.dispatchEvent(alertmessage);
-      });
-  }
+    }
 
   @track showpreviewimage = false;
   @track previewimageexist = false;
@@ -1980,4 +2047,145 @@ export default class DiscrepancyDbComponent extends LightningElement {
     // Display the unique objects
     return newArray;
   }
+
+  // Generic function to Show alert toasts.
+  showmessage(title, message, variant) {
+    const alertmessage = new ShowToastEvent({
+      title: title,
+      message: message,
+      variant: variant
+    });
+    this.dispatchEvent(alertmessage);
+  }
+
+  async modifyselecteddiscrepancy(event) {
+    var targetvalue = event.target.value;
+    var targetname = event.target.name;
+    this.selecteddiscrepancy[targetname] = targetvalue;
+    this.enablediscupdate = true;
+    if (targetname == 'department_id') {
+      // this.selecteddiscrepancy.departmentid = targetvalue;
+      this.discdepartmentchanged = true;
+      this.selecteddiscrepancy.department_id = targetvalue;//
+      for (var i in this.departmentIdMap) {
+        if (this.departmentIdMap[i].value == targetvalue) {
+          this.selecteddiscrepancy.department_name = this.departmentIdMap[i].label;
+        }
+      }
+      this.selecteddiscrepancy.disc_bsavailable = false;
+      // Set Prod and QC also
+      this.selecteddiscrepancy.allprodlist = [];
+      this.selecteddiscrepancy.selectedprodlist = [];//
+      if (this.selecteddiscrepancy.ecard_id != undefined) {
+        this.moddifydefectpickvalues(targetvalue);
+        var ecardid = this.selecteddiscrepancy.ecard_id;
+        var departmentId = targetvalue;
+        var ecardiddeptid = { ecard_id: ecardid, dept_id: departmentId };
+        var bs = { label: "Unknown", value: "Unknown", workcentreId: 0, workcentreName: "0000" };//Vishwas
+        await getDepartmentOperations({ ecardiddeptid: JSON.stringify(ecardiddeptid) })
+          .then(data => {
+            var prod_supervisor = modifieduserlist(data.builstationMapWrapper.prod_supervisor);
+            this.deptsupervisorforselecteddept = prod_supervisor;
+            //this.selecteddiscrepancy.allPRODlist = prod_supervisor;
+            this.selecteddiscrepancy.allprodlist = prod_supervisor;
+            this.buildstationoptions = data.buildstationList;
+            this.buildstationoptions.push(bs);//Vishwas
+            this.selecteddeptbsdetails = this.getcompleteBuilstationlist(data);
+            // this.selecteddiscrepancy.buildstation_id = undefined;
+            this.selecteddiscrepancy.buildstation_id = null;//
+          }).catch(error => {
+            this.error = error;
+            this.showmessage('Failed to fetch Build Station Details.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+          });
+      }
+      else {
+        this.selecteddiscrepancy.departmentid = undefined;
+        this.showmessage('Select a Bus.', 'Please select a Bus before selecting Department.', 'warning');
+      }
+    }
+    if (targetname == 'buildstation_id') {
+      var buildstationdetails = this.selecteddeptbsdetails;
+      var buildstationId = targetvalue;
+      var selectedbuildstation;
+      for (var bs in buildstationdetails) {
+        if (buildstationId.toString() == buildstationdetails[bs].buildstation_id.toString()) {
+          selectedbuildstation = buildstationdetails[bs];
+        }
+      }
+      //this.newdiscrepancy.buildstation_id = selectedbuildstation.buildstation_id.toString();
+      this.selecteddiscrepancy.buildstation_id = buildstationId == 'Unknown' ? this.selecteddiscrepancy.buildstation_id : selectedbuildstation.buildstation_id.toString();
+      if (buildstationId != 'Unknown') {
+        this.selecteddiscrepancy.disc_bsavailable = true;
+        this.selecteddiscrepancy.buildstation_code = selectedbuildstation.buildstation_code;
+        this.selecteddiscrepancy.workcenter_code = selectedbuildstation.workcentername;
+        this.selecteddiscrepancy.workcenter_name = selectedbuildstation.workcentername;
+      }
+      // Set Prod and QC also
+      var allPRODlist = [];
+      var allQClist = [];
+      var PRODlist = [];
+      if (buildstationId != 'Unknown' && selectedbuildstation.QClist != null && selectedbuildstation.QClist.length != 0) {
+        allQClist = selectedbuildstation.QClist;
+      }
+      if (this.selecteddiscrepancy.discrepancy_type == 'Department') {
+        if (this.deptsupervisorforselecteddept.length != 0) {
+          allPRODlist = this.deptsupervisorforselecteddept;
+        }
+        PRODlist = this.deptsupervisorforselecteddept;
+      }
+      else if (buildstationId != 'Unknown') {
+        if (selectedbuildstation.PRODlist != null && selectedbuildstation.PRODlist.length != 0) {
+          allPRODlist = selectedbuildstation.PRODlist;
+        }
+        PRODlist = selectedbuildstation.selectedprod;
+      }
+      var QClist = buildstationId == 'Unknown' ? [] : selectedbuildstation.selectedqc;
+      this.selecteddiscrepancy.qclist = QClist;
+      this.selecteddiscrepancy.selectedprodlist = PRODlist;
+      // this.selecteddiscrepancy.allPRODlist = allPRODlist;
+      this.selecteddiscrepancy.allprodlist = allPRODlist;//
+      // this.selecteddiscrepancy.allQClist = allQClist;
+      this.selecteddiscrepancy.allqclist = allQClist;//
+    }
+    if (this.selecteddiscrepancy.allprodlist.length == 0) {
+      var userdetails = [];
+      await getcrewingsuserslist({ deptid: this.selecteddiscrepancy.department_id })//departmentid
+        .then((result) => {
+          userdetails = JSON.parse(result.responsebody).data.user;
+          this.selecteddiscrepancy.allprodlist = userdetails.length > 0 ? modifieduserlist(userdetails) : userdetails;
+        })
+        .catch((error) => {
+        });
+    }
+  }
+  handlediscdeptupdateaction(event) {
+    const allValid = [...this.template.querySelectorAll('.deptchangevalidation')]
+      .reduce((validSoFar, inputCmp) => {
+        inputCmp.reportValidity();
+        return validSoFar && inputCmp.checkValidity();
+      }, true);
+    if (allValid) {
+      var discrepancytobeupdated = this.selecteddiscrepancy;
+      if (discrepancytobeupdated.buildstation_id == undefined || discrepancytobeupdated.buildstation_id == 'Unknown') {
+        discrepancytobeupdated.buildstation_id = null;
+      }
+      this.updatediscrepancytoserver();
+    }
+    else {
+      this.showmessage('Please fill required fields.', 'Please fill required and update all blank form entries.', 'warning');
+    }
+  }
+
+  getStatusColor(status) {
+    //var discrepancycolor = '#ff3b30';
+    var discrepancycolor = '';
+    if(status.toLowerCase() == 'resolve'){
+        discrepancycolor = '#e8bb07';
+    }
+    if(status.toLowerCase() == 'approve'){
+        discrepancycolor = '#34c759';
+    }
+    var bgColor = `background-color: ${discrepancycolor};`;
+    return bgColor;
+}
 }
