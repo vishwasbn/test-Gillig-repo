@@ -282,7 +282,8 @@ export default class SerialnumberComponent extends LightningElement {
          var buildstation_part_mapping_id = event.target.title;
          this.selectedserialnolog = this.getselectedserialnumberlog(buildstation_part_mapping_id);
          var valuetoupdate = event.target.name;
-         this.selectedserialnolog[valuetoupdate] = event.target.value;
+         //this.selectedserialnolog[valuetoupdate] = event.target.value;
+         this.selectedserialnolog[valuetoupdate] = event.target.value == '' ? null : event.target.value;
          await this.updateserialnumberlogtoserver();
            
      }
@@ -309,13 +310,14 @@ export default class SerialnumberComponent extends LightningElement {
             .then(data => {
                 if(data.isError){
                     if (data.errorMessage == 202) {
-                        /*const alertmessage = new ShowToastEvent({
-                            title: "Sorry we could not complete the operation.",
-                            message: JSON.parse(data.responsebody).data.validation_message,
+                        const alertmessage = new ShowToastEvent({
+                            //title: "Sorry we could not complete the operation.",
+                            title: "Duplicated Serial Number.",
+                            message: "Couldn’t update data, "+JSON.parse(data.responsebody).data.validation_message,
                             variant: "error"
                         });
                         this.dispatchEvent(alertmessage);
-                        this.loadSerialNologdata();*/
+                        this.loadSerialNologdata();
                     } else {
                         const alertmessage = new ShowToastEvent({
                             title: "Sorry we could not complete the operation.",
@@ -362,54 +364,4 @@ export default class SerialnumberComponent extends LightningElement {
         
      }
 
-     // To add new shortage
-    showReportShortageAdd(event){
-        const addshortage = new CustomEvent(
-            "addshortage",
-            {
-                detail : {} 
-                
-            }
-        );
-        /* eslint-disable no-console */
-        //console.log( this.record.Id);
-        /* fire the event to be handled on the Parent Component */
-        this.dispatchEvent(addshortage);
-    }
-
-    // To add new discrepancy
-    addnewdiscrepancymodal(event){
-        const adddiscrepancy = new CustomEvent(
-            "adddiscrepancy",
-            {
-                detail : {} 
-                
-            }
-        );
-        this.dispatchEvent(adddiscrepancy);
-    }
-
-    // To show QC checklist
-    showqccheclist(event){
-        const showqccheclist = new CustomEvent(
-            "showqccheclist",
-            {
-                detail : {} 
-                
-            }
-        );
-        this.dispatchEvent(showqccheclist);
-    }
-
-    // To show gethelpdocuments
-    gethelpdocuments(event){
-        const gethelpdocuments = new CustomEvent(
-            "gethelpdocuments",
-            {
-                detail : {} 
-                
-            }
-        );
-        this.dispatchEvent(gethelpdocuments);
-    }
 }

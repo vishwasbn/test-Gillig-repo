@@ -6,6 +6,7 @@ import pubsub from 'c/pubsub' ;
 
 import uploadTargetPicture from "@salesforce/apex/ecardOperationsController.uploadTargetPicture";
 import uploadSourcePicture from "@salesforce/apex/ecardOperationsController.uploadSourcePicture";
+import deleteTargetPicture from "@salesforce/apex/ecardOperationsController.deleteTargetPicture";
 import getTargetImage from "@salesforce/apex/ecardOperationsController.getTargetImage";
 import getTargetandActualImage from "@salesforce/apex/ecardOperationsController.getTargetandActualImage";
 import getbuildstationopcheckDetails  from "@salesforce/apex/ecardOperationsController.getbuildstationopcheckDetails";
@@ -23,6 +24,14 @@ export default class ShowValidationiconsComponent extends LightningElement {
     @track has_op_check;	
     @track has_operation_check;
     @track registerevent=false;
+
+    @api ecardid;
+    @api busname;
+    @api buschasisnumber;
+    @api departmentid;
+    @api departmentIdMap;
+    @api department;
+    @api selecteddepartmentid;
 
     @api permissionset;
     @api
@@ -51,11 +60,14 @@ export default class ShowValidationiconsComponent extends LightningElement {
         this.buildstationdetailslocal = buildstation;
         this.buildstationdata = this.buildstationdetailslocal;
         this.buildstationcode = this.buildstationdetailslocal.buildstation_code;
+        this.buildstationstatus=this.buildstationdetailslocal.status;
+
     }
 
     //to show icons respective to list
     @track validationslocal;
     @track buildstationdetailslocal;
+    @track buildstationstatus;
     @track has8410;
     @track has_pco;
     @track has_bm35;
@@ -131,6 +143,9 @@ export default class ShowValidationiconsComponent extends LightningElement {
     }
 
     get picvalidationoptional(){
+        if(this.buildstationstatus=='approve' && this.buildstationdata.picture_validation_id == undefined){
+            return true;
+        }
         if(this.buildstationdata.picture_validation_target_image_id == undefined){
             if(this.buildstationdata.picture_validation_id == undefined){
                 return true;
@@ -140,6 +155,9 @@ export default class ShowValidationiconsComponent extends LightningElement {
     }
 
     get picvalidationrequired(){
+        if(this.buildstationstatus=='approve'){
+            return false;
+        }
         if(this.buildstationdata.picture_validation_target_image_id != undefined){
             if(this.buildstationdata.picture_validation_id == undefined){
                 return true;
@@ -193,7 +211,9 @@ export default class ShowValidationiconsComponent extends LightningElement {
         }
         
     }
-    
+    get istargetdelete(){
+        return this.istargetimagepresent && this.permissionset.target_image_delete.write;
+    }
     
     /*connectedCallback(){
         
@@ -602,7 +622,7 @@ export default class ShowValidationiconsComponent extends LightningElement {
                   }
                   else{
                     var buildstationpartsdata = JSON.parse(data.responsebody).data.bus_part_detail;
-                    this.buildstationpartslist = buildstationpartsdata;
+                    this.buildstationpartslist = this.getmodifiedlist(buildstationpartsdata);
                     this.showSpinnerforbuildstation = false;
                   }
                     
@@ -640,7 +660,7 @@ export default class ShowValidationiconsComponent extends LightningElement {
                  }
                  else{
                    var bm35data = JSON.parse(data.responsebody).data.buildstations_mapping_adon;
-                   this.buildstationbm35details = bm35data;
+                   this.buildstationbm35details = this.getmodifiedlist(bm35data);
                    this.showSpinner = false;
                  }
                    
@@ -678,7 +698,7 @@ export default class ShowValidationiconsComponent extends LightningElement {
                     }
                     else{
                     var pcodata = JSON.parse(data.responsebody).data.buildstations_mapping_adon;
-                    this.buildstationpcodetails = pcodata;
+                    this.buildstationpcodetails = this.getmodifiedlist(pcodata);
                     this.showSpinner = false;
                     }
                     
@@ -861,7 +881,7 @@ export default class ShowValidationiconsComponent extends LightningElement {
         }
         this.uploadopchecktoserver(this.selectedopchek);  
     }
-    createshortage(event){
+    /*createshortage(event){
         let partno=event.target.dataset.id;
         let bscode=event.target.name;
         let partname=event.target.value;
@@ -881,22 +901,7 @@ export default class ShowValidationiconsComponent extends LightningElement {
         );
         this.dispatchEvent(addshortage);
         //pubsub.fire('addshortage', JSON.stringify(message) );
-    }
-    // To add new discrepancy
-    creatediscrepancy(event){
-        var opcheckdetails={
-            //description : event.target.value,
-            description : '',
-			buildstation: this.buildstationdata
-        };
-        const adddiscrepancy = new CustomEvent(
-            "addopckdiscrepancy",
-            {
-                detail : {opcheckdetails: opcheckdetails} 
-            }
-        );
-        this.dispatchEvent(adddiscrepancy);
-    }
+    }*/ //Vishwas
     handlemodalaction(messageFromEvt){
         if(messageFromEvt != undefined){
             var message = JSON.parse(messageFromEvt);
@@ -941,5 +946,65 @@ export default class ShowValidationiconsComponent extends LightningElement {
         console.log('Modal Action registered ');
         pubsub.unregister('modalaction', 'handlemodalaction');
     }*/
+    getmodifiedlist(validationdata){
+        var validationitemlist=validationdata;
+        var modifiedList = validationitemlist.map(row => ({
+            ...row,
+            displyitemnumber: 'Test'
+          }));
+        var displyitemnumber;
+        for(var li in modifiedList){
+            var vd=modifiedList[li];
+            if(vd.lvl==2){
+                displyitemnumber=' ->'+ vd.buspart_no;
+            }else if(vd.lvl==3){
+                displyitemnumber=' -->'+ vd.buspart_no;
+            }else{
+                displyitemnumber    =vd.buspart_no;
+            }
+            vd.displyitemnumber=displyitemnumber;
+        }
+        return modifiedList;
+    }
+    deletetargetimage(event){
+        this.showSpinner = true;
+        var requestbody = {
+            "fleet_id" : event.target.dataset.name,
+            "buildstation_id" : event.target.dataset.id
+        };
+        deleteTargetPicture({requestbody:JSON.stringify(requestbody)})
+              .then(data => {
+                  if(data.isError){
+                      const alertmessage = new ShowToastEvent({
+                          title : 'Sorry we could not complete the operation. Please try to attach an image file only.',
+                          message : 'Something unexpected occured. Please contact your Administrator',
+                         variant : 'error'
+                    });
+                    this.dispatchEvent(alertmessage);
+                    
+                  }
+                  else{
+                      const alertmessage = new ShowToastEvent({
+                          title : 'Delete Succcessfull',
+                          message : 'Target Image deleted successfully from fleet.',
+                          variant : 'success'
+                    });
+                    this.dispatchEvent(alertmessage);
+                    this.refreshtheoperationlist();
+                    this.istargetimagepresent=false;
+                    this.showSpinner = false;
+                  }
+                    
+              }).catch(error => {
+              this.error = error;
+               const alertmessage = new ShowToastEvent({
+                    title : 'Sorry we could not complete the operation. Please try to attach an image file only.',
+                    message : 'Something unexpected occured. Please contact your Administrator',
+                   variant : 'error'
+              });
+              this.dispatchEvent(alertmessage);
+              //this.showSpinner = false;
+              });
+    }
 
 }

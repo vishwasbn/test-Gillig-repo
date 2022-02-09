@@ -378,6 +378,7 @@ export default class ManageCrewingScheduleComponent extends LightningElement {
                          assignedemployees.push(buildstationcrewdata[i].assinged_emp[emp].value);
                      }
                      buildstationcrewdata[i]['selectedusers'] = assignedemployees;
+                     buildstationcrewdata[i]['assignedusers'] = assignedemployees;//to tack new assigned/unassigned user while modifying the assignement for BS
                      buildstationcrewdata[i]['isusersavailable'] = assignedemployees.length!=0;
                      modifiedbscrewdata.push(buildstationcrewdata[i]);
                 }
@@ -458,16 +459,27 @@ export default class ManageCrewingScheduleComponent extends LightningElement {
 
     updatebscrewmapping(event){
         var selecteddepartment =  this.selectedbsdata;
+        var selecteduser = [];
+        var unassigneduser =[]
         var selecteduserids = [];
-        for(var i in this.availableusersforassignmentbs){
-            if(this.selectedbsdata.selectedusers.includes(this.availableusersforassignmentbs[i].value)){
+        var unassigneduserids =[];
+        //To track new assignment/unassignment
+        unassigneduser = this.selectedbsdata.assignedusers.filter(user => !this.selectedbsdata.selectedusers.includes(user));
+        selecteduser = this.selectedbsdata.selectedusers.filter(user => !this.selectedbsdata.assignedusers.includes(user));
+        //Get the id for the assigned user and unassigned user
+        for (var i in this.availableusersforassignmentbs) {
+            if (selecteduser.includes(this.availableusersforassignmentbs[i].value)) {
                 selecteduserids.push(this.availableusersforassignmentbs[i].Id);
+            }
+            if (unassigneduser.includes(this.availableusersforassignmentbs[i].value)) {
+                unassigneduserids.push(this.availableusersforassignmentbs[i].Id);
             }
         }
         var requestbody = {
             "department_id" : this.selecteddepartment,
             "buildstation_id" : selecteddepartment.buildstation_id,
-            "mapped_employees" : JSON.stringify(selecteduserids)
+            "mapped_employees" : JSON.stringify(selecteduserids),
+            "unmapped_employees" : JSON.stringify(unassigneduserids)
         };
         assignPoolUserstoBuildStation({requestbody:JSON.stringify(requestbody)})
          .then((result) => {

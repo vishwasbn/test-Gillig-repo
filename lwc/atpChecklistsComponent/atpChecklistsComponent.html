@@ -20,14 +20,14 @@
                         </template> 
                     </div>
                 </div>
-                <div class="slds-col">
-                </div>
-                <div if:true={buttonenabled}>
-                    <div class="slds-col alignbutton">
-                     <lightning-button disabled={disablenewattchmentitem} label={buttonLabel} variant="brand-outline" title="New List Item" onclick={addnewlistitem} class="slds-m-right_xxx-small"></lightning-button> 
-                    </div>
-                </div>
-              </div>
+               <div class="slds-col alignbutton">
+                  <c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={departmentid} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset}></c-new-discrepancy-component>
+                  <c-qc-check-list departmentoptions={departmentoptions} ecardid={ecardid} departmentid={departmentid}></c-qc-check-list>
+                  <c-meeting-note-component departmentoptions={departmentoptions} ecardid={ecardid} departmentid={departmentid}></c-meeting-note-component>
+                  <c-help-component departmentoptions={departmentoptions} ecardid={ecardid} departmentid={departmentid}></c-help-component>
+                  <lightning-button if:true={buttonenabled} disabled={disablenewattchmentitem} label={buttonLabel} variant="brand-outline" title="New List Item" onclick={addnewlistitem} class="slds-m-right_xxx-small"></lightning-button>
+               </div>
+            </div>
         </section>
      <section class="actioncontent">
         <div class="slds-tabs_default">
@@ -445,5 +445,4 @@
       </section>
    <div class="slds-backdrop slds-backdrop_open"></div>
       </template>
-   <!--Acceptance Test QC User Select Modal End-->
 </template>

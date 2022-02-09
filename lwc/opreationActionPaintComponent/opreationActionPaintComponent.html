@@ -22,10 +22,14 @@
                   
                 </div>
                 <div class="slds-col alignbutton">
-                  <lightning-button label="Add Shortage" variant="brand-outline" title="Add Shortage" onclick={showReportShortageAdd} class="slds-m-right_xxx-small"></lightning-button> 
-                  <lightning-button label="Add Discrepancy" variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
-                  <lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button> 
-                  <lightning-button label="Help" variant="brand-outline" title="Help" onclick={gethelpdocuments} class="slds-m-right_xxx-small"></lightning-button>
+                  <!--lightning-button label="Add Shortage" variant="brand-outline" title="Add Shortage" onclick={showReportShortageAdd} class="slds-m-right_xxx-small"></lightning-button-->
+                  <c-new-shortage-component buttonlabel="Add Shortage" modalheading="New Shortage" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentId} buildstationrequired="true" department-id-map={departmentIdMap} permissionset={permissionset}></c-new-shortage-component>
+                  <!--lightning-button label="Add Discrepancy" variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button-->
+                  <c-new-discrepancy-component buttonlabel="Add Discrepancy" modalheading="New Discrepancy" type="buildstation" ecardid={ecardid} busname={busname} buschasisnumber={buschasisnumber} department={department} departmentid={selecteddepartmentId} buildstationrequired="true" department-id-map={departmentIdMap} onoperationrefresh={refreshoperation} permissionset={permissionset}></c-new-discrepancy-component>
+                  <!--lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button-->
+                  <c-qc-check-list  departmentoptions={departmentoptions} ecardid={ecardid} departmentid={selecteddepartmentId}></c-qc-check-list>
+                  <!--lightning-button label="Help" variant="brand-outline" title="Help" onclick={gethelpdocuments} class="slds-m-right_xxx-small"></lightning-button-->
+                  <c-help-component departmentoptions={departmentoptions} ecardid={ecardid} departmentid={selecteddepartmentId}></c-help-component>
                 </div>
               </div>
 
@@ -89,7 +93,8 @@
                                      
                                     </td>
                                     <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="slds-text-heading_small slds-align_absolute-center"><span class="statusbadge">{discrepancy.discrepancy_statusdisplay}</span></div></td>
-                                    <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" >{discrepancy.buildstation_code}</div></td>
+                                    <td if:true={discrepancy.disc_bsavailable} data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" >{discrepancy.buildstation_code}</div></td>
+                                    <td if:false={discrepancy.disc_bsavailable} data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" ></div></td>
                                     <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" >{discrepancy.defect_code}, {discrepancy.defect_name}</div></td> <!--.{discrepancy.defect_name}-->
                                     <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class=""><c-userlist-icon-component type='discrepancy prod' buildstationid={discrepancy.ecard_discrepancy_log_id}  userlist={discrepancy.assignedprod} ></c-userlist-icon-component></div> </td>
                                     <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div if:true={discrepancy.qcavailable} class=""><c-userlist-icon-component type='discrepancy qc' buildstationid={discrepancy.ecard_discrepancy_log_id} userlist={discrepancy.assigend_qc_id}></c-userlist-icon-component></div>  </td>
@@ -168,10 +173,12 @@
             <lightning-input type="text" label="Department" name="department_name" value={selecteddiscrepancy.department_name} readonly></lightning-input>
           </div>
           <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-            <lightning-input type="text" label="Build Station" name="buildstation_code" value={selecteddiscrepancy.buildstation_code} readonly></lightning-input>
+            <lightning-input if:true={selecteddiscrepancy.disc_bsavailable} type="text" label="Build Station" name="buildstation_code" value={selecteddiscrepancy.buildstation_code} readonly></lightning-input>
+            <lightning-input if:false={selecteddiscrepancy.disc_bsavailable} type="text" label="Build Station" name="buildstation_code" value='' readonly></lightning-input>
           </div>
           <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-            <lightning-input type="text" label="Work Centre" name="workcenter_name"  value={selecteddiscrepancy.workcenter_name} readonly></lightning-input>
+            <lightning-input if:true={selecteddiscrepancy.disc_bsavailable} type="text" label="Work Center" name="workcenter_name"  value={selecteddiscrepancy.workcenter_name} readonly></lightning-input>
+            <lightning-input if:false={selecteddiscrepancy.disc_bsavailable} type="text" label="Work Center" name="workcenter_name"  value='' readonly></lightning-input>
           </div>
           
           <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium"> 
@@ -267,9 +274,18 @@
         <div class="slds-align_absolute-center" >
           <div class="referenceimage" style="max-height:380px;max-width:1200px;"> <!--style={parentdivdimensions}-->
             <img src={discrepancyimage} style={parentdivdimensions} alt="Discrepancy Image"/>
-            <span style={setdiscrepancypoint} class="discrepancypoint">
+            <!--take care of historical Discrepancy point as object - can be removed from next release START-->
+            <span if:false={isbusareaarray} style={setdiscrepancypoint} class="discrepancypoint">
               {selecteddiscrepancy.ecard_discrepancy_log_number}
-            </span>                                            
+            </span>
+            <!--take care of historical Discrepancy point as object - can be removed from next release END-->
+            <!--this is to consider the array of the paint discrepancy point - new implementation START-->
+            <template if:true={isbusareaarray} for:each={setdiscrepancypoint} for:item='discrepancypoint'>
+              <span style={discrepancypoint.style} key={discrepancypoint.index} class="discrepancypoint">
+                {selecteddiscrepancy.ecard_discrepancy_log_number}
+              </span>
+            </template>
+            <!--this is to consider the array of the paint discrepancy point - new implementation END-->
           </div>
        </div>
       </template>

@@ -24,6 +24,8 @@ import deleteDiscOrShortage from "@salesforce/apex/ecardOperationsController.del
 import {permissions, modifieduserlist, getmoddeddate, getselectedformandetails, preassignforeman, preassignqc, setstatusfordisplay}  from 'c/userPermissionsComponent';
 import getPermissions from "@salesforce/apex/userAuthentication.getPermissions";
 import EcardLogin from "@salesforce/apex/userAuthentication.EcardLogin";
+import getStatusPicklistOptions from "@salesforce/apex/scheduleBoardController.getPicklistOptions";
+import pubsub from 'c/pubsub' ;
 
 export default class DiscrepancyDbComponent extends LightningElement {
   nodatadessert = noDatadessert;
@@ -90,6 +92,19 @@ export default class DiscrepancyDbComponent extends LightningElement {
   @track qccapturerole=false;
   @track qccaptureaction=false;
   @track isdelenabled=false;
+  @track busstatuslist =[{'label': 'WIP', 'value' : 'WIP'}];
+  @track selectedBusStatus = 'WIP';
+  @track isbusareaarray = false;
+  @track departmentIdMap = [{'bus_area_discrepancy_enabled':true,
+                            'label':'All Departments',
+                            'value': '0'}];
+  @track statusascomment = false;
+  @track statuscommentmap = {
+    "resolve": "Status changed to Resolved",
+    "approve": "Status changed to Verified",
+    "open": "Status changed to Open"
+  };
+  
 
   // Use whenever a false attribute is required in Component.html
   get returnfalse() {
@@ -131,7 +146,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
     else{
       updatepermission=this.permissionset.discrepancy_update_prod.write;
     }
-    if (this.selecteddiscrepancy.discrepancy_status != "open" && updatepermission ) {
+    if (this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open" && updatepermission ) {
       return true;
     } else {
       return false;
@@ -139,7 +154,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
   }
 
   get disableqcforupdate() {
-    if (this.selecteddiscrepancy.discrepancy_status == "approve") {
+    if (this.selecteddiscrepancy.discrepancy_status.toLowerCase() == "approve") {
       return true;
     } else {
       return false;
@@ -162,6 +177,18 @@ export default class DiscrepancyDbComponent extends LightningElement {
     }
   }
 
+  //used to dispaly/hide the preview image colomn
+  get isdepartmentPaint(){
+    var isdepartmentpaintortrim = false;
+    var departmentname = this.selecteddepartement;
+    for(var i in this.departmentIdMap){
+        if(this.departmentIdMap[i].label == departmentname){
+            isdepartmentpaintortrim = this.departmentIdMap[i].bus_area_discrepancy_enabled;
+        }
+    }
+    return isdepartmentpaintortrim;
+}
+
     wiredPermissions;
     permissionset;
     getPermissionsfromserver(event){
@@ -181,8 +208,10 @@ export default class DiscrepancyDbComponent extends LightningElement {
     loadStyle(this, HideLightningHeader);
     this.getloggedinuser();
     this.getPermissionsfromserver();
+    this.setdepartmentidmap();
     this.showSpinner = true;
     this.loaddataforview(event);
+    pubsub.register('operationrefresh', this.refreshDiscrepancy.bind(this));
   }
 
   getloggedinuser(){
@@ -216,10 +245,17 @@ export default class DiscrepancyDbComponent extends LightningElement {
     var today = new Date();
     var start = today;
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()+":"+today.getMilliseconds();
-    console.log('Discrepancy DB :- Time before excuting API call :', time );
-    getAllDiscrepanciesfromServer()
+    this.showSpinner = true;
+    var statuslist = [];
+    if (this.selectedBusStatus != 'All Bus Status') {
+      statuslist.push(this.selectedBusStatus.replaceAll(" ", "%20"));
+    }
+    else{
+      statuslist = null;
+    }
+    var statusparm = { bus_status: statuslist};
+    getAllDiscrepanciesfromServer({ecardbusstatus : JSON.stringify(statusparm)})
       .then((response) => {
-        this.showSpinner = true;
         if (response.isError) {
           const alertmessage = new ShowToastEvent({
             title: "Failed to fetch Discrepancy List.",
@@ -288,11 +324,11 @@ export default class DiscrepancyDbComponent extends LightningElement {
               discrepancy.verifiedby_id
             ]);
             var assigneduser = [];
-            if (discrepancy.discrepancy_status == "open") {
+            if (discrepancy.discrepancy_status.toLowerCase() == "open") {
               assigneduser = selectedprodlist;
-            } else if (discrepancy.discrepancy_status == "resolve") {
+            } else if (discrepancy.discrepancy_status.toLowerCase() == "resolve") {
               assigneduser = assigend_qc_id;
-            } else if (discrepancy.discrepancy_status == "approve") {
+            } else if (discrepancy.discrepancy_status.toLowerCase() == "approve") {
               assigneduser = assigend_qc_id;
             } else {
               assigneduser = selectedprodlist;
@@ -309,7 +345,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
             var bsavailable=discrepancy.buildstation_code=='9999'?false:true;
             //alert(discrepancy.modified_date);    
             var is_deletable=false;
-            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancy.discrepancy_status=="open")){
+            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancy.discrepancy_status.toLowerCase()=="open")){
               is_deletable=true;
             }    
             var modeddiscrepancy = {
@@ -340,9 +376,9 @@ export default class DiscrepancyDbComponent extends LightningElement {
                 discrepancy.discrepancy_priority
               ),
               discrepancy_statusdisplay: setstatusfordisplay(
-                discrepancy.discrepancy_status
+                discrepancy.discrepancy_status.toLowerCase()
               ),
-              discrepancy_status: discrepancy.discrepancy_status,
+              discrepancy_status: discrepancy.discrepancy_status.toLowerCase(),
               discrepancy_type: this.capitalize(discrepancytype),
               isdepartmentdiscrepancy: isdepartmentdiscrepancy,
               isdeletable:is_deletable,
@@ -619,6 +655,27 @@ export default class DiscrepancyDbComponent extends LightningElement {
           this.dispatchEvent(alertmessage);
         });
     }
+  }
+
+  setdepartmentidmap() {
+    getDepartmentdata({ authdata: '' })
+      .then(result => {
+        for (var dept in result.departmentPickList) {
+          var deprtmentopt = result.departmentPickList[dept];
+          if (deprtmentopt.value != 'None') {
+            this.departmentIdMap.push(deprtmentopt);
+          }
+        }
+      })
+      .catch(error => {
+        this.showSpinner = true;
+        const alertmessage = new ShowToastEvent({
+          title: 'Department data fetch failed.',
+          message: 'Something unexpected occured. Please contact your Administrator',
+          variant: 'error'
+        });
+        this.dispatchEvent(alertmessage);
+      });
   }
 
   // Handle Department Change
@@ -1292,7 +1349,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
             //Crewing End
     this.getselecteddiscrepancycomments(selecteddiscrepancylogid);
     this.isdelenabled=false;
-    if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status =='open')){
+    if(this.selecteddiscrepancy.isdeletable || (this.permissionset.discrepancy_delete.write && this.selecteddiscrepancy.discrepancy_status.toLowerCase() =='open')){
             this.isdelenabled=true;
     }
     this.detailsmodal = true;
@@ -1365,6 +1422,27 @@ export default class DiscrepancyDbComponent extends LightningElement {
       });
   }
 
+  // Add the discrepancy status change as comment
+  addstatusasdiscrepancycomment(discrepancylogid, commenttext) {
+    var ecarddiscrepancylogid = discrepancylogid;
+    var newcommentbody = {
+      "ecard_discrepancy_log_id": discrepancylogid,
+      "discrepancy_comments": commenttext
+    };
+    addnewComment({ requestbody: JSON.stringify(newcommentbody) })
+      .then(data => {
+        if (data.isError) {
+          this.showmessage('Failed to add Comments.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+        }
+        else {
+          this.getselecteddiscrepancycomments(ecarddiscrepancylogid);
+        }
+      })
+      .catch(error => {
+        this.showmessage('Failed to add Comments.', 'Something unexpected occured. Please contact your Administrator.', 'error');
+      });
+  }
+
   // Get Comments of selected discrepancy
   getselecteddiscrepancycomments(selecteddiscrepancylogid) {
     var requesthead = selecteddiscrepancylogid.toString();
@@ -1428,7 +1506,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
   }
 
   get disablecomponentdates() {
-    return this.selecteddiscrepancy.discrepancy_status != "open";
+    return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open";
   }
 
   // Handle Discrepancy Actions
@@ -1503,6 +1581,7 @@ export default class DiscrepancyDbComponent extends LightningElement {
       this.selecteddiscrepancy.discrepancy_status = "resolve";
     }
     if (passedallvalidation) {
+      this.statusascomment = true;
       this.updatediscrepancytoserver();
     }
   }
@@ -1573,6 +1652,11 @@ export default class DiscrepancyDbComponent extends LightningElement {
           this.dispatchEvent(alertmessage);
           this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;
           //this.detailsmodal = false;
+          if (this.statusascomment) {
+            this.statusascomment = false;
+            var response = JSON.parse(data.operationlogresponse).data;
+            this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+          }
           this.loaddataforview();
         }
       })
@@ -1661,10 +1745,10 @@ export default class DiscrepancyDbComponent extends LightningElement {
         };
         debugger
         var discrepancycolor = '#ff3b30';
-        if(this.selecteddiscrepancy.discrepancy_status == 'resolve'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'resolve'){
             discrepancycolor = '#e8bb07';
         }
-        if(this.selecteddiscrepancy.discrepancy_status == 'approve'){
+        if(this.selecteddiscrepancy.discrepancy_status.toLowerCase() == 'approve'){
             discrepancycolor = '#34c759';
         }
         var maxwidth = 1200; 
@@ -1687,13 +1771,26 @@ export default class DiscrepancyDbComponent extends LightningElement {
         }
         var bus_area = this.selecteddiscrepancy.bus_area;
         this.parentdivdimensions = `height: ${parentdivheight}px; weight: ${parentdivwidth}px`;
-        this.setdiscrepancypoint =`top: ${bus_area.y*zoomScale}px;left: ${bus_area.x*zoomScale}px;background: ${discrepancycolor};`;
+        this.isbusareaarray = Array.isArray(bus_area);
+        /** this is to consider the array of the paint discrepancy point - new implementation*/
+        if (this.isbusareaarray) {
+          var buspointlist = [];
+          for (var i in bus_area) {
+            var style = `top: ${bus_area[i].y * zoomScale}px;left: ${bus_area[i].x * zoomScale}px;background: ${discrepancycolor};`;
+            buspointlist.push({ index: i, style: style });
+          }
+          this.setdiscrepancypoint = buspointlist;
+        }
+        else { /** This condition is to take care of historical Discrepancy point as object - can be removed from next release */
+          this.setdiscrepancypoint = `top: ${bus_area.y * zoomScale}px;left: ${bus_area.x * zoomScale}px;background: ${discrepancycolor};`;
+        }
         this.previewimageexist = true;
         this.showspinnerwithmodal = false;
     }
 
     hidepreviewimage(event){
         this.showpreviewimage = false;
+        this.previewimageexist = false;
     }
 
     @track s3tempurlfornewdiscrepancy = [];
@@ -1781,5 +1878,53 @@ export default class DiscrepancyDbComponent extends LightningElement {
       }
 
   }
+  //Added to refresh the Discrepancydblist after adding new Discrepancy
+  refreshDiscrepancy() {
+    this.loaddataforview();
+  }
 
+  // used to load the busStatus picklist
+  loadstatuspicklistvalues(event) {
+    var picklistname = event.target.name;
+    if (event.target.options.length == 1) {
+      getStatusPicklistOptions({ picklistName: picklistname })
+        .then((data) => {
+          if (data.isError) {
+            const alertmessage = new ShowToastEvent({
+              title: "Picklist data value failed to fetch.",
+              message:
+                "Something unexpected occured. Please contact your Administrator",
+              variant: "error"
+            });
+            this.dispatchEvent(alertmessage);
+            throw "Data fetch failed";
+          } else {
+            var options = data.options;
+            if (picklistname == 'busstatus') {
+              for (var i = 0; i < options.length; i++) {
+                if (options[i].value === 'Staging' || options[i].value === 'Sold') {
+                  options.splice(i, 1);
+                }
+              }
+              this.busstatuslist = options;
+            }
+          }
+        })
+        .catch((error) => {
+          this.error = error;
+          const alertmessage = new ShowToastEvent({
+            title: "Picklist data value failed to fetch.",
+            message:
+              "Something unexpected occured. Please contact your Administrator",
+            variant: "error"
+          });
+          this.dispatchEvent(alertmessage);
+        });
+    }
+  }
+  // To handle  when filter on Bus Status is selected.
+  handlebusstatuschange(event) {
+    this.selectedBusStatus = event.detail.value;
+    this.loaddataforview();
+  }
 }

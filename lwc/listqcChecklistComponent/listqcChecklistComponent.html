@@ -17,20 +17,22 @@
               show-search-box="true" 
               onpaginatorchange={handlePaginatorChange}>
   </c-paginator>
-  <lightning-datatable
-    key-field="qc_check_list_id"
-    columns={columns}
-    data={recordsToDisplay}
-    hide-checkbox-column="true"
-    show-row-number-column
-    row-number-offset={rowNumberOffset}
-    suppress-bottom-bar
-    default-sort-direction={defaultSortDirection}
-    sorted-direction={sortDirection}
-    sorted-by={sortedBy}
-    onrowaction={handleRowAction}
-    onsort={onHandleSort}>
-</lightning-datatable>
+  <div style={tableHeight}>
+   <lightning-datatable
+      key-field="qc_check_list_id"
+      columns={columns}
+      data={recordsToDisplay}
+      hide-checkbox-column="true"
+      show-row-number-column
+      row-number-offset={rowNumberOffset}
+      suppress-bottom-bar
+      default-sort-direction={defaultSortDirection}
+      sorted-direction={sortDirection}
+      sorted-by={sortedBy}
+      onrowaction={handleRowAction}
+      onsort={onHandleSort}>
+   </lightning-datatable>
+  </div>
 
 </template>
 
@@ -69,7 +71,7 @@
               <lightning-combobox disabled required class="updatevalidation" label="Fleet"  name="fleet_id"  value={record.fleet_id}  placeholder="Fleet" options={fleetlistoptions} ></lightning-combobox>
            </div>
            <div class="slds-col slds-size_1-of-2">
-              <lightning-combobox disabled required class="updatevalidation" label="Department"  name="department_id"  value={record.department_id}  placeholder="Departments" options={departmentlistoptions} ></lightning-combobox>
+              <lightning-combobox disabled required class="updatevalidation" label="Department"  name="department_id"  value={record.department_id}  placeholder="Departments" options={departmentlistoptions}></lightning-combobox>
             </div>
             <div class="slds-col slds-size_1-of-1">
                <!--lightning-input  required type="url" class="updatevalidation" name="qc_check_list_url"  value={record.qc_check_list_url} label="File URL" onchange={trackchangeonupdate}></lightning-input-->
@@ -108,6 +110,7 @@
         <!-- modal body start -->
         <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
           <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1"><br/></div>
            <div class="slds-col slds-size_1-of-2">
             <c-custom-search-component
             isrequired={returntrue}
@@ -124,11 +127,13 @@
            </div>
            <div class="slds-col slds-size_1-of-2">
               <lightning-combobox  required class="newrecordvalidation" label="Department"  name="department_id"  value={newqcchecklist.department_id}  placeholder="Departments" options={departmentlistoptions}  onchange={tracknewvaluechange} ></lightning-combobox>
-            </div> 
+            </div>
+            <div class="slds-col slds-size_1-of-1"><br/></div>
            <div class="slds-col slds-size_1-of-1">
                <!--lightning-input class="newrecordvalidation" required type="url" name="qc_check_list_url" value={newqcchecklist.qc_check_list_url} label="File URL" onchange={tracknewvaluechange} ></lightning-input-->
                <lightning-input class="newrecordvalidation" required type="text" name="qc_check_list_url" value={newqcchecklist.qc_check_list_url} label="File URL" onchange={tracknewvaluechange} ></lightning-input>
             </div>
+            <div class="slds-col slds-size_1-of-1"><br/></div>
             
             
             
