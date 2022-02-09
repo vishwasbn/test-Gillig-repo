@@ -101,14 +101,14 @@
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>true</editable>
+        <editable>false</editable>
         <field>User.Ecard_Access_Time__c</field>
-        <readable>true</readable>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>true</editable>
+        <editable>false</editable>
         <field>User.Ecard_Access_Token__c</field>
-        <readable>true</readable>
+        <readable>false</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Ecard Prod</label>
@@ -130,6 +130,10 @@
     </tabSettings>
     <tabSettings>
         <tab>Selected_Discrepancies</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Shortage_DB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <userPermissions>

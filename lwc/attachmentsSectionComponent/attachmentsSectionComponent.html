@@ -22,6 +22,7 @@
             label="Upload New File"
             accept={acceptedFormats}
             onchange={handleupload}
+            disabled={disableattachment}
          >
         </lightning-input>
        </div>
@@ -40,7 +41,7 @@
                   <div class="slds-file__actions-menu">
                     <div class="slds-button-group" role="group">
                       <a href="javascript:void(0);">
-                        <lightning-button-icon icon-name="utility:delete" data-id={attachment.Id} onclick={deleteattachment} alternative-text="Delete"   variant="bare-inverse" class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
+                        <lightning-button-icon if:false={disableattachment} icon-name="utility:delete" data-id={attachment.Id} onclick={deleteattachment} alternative-text="Delete"   variant="bare-inverse" class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
                       </a>
                       <!--  <a href={attachment.url}>
                             <lightning-button-icon icon-name="utility:download"    alternative-text="Download"   variant="bare-inverse" class="slds-m-left_xx-small" title="Download"></lightning-button-icon>

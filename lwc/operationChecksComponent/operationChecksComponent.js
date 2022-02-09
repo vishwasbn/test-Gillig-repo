@@ -64,6 +64,9 @@ export default class OpertaionChecksComponent extends LightningElement {
       return this.permissionset.dept_discrepancy_new.write;
     }
 
+    get disablerequired(){
+      return !this.permissionset.atp.write;
+  }
     get filterapplied(){
       return this.filterlocal!=undefined;
     }
@@ -87,7 +90,7 @@ export default class OpertaionChecksComponent extends LightningElement {
         this.opckdetails=this.tmpopckdetails;
       } 
     }*/
-    //opckdetails=[]; //
+    //opckdetails=[]; //Vishwas Commented
     /*connectedCallback(){
         console.log('Inside Operation Checks');
         if(this.check){
@@ -240,9 +243,9 @@ export default class OpertaionChecksComponent extends LightningElement {
                   }
                   else{
                       const alertmessage = new ShowToastEvent({
-                          title : 'Upload Succcessfull',
-                          message : 'Operation Check uploaded successfully.',
-                         variant : 'success'
+                        title: 'Update Succcessful',
+                        message: 'Operation Check updated successfully.',
+                        variant: 'success'
                     });
                     this.dispatchEvent(alertmessage);
                     this.showSpinner = false;

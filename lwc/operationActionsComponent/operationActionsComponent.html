@@ -47,36 +47,36 @@
           
       </section>
       <section class="actioncontent">
-          <div class="slds-card">
+          <div class="slds-card pageheader">
               
               <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                   <thead>
                   <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                  <th if:false={isalldepartment} class="tblheaderth" scope="col">
+                  <th if:false={isalldepartment} class="tblheaderth tableheader" scope="col">
                        <div class="slds-truncate" title="SL NO.">SL NO.</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="">{department} - {operation}</div>
                   </th>
-                  <th if:true={isalldepartment} class="tblheaderth" scope="col">
+                  <th if:true={isalldepartment} class="tblheaderth tableheader" scope="col">
                     <div class="slds-truncate" title="DEPT. CODE">DEPT.CODE</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="BUILD STATION/FLAG/VALIDATION">BUILD STATION/FLAG/VALIDATION</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="DISC./SHORT.">DISC./SHORT.</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                     <div class="slds-truncate" title="ATTACHMENTS">ATTACHMENTS</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="PROD">PROD</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="QC">QC</div>
                   </th>
-                  <th class="tblheaderth" scope="col">
+                  <th class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="ACTION">ACTION</div>
                   </th>
                   
@@ -96,7 +96,7 @@
                               </td>
                               <td><div> <!---->
                                    <lightning-button if:true={buildstation.hasdescrepancy} label="View" title="View Discrepancy" data-id={buildstation.buildstation_id} onclick={showdiscrepancylistmodal} class="slds-m-left_xx-small" ></lightning-button> <!--icon-name="utility:preview"-->
-                                   <lightning-button-icon icon-name="utility:add" data-id={buildstation.buildstation_id} variant="border-filled" alternative-text="Add Discrepancy" title="Add Discrepancy" onclick={showopdiscrepancymodal} class="slds-m-left_xx-small"></lightning-button-icon>
+                                   <lightning-button-icon if:true={enableoperationdisc} icon-name="utility:add" data-id={buildstation.buildstation_id} variant="border-filled" alternative-text="Add Discrepancy" title="Add Discrepancy" onclick={showopdiscrepancymodal} class="slds-m-left_xx-small"></lightning-button-icon>
                                   </div>
                               </td>
                               <td><div class=""> <lightning-button data-id={buildstation.buildstation_id} onclick={showattachmentsmodal} label="View/Upload" title="View" icon-name="utility:attach"></lightning-button></div> </td>
@@ -171,35 +171,35 @@
               
           </section>
           <section class="actioncontent">
-              <div class="slds-card">
+              <div class="slds-card pageheader">
                   <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                       <thead>
                       <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="DEFECT ID">DEFECT ID</div>
                      </th>
-                     <th if:true={isalldepartment} class="tblheaderth" scope="col">
+                     <th if:true={isalldepartment} class="tblheaderth tableheader" scope="col">
                       <div class="slds-truncate" title="DEPT. CODE">DEPT.CODE</div>
                     </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="">DESCRIPTION</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                         <div class="slds-truncate" title="DEFECT STATUS">DEFECT STATUS</div>
                      </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="BUILD STATION">BUILD STATION</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="DEFECT CODE">DEFECT CODE</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="PROD">PROD</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="QC">QC</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="ACTION">ACTION</div>
                       </th>
                       </tr>
@@ -291,38 +291,38 @@
               
           </section>
           <section class="actioncontent">
-              <div class="slds-card">
+              <div class="slds-card pageheader">
                   <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                       <thead>
                       <tr class="slds-line-height_reset slds-text-title_caps tblheader">
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="SHORTAGE ID">SHORTAGE ID</div>
                      </th>
-                     <th if:true={isalldepartment} class="tblheaderth" scope="col">
+                     <th if:true={isalldepartment} class="tblheaderth tableheader" scope="col">
                          <div class="slds-truncate" title="DEPT. CODE">DEPT.CODE</div>
                      </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                            <div class="slds-truncate" title="PART NUMBER">PART NUMBER</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                         <div class="slds-truncate" title="PO #">PO #</div>
                      </th>
-                     <th class="tblheaderth" scope="col">
+                     <th class="tblheaderth tableheader" scope="col">
                        <div class="slds-truncate" title="QTY REQD">QTY REQD</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="DUE DATE">DUE DATE</div>
                       </th>
-                     <th class="tblheaderth" scope="col">
+                     <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="PROD">PROD</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="QC">QC</div>
                       </th>
-                      <th class="tblheaderth" scope="col">
+                      <th class="tblheaderth tableheader" scope="col">
                           <div class="slds-truncate" title="ACTION">ACTION</div>
                       </th>
                       </tr>
@@ -374,7 +374,7 @@
   <template if:true={isSelectedSlnologs}>
     
     <c-serialnumber-component ecardid={ecardid} buschasisnumber={buschasisnumber} department={department} selecteddepartment-id={selecteddepartmentid}
-    busname={busname} operation={selectedoperation} department-id-map={departmentIdMap} filter={filter}></c-serialnumber-component>
+    busname={busname} operation={selectedoperation} department-id-map={departmentIdMap} filter={filter} permissionset={permissionset}></c-serialnumber-component>
        
   </template>
   <!--Serial No Logs End-->
@@ -471,7 +471,7 @@
               <lightning-input type="text" name="po_no"   label="PO Number" onchange={updatenewpartshortage} value={newpartshortage.po_no} ></lightning-input>
            </div>
            <div class="slds-col slds-size_1-of-2">
-              <lightning-input type="date" name="cut_off_date" onchange={updatenewpartshortage} min={todaysdate} label="Due Date" value={newpartshortage.cut_off_date}></lightning-input>
+              <lightning-input type="date" name="cut_off_date" onchange={updatenewpartshortage} min={todaysdate} label="Due Date" value={newpartshortage.cut_off_date}></lightning-input><!--Due Date to ETA-->
            </div>
            <div class="slds-col slds-size_1-of-2">
             <lightning-combobox  name="priority" label="Priority" onchange={updatenewpartshortage}  value={newpartshortage.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
@@ -494,6 +494,74 @@
           </div>
              
           </div>
+          <!--new fileds addition-->
+          <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small">
+            <div class="slds-col slds-size_1-of-1"><br /></div>
+            <div class="slds-col slds-size_2-of-8">
+              <lightning-input type="text" name="buyer_code" label="Buyer / Planner Code" value={newpartshortage.buyer_code}
+                readonly disabled={disablebuyercode}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_3-of-8">
+              <lightning-combobox name="vendor_number" label="Vendor" value={newpartshortage.vendor_number}
+                options={partsvendorslist} onchange={updatenewpartshortage} disabled={disablevendorselection}></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_3-of-8">
+              <lightning-combobox name="shortage_cause_id" label="Cause" placeholder="Select Shortage Cause"
+                value={newpartshortage.shortage_cause_id} options={shortgecauselist} onfocus={loadpartshotcauselist}
+                onchange={updatenewpartshortage}></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-1"><br /></div>
+            <div class="slds-col slds-size_4-of-12">
+              <lightning-input type="text" name="carrier_text" label="Carrier" value={newpartshortage.carrier_text}
+                onchange={updatenewpartshortage}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_3-of-12">
+              <lightning-input type="text" name="carrier_arrival_text" label="Carrier Arrival Time"
+                value={newpartshortage.carrier_arrival_text} onchange={updatenewpartshortage}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_4-of-12">
+              <lightning-input type="text" name="tracking" label="Tracking #" value={newpartshortage.tracking}
+                onchange={updatenewpartshortage}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1"><br /></div>
+            <div class="slds-col slds-size_2-of-6">
+              <lightning-input type="date" name="date_received" label="Date Received" value={newpartshortage.date_received}
+                onchange={updatenewpartshortage}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+              <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="is_b_whs_kit">B Whs Kit?</label>
+                  <lightning-input type="checkbox" name="is_b_whs_kit" checked={newpartshortage.is_b_whs_kit}
+                    onchange={updatenewpartshortagecheckbox}></lightning-input>
+                </div>
+              </div>
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+              <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="is_ship_short">Ship Short?</label>
+                  <lightning-input type="checkbox" name="is_ship_short" checked={newpartshortage.is_ship_short}
+                    onchange={updatenewpartshortagecheckbox}></lightning-input>
+                </div>
+              </div>
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+              <!-- <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                  <label class="slds-form-element__label" for="is_long_term">Long Term?</label>
+                  <lightning-input type="checkbox" name="is_long_term" checked={newpartshortage.is_long_term}
+                    onchange={updatenewpartshortagecheckbox}></lightning-input>
+                </div>
+              </div> -->
+            </div>
+            <div class="slds-col slds-size_1-of-1"><br /></div>
+          </div>
+          <div class="slds-col slds-size_1-of-1">
+            <lightning-textarea name="remarks" field-level-help="" value={newpartshortage.remarks} label="Remark"
+              onchange={updatenewpartshortage}></lightning-textarea>
+          </div>
+          <!--new fileds addition-->
           <div class="slds-m-top_x-small slds-border_top">
             <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
           </div>
@@ -721,7 +789,7 @@
       </div>
       <div class="slds-grid slds-wrap slds-gutters">
         <div class="slds-col slds-size_1-of-1">
-          <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" ></c-attachments-section-component>
+          <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" permissionset={permissionset}></c-attachments-section-component>
         </div>
         <div class="slds-col slds-size_1-of-1">
           <c-comments-section-component unique-id={selecteddiscrepancy.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
@@ -805,7 +873,7 @@
         </div>
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
           <lightning-input if:true={selectedshortage.disc_bsavailable} type="text" label="Work Center" name="workcenter_name"  value={selectedshortage.workcenter_name} readonly></lightning-input>
-            <lightning-input if:false={selectedshortage.disc_bsavailable} type="text" label="Work Center" name="workcenter_name"  value='' readonly></lightning-input>
+          <lightning-input if:false={selectedshortage.disc_bsavailable} type="text" label="Work Center" name="workcenter_name"  value='' readonly></lightning-input>
         </div>
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
           <lightning-input type="text" label="Priority" name="discrepancy_priority" value={selectedshortage.discrepancy_priority} readonly></lightning-input>
@@ -813,14 +881,69 @@
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
           <lightning-input type="text" label="Shortage Status" name="discrepancy_statusdisplay" value={selectedshortage.discrepancy_statusdisplay} readonly></lightning-input>
         </div>
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <lightning-input type="text" label="Buyer / Planner Code" name="buyer_code" value={selectedshortage.buyer_code} readonly></lightning-input>
+        </div>
       </div>
-
+      <!--New Fileds Added Start-->
+      <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <!-- <lightning-combobox label="Vendor" name="vendor_number" value={selectedshortage.vendor_number} options={partsvendorslist} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-combobox> -->
+          <c-custom-search-lookup-component showicon=true showlabel=true disablecomponent={disableeditshortage}
+            placeholdertext="Add Custom Vendor" -icon-name="custom:custom111" listto-search={vendornamelist}
+            selectedcustomer={selectedshortage.vendor_name} label="Vendor" onselect={onvendorselection} onclear={onclearvendor}>
+          </c-custom-search-lookup-component>
+        </div>
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <lightning-input type="text" label="Carrier" name="carrier_text" value={selectedshortage.carrier_text} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+        </div>
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <lightning-input type="text" label="Carrier Arrival Time" name="carrier_arrival_text" value={selectedshortage.carrier_arrival_text} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+        </div>
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <lightning-combobox label="Cause" name="shortage_cause_id" value={selectedshortage.shortage_cause_id} options={shortgecauselist} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-combobox>
+        </div>
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <lightning-input type="text" name="tracking" label="Tracking #" value={selectedshortage.tracking} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+        </div>
+        <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+          <lightning-input type="date" name="date_received" label="Date Received" value={selectedshortage.date_received} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+        </div>
+        <div class="slds-col slds-grid slds-wrap slds-size_2-of-4 slds-m-bottom_medium">
+          <div class="slds-size_1-of-3 slds-form slds-form_stacked">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label" for="is_b_whs_kit">B Whs Kit?</label>
+              <lightning-input type="checkbox" name="is_b_whs_kit" checked={selectedshortage.is_b_whs_kit}
+                onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+            </div>
+          </div>          
+          <div class="slds-size_1-of-3 slds-form slds-form_stacked">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label" for="is_ship_short">Ship Short?</label>
+              <lightning-input type="checkbox" name="is_ship_short" checked={selectedshortage.is_ship_short}
+                onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+            </div>
+          </div>
+          <div class="slds-size_1-of-3 slds-form slds-form_stacked">
+            <!-- <div class="slds-form-element">
+              <label class="slds-form-element__label" for="is_long_term">Long Term?</label>
+              <lightning-input type="checkbox" name="is_long_term" checked={selectedshortage.is_long_term}
+                onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+            </div> -->
+          </div>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+          <lightning-textarea name="remarks" field-level-help="" value={selectedshortage.remarks} label="Remark"
+            onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-textarea>
+        </div>
+      </div>
+      <!--New Fileds Added End-->
       <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
         <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
-          <lightning-input disabled={disableqcforselectedshortage} type="text" label="PO Number" name="po_no" value={selectedshortage.po_no} onchange={updateselectedshortage}></lightning-input>
+          <lightning-input disabled={disableeditshortage} type="text" label="PO Number" name="po_no" value={selectedshortage.po_no} onchange={updateselectedshortage}></lightning-input>
         </div>
         <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
-          <lightning-input disabled={disableqcforselectedshortage} type="date" min={todaysdate} label="Due Date" name="cut_off_date" value={selectedshortage.cut_off_date} onchange={updateselectedshortage}></lightning-input>
+          <lightning-input disabled={disableeditshortage} type="date" min={todaysdate} label="Due Date" name="cut_off_date" value={selectedshortage.cut_off_date} onchange={updateselectedshortage}></lightning-input><!--Due Date to ETA-->
         </div>
         <div  class="slds-col slds-size_1-of-2"> 
           <c-re-usable-multi-select-lookup disablecomponent="true" limittoone={returntrue} selectedrecords={selectedshortage.assigend_qc_id} label="QC" -icon-name="standard:user" placeholdertext="" onitemselected={updateuserpartshortage} listtosearch={selectedshortage.allqclist}></c-re-usable-multi-select-lookup>
@@ -831,7 +954,7 @@
       </div>
       <div class="slds-grid slds-wrap slds-gutters">
         <div class="slds-col slds-size_1-of-1">
-          <c-attachments-section-component uniqueid={selectedshortage.ecard_discrepancy_log_id}  type="discrepancy" ></c-attachments-section-component>
+          <c-attachments-section-component uniqueid={selectedshortage.ecard_discrepancy_log_id}  type="discrepancy" permissionset={permissionset}></c-attachments-section-component>
         </div>
         <div class="slds-col slds-size_1-of-1">
            <c-comments-section-component unique-id={selectedshortage.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
@@ -841,6 +964,9 @@
     <!-- modal footer start-->
     <footer class="slds-modal__footer">
       <lightning-button if:true={isdeletable} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" name={selectedshortage.ecard_discrepancy_log_id} onclick={deletediscshortage}></lightning-button>   
+      <lightning-button if:true={isupdated} variant="brand" label="Update" title="Update" icon-name="utility:record_update"
+        class="slds-m-right_x-small" onclick={updatepartshortagetoserver}>
+      </lightning-button>
       <lightning-button label="Cancel" title="Cancel" onclick={hidepartshortagedetail} class="slds-m-right_x-small"></lightning-button>
       <c-status-operations-component permissionset={permissionset} type="shortage" prodlist={selectedshortage.assignedprod} qclist={selectedshortage.assigend_qc_id} data-id={selectedshortage.ecard_discrepancy_log_id} buildstationid={selectedshortage.ecard_discrepancy_log_id} ecardid={selectedshortage.ecard_id} status={selectedshortage.discrepancy_status} onsubmitchange={handlepartshortageactions}></c-status-operations-component> 
       <!--onsubmitchange={discrepancyactionshandler} -->
@@ -871,7 +997,7 @@
         </header>
         <!-- modal body start -->
         <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-83">
-          <c-attachments-section-component uniqueid={attachmentrequireddetails.operationlog_id}  type="operationlog" ecardid={attachmentrequireddetails.ecard_id} buildstationid={attachmentrequireddetails.buildstation_id} departmentid={attachmentrequireddetails.department_id} onnewadded={refreshoperation}></c-attachments-section-component>
+          <c-attachments-section-component uniqueid={attachmentrequireddetails.operationlog_id}  type="operationlog" ecardid={attachmentrequireddetails.ecard_id} buildstationid={attachmentrequireddetails.buildstation_id} departmentid={attachmentrequireddetails.department_id} onnewadded={refreshoperation} permissionset={permissionset}></c-attachments-section-component>
         </div>
         
         <!-- modal footer start-->

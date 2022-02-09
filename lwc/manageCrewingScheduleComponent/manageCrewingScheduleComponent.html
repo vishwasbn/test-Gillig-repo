@@ -24,6 +24,8 @@
                         </template>
                         <lightning-button if:true={isselectedworkcentremapping} variant="brand" data-label="workmapping" label="Build Station Mapping" onclick={changeview}></lightning-button>
                         <lightning-button if:false={isselectedworkcentremapping} data-label="workmapping" label="Build Station Mapping" onclick={changeview}></lightning-button>
+                        <lightning-button if:true={isselectedcrewingadjustment} variant="brand" data-label="crewadjustment" label="Crewing Adjustment" onclick={changeview}></lightning-button>
+                        <lightning-button if:false={isselectedcrewingadjustment} data-label="crewadjustment" label="Crewing Adjustment" onclick={changeview}></lightning-button>
                     </lightning-button-group>
                 </div>
             </div>
@@ -77,6 +79,7 @@
             </div>
                 
         </template>
+        
         <template if:true={isselectedworkcentremapping}>
             <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
                 <div class="slds-col"> <!--variant="label-hidden"-->
@@ -86,7 +89,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="slds-card">
                 <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
                      <thead>
@@ -105,8 +107,7 @@
                      </th>
                      <th class="tblheaderth" scope="col">
                          <div class="slds-truncate" title="ACTION">ACTION</div>
-                     </th>
-                     
+                     </th>                     
                      </tr>
                      </thead>
                      <tbody>
@@ -128,9 +129,160 @@
                      </table>
              </div>
         </template>
+        <!--Content Crewing Schedule Starts-->
+        <template if:true={isselectedcrewingadjustment}>
+            <div class="slds-grid">
+                <div class="slds-col slds-size_1-of-1 slds-p-top_x-small">
+                    <div class="slds-align_absolute-center slds-p-around_x-small headerborder">
+                        <span class="slds-text-heading_small headstyle" style="font-size: large">Crewing Adjustment Table</span>
+                    </div>
+                </div>              
+            </div>
+            <div class="slds-grid slds-wrap">
+                <div class="slds-col slds-size_1-of-4 slds-p-top_x-small">
+                    <div class="slds-p-around_x-small">
+                        <c-custom-search-component showicon={returntrue} showlabel={returnfalse} selectedcustomer={selectedEmployee}
+                            placeholdertext="Search By Employee Name" -icon-name="standard:user" listto-search={employeelist}
+                            label="Employee Search" onselect={onemployeeselect} onclear={onclearemployee}>
+                        </c-custom-search-component>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_2-of-4 slds-p-top_x-small">
+                    <div class="slds-p-around_x-small">
+            
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-4 slds-p-top_x-small">
+                    <div class="slds-p-around_x-small">
+                        <lightning-button variant="brand" class="slds-float_right slds-m-right_x-small" label="Add new assignment"
+                            title="Add new Assignment" onclick={newassignmentmodal} icon-name="utility:add" disabled={isAdjustmentButtonDisabled}>
+                        </lightning-button><!--Add new Assignment-->
+                    </div>
+                </div>
+            </div>
+            <div class="slds-grid slds-wrap">
+                <div class="slds-col slds-size_1-of-6 slds-p-around_x-small">
+                    <lightning-combobox variant="label-hidden" name="original_department" value={selectepoolddepartement}
+                        placeholder="Original Department" options={pooldepartmentlist} onchange={handlepooldepartmentchange}
+                        onfocus={loadpicklist}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-6 slds-p-around_x-small">
+                    <lightning-combobox variant="label-hidden" name="assigned_department" value={selectednonpooldepartement}
+                        placeholder="Assigned Department" options={nonpooldepartmentlist} onchange={handledepartmentchange}
+                        onfocus={loadpicklist}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-6 slds-p-around_x-small">
+                    <lightning-input type="date" variant="label-hidden" name="startdate_filter" placeholder="Filter by Start Date"
+                        value={selectedstartdate} onchange={handlestartdatechange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-6 slds-p-around_x-small">
+                    <lightning-input type="date" variant="label-hidden" name="enddate_filter" placeholder="Filter by End Date"
+                        value={selectedenddate} onchange={handleenddatechange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-6 slds-p-around_x-small">
+                    <c-custom-search-component showicon={returntrue} showlabel={returnfalse} placeholdertext="Search By Created User" selectedcustomer={selectedCreteduser}
+                        -icon-name="standard:user" listto-search={createduserlist} label="Employee Search" onselect={oncreateduserselect}
+                        onclear={onclearuserselect}>
+                    </c-custom-search-component>
+                </div>
+                <div class="slds-col slds-size_1-of-6 slds-p-top_large slds-p-around_x-small slds-p-horizontal_small">
+                    <lightning-input class="slds-float_left" type="toggle" name="active_data" onchange={ondatafilterselection}
+                    checked={is_active_data} message-toggle-active="Active" message-toggle-inactive="Inactive">
+                    </lightning-input>
+                    <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh"
+                        class="slds-m-left_xx-small slds-float_right" title="Refresh" onclick={handlerefresh}></lightning-button-icon>
+                        <!-- <lightning-button icon-name="utility:refresh" alternative-text="Refresh"
+                        class="slds-m-left_xx-small slds-float_right" title="Refresh" onclick={handlerefresh}></lightning-button> -->
+                </div>
+            </div>
+            <div class="slds-card">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered tablelayout">
+                    <thead>
+                        <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                            <th class="tblheaderth" scope="col" style="width:21%">
+                                <lightning-button variant="base" label="EMPLOYEE" title="EMPLOYEE" data-id="employeename" icon-position="right" onclick={sort}
+                                    class="slds-truncate">
+                                </lightning-button>
+                            </th>
+                            <th class="tblheaderth" scope="col" style="width:12%">
+                                <lightning-button variant="base" label="ORIGINAL DEPARTMENT" title="ORIGINAL DEPARTMENT" data-id="original_departmen_code" icon-position="right" onclick={sort}
+                                    class="slds-truncate">
+                                </lightning-button>
+                            </th>
+                            <th class="tblheaderth" scope="col" style="width:12%">
+                                <lightning-button variant="base" label="ASSIGNED DEPARTMENT" title="ASSIGNED DEPARTMENT" data-id="assigned_department_code" icon-position="right" onclick={sort}
+                                    class="slds-truncate">
+                                </lightning-button>
+                            </th>
+                            <th class="tblheaderth" scope="col" style="width:12%">
+                                <lightning-button variant="base" label="ASSIGNMENT START DATE" title="ASSIGNMENT START DATE" data-id="crewing_startdate" icon-position="right" onclick={sort}
+                                    class="slds-truncate">
+                                </lightning-button>
+                            </th>
+                            <th class="tblheaderth" scope="col" style="width:12%">
+                                <lightning-button variant="base" label="ASSIGNMENT END DATE" title="ASSIGNMENT END DATE" data-id="crewing_enddate" icon-position="right" onclick={sort}
+                                    class="slds-truncate">
+                                </lightning-button>
+                            </th>
+                            <th class="tblheaderth" scope="col" style="width:21%">
+                                <lightning-button variant="base" label="COMMENTS" title="COMMENTS"
+                                    class="slds-truncate avoidclicks">
+                                </lightning-button>
+                            </th>
+                            <th class="tblheaderth" scope="col" style="width:10%">
+                                <!-- <lightning-button variant="base" label="DEACTIVATE" title="DEACTIVATE"
+                                    class="slds-truncate avoidclicks">
+                                </lightning-button> -->
+                                <lightning-button variant="base" label="MANUAL DEACTIVATION" title="MANUAL DEACTIVATION"
+                                    class="slds-truncate avoidclicks">
+                                </lightning-button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={filteredcrewadjustment} for:item='data'>
+                            <tr key={data.crewingadjustment_id}>
+                                <td title={data.employee_name} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.employeename}</div>
+                                </td>
+                                <td title={data.original_departmen_code} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.original_departmen_code}</div>
+                                </td>
+                                <td title={data.assigned_department_code} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.assigned_department_code}</div>
+                                </td>
+                                <td title={data.crewing_startdate_display} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.crewing_startdate_display}</div>
+                                </td>
+                                <td title={data.crewing_enddate_display} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.crewing_enddate_display}</div>
+                                </td>
+                                <td title={data.crewing_adj_comments} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.crewing_adj_comments}</div>
+                                </td>
+                                <td title={data.deactivation_date_display} class={data.classname} data-id={data.crewingadjustment_id}
+                                    onclick={showassignmentdetail}>
+                                    <div class="slds-text-heading_small">{data.deactivation_date_display}</div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <!--Content Crewing Schedule End--> 
       </div>
-    </section>
-    <!--Content Crewing Schedule Start--> 
+    </section>    
     <!-- Modify Department Crew Schedule modal start -->
     <template if:true={editdeptmapping}>
     <section role="dialog" tabindex="-1"
@@ -168,6 +320,15 @@
                 <div if:true={selecteddeptforpoolcrew.lockedusersavailable} class="slds-p-around_medium">
                         <h3>The <lightning-icon icon-name="utility:lock" alternative-text="Lock" variant="brand" size="xx-small" ></lightning-icon> symbol with the selected user indicates that the user assigned to a build station.</h3>
                         <h3>Please co-ordinate with the respective department supervisor to unlock the user.</h3>
+                </div>
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-1 slds-p-top_x-small">
+                        <div class="slds-align_absolute-center slds-p-around_x-small ">
+                            <lightning-button variant="brand" label="Crewing Adjustment" onclick={navigatetocrewadjustment}
+                                title="Crewing Adjustment" name="crew_adjustment"  icon-name="">
+                            </lightning-button>
+                        </div>
+                    </div>
                 </div>
 
           </div>
@@ -233,5 +394,186 @@
     <div class="slds-backdrop slds-backdrop_open"></div>
    </template>
    <!-- Modify Workcentre Crew Schedule modal end -->
+
+<!-- Create new crewing adjustment modal start -->
+<template if:true={addnewcrewassignmentmodal}>
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-03" aria-modal="true"
+        aria-describedby="modal-content-id-3" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={closenewcrewassignmentmodal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small">
+                    </lightning-icon>
+                </button>
+                <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">New Crewing Adjustment</h2>
+            </header>
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-combobox class="slds-m-bottom_small" label="Labor Pool Departments" name="department"
+                            value={selectedcrewiadjustmentpooldept} placeholder="Departments"
+                            options={departmentlistnonassembly} onchange={onlaborpooldepartmentchange}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-combobox class="slds-m-bottom_small fieldvalidation" label="Department" name="department" value={selectedcrewiadjustmentwipdept}
+                            placeholder="Departments" options={departmentlistoptions} onchange={onnonpooldepartmentchange} required>
+                        </lightning-combobox>
+                    </div>               
+                    <div class="slds-col slds-size_1-of-1">
+                        <lightning-dual-listbox name="users" label="Select Users to Assign " class="slds-p-vertical_medium fieldvalidation"
+                            source-label="Available Employees" selected-label="Selected Employees"
+                            field-level-help="Select the Employees for Crewing adjustment Assignment."
+                            options={availableusersforcrewassignment} onchange={updatecrewingadjustmentusers}
+                            value={selectedcrewingadjustusers} required>
+                        </lightning-dual-listbox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-8"></div>
+                    <div class="slds-col slds-size_3-of-8">
+                        <lightning-input class="fieldvalidation slds-m-right_small" type="date" name="start_date" min={today}
+                            value={crewadjustmentdate.start_date} onchange={updateassignmentdate} label="Assignment Start Date"
+                            title="Assignment Starts from" required>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_3-of-8">
+                        <lightning-input class="fieldvalidation slds-m-left_small" type="date" name="end_date"
+                            min={crewadjustmentdate.start_date} value={crewadjustmentdate.end_date} onchange={updateassignmentdate}
+                            label="Assignment End Date" title="Assignment Ends on" required>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-8"></div>
+                    <div class="slds-col slds-size_1-of-1">
+                        <lightning-textarea name="comments" field-level-help="" value={assignmentcomment} label="Comments"
+                            onchange={updateassignmentcomment}></lightning-textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                <lightning-button label="Cancel" title="Cancel" onclick={closenewcrewassignmentmodal}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button variant="brand" label="Create Assignment" onclick={createnewassignment} title="Create Assignment"
+                    icon-name="utility:record_create">
+                </lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Create new crewing adjustment modal end -->
+
+<!-- Crewing adjustment detail modal start -->
+<template if:true={assignmentdetailmodal}>
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-04" aria-modal="true"
+        aria-describedby="modal-content-id-4" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                    onclick={hideassignmentdetail}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small">
+                    </lightning-icon>
+                </button>
+                    <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">{selectedassignment.employeename}</h2>
+            </header>
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+                <div class="slds-grid slds-wrap slds-gutters">
+                
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label">Created By</label>
+                            <div title="created by" class="slds-form-element__static">
+                                <c-userlist-icon-component type='Created User' userlist={selectedassignment.created_by}>
+                                </c-userlist-icon-component>
+                            </div>
+                        </div>
+                    </div>                
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <lightning-input type="text" label="Created On" name="raised_date_display"
+                            value={selectedassignment.created_date_display} readonly></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <lightning-input type="text" label="Original Department" name="original_department"
+                            value={selectedassignment.original_department_name} readonly></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <!-- <lightning-input type="text" label="Assigned Department" name="assigned_department"
+                            value={selectedassignment.assigned_department_name} readonly></lightning-input> -->
+                            <lightning-combobox class="slds-m-bottom_small updatevalidation" label="Assigned Department"
+                                name="assigned_department_id" value={selectedassignment.assigned_department_id} placeholder="Departments"
+                                options={departmentlistoptions} disabled={disabletoggle} onchange={updateselectedassignment} required>
+                            </lightning-combobox>
+                    </div>  
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <!-- <lightning-input type="date" label="Assignment Start Date" name="start_date" min={today}
+                            value={selectedassignment.crewing_startdate} readonly></lightning-input> -->
+                            <lightning-input class="slds-m-right_small updatevalidation" type="date" name="crewing_startdate"
+                                value={selectedassignment.crewing_startdate} onchange={updateselectedassignment} disabled={disabletoggle}
+                                label="Assignment Start Date" title="Assignment Starts from" required>
+                            </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <!-- <lightning-input type="date" label="Assignment End Date" name="end_date"
+                            value={selectedassignment.crewing_enddate} readonly></lightning-input> -->
+                            <lightning-input class="slds-m-left_small updatevalidation" type="date" name="crewing_enddate"
+                                min={selectedassignment.crewing_startdate} value={selectedassignment.crewing_enddate}
+                                onchange={updateselectedassignment} disabled={disabletoggle} label="Assignment End Date" title="Assignment Ends on"
+                                required>
+                            </lightning-input>
+                    </div>
+                    <div if:true={showdeactivedate} class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <lightning-input type="date" label="Deactivation Date" name="deactivation_date"
+                            value={selectedassignment.deactivation_date} readonly>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <!-- <lightning-input class="slds-p-top_large" type="toggle" name="is_active" disabled={disabletoggle}
+                            onchange={updateselectedassignment} checked={selectedassignment.is_active} message-toggle-active="Active" message-toggle-inactive="Deactivated">
+                        </lightning-input> -->
+                        <lightning-input class="slds-p-top_large slds-float_left" type="toggle" name="is_active" disabled={disabletoggle} onchange={updateselectedassignment}
+                            checked={selectedassignment.is_active} message-toggle-active="Active" message-toggle-inactive="Deactivated">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                        <lightning-textarea name="crewing_adj_comments" field-level-help=""
+                            value={selectedassignment.crewing_adj_comments} label="Comments" onchange={updateselectedassignment} disabled={disableassignupdate}>
+                        </lightning-textarea>
+                    </div>
+
+                    <div if:true={selectedassignment.is_modified} class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label">Modified By</label>
+                            <div title="modified by" class="slds-form-element__static">
+                                <c-userlist-icon-component type='Created User' userlist={selectedassignment.modifiedby_id}>
+                                </c-userlist-icon-component>
+                            </div>
+                        </div>
+                    </div>
+                    <div if:true={selectedassignment.is_modified} class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+                        <lightning-input type="text" label="Modified On" name="modified_date_display"
+                            value={selectedassignment.modified_date_display} readonly></lightning-input>
+                    </div>
+
+                </div>
+            </div>
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                <lightning-button variant="brand-outline" label="OK" title="OK" onclick={hideassignmentdetail}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button if:true={isupdated} variant="brand" label="Update" onclick={updateassignment} title="Update" disabled={disableassignupdate}
+                    icon-name="utility:record_update">
+                </lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Crewing adjustment detail  modal end -->
 
 </template>

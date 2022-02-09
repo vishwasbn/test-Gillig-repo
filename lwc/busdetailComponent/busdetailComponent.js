@@ -23,6 +23,7 @@ export default class BusdetailComponent extends LightningElement {
   @api selectedBusLabel;
   @api ecardid;
   @api bussequence;
+  @api permissionset;
 
   @track showbusoverview = false;
   @track selectedview = "busstatus";
@@ -61,6 +62,10 @@ export default class BusdetailComponent extends LightningElement {
   //Sajith
   get acceptedFormats() {
     return ['.png','.jpg','.jpeg'];
+  }
+
+  get disablebusinfoedit() {
+    return !this.permissionset.bus_informations_details.write;
   }
 
   uploadvintoserver(){

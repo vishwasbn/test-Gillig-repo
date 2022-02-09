@@ -476,7 +476,7 @@ export default class PartnumberValidationComponent extends LightningElement {
                  }
                  else{
                     const alertmessage = new ShowToastEvent({
-                        title : 'Search Successfull.',
+                        title : 'Search Successful.',
                         message : 'Please see the list for search results.',
                         variant : 'success'
                     });

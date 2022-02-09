@@ -222,7 +222,20 @@ export function getmodifiedshortageslist(departmentdata,departmentIdMap,empid){
                 verified_date : shortageobj.verified_date,
                 verified_status_updated_date : shortageobj.verified_status_updated_date,
                 workcenter_code : shortageobj.workcenter_code,
-                workcenter_name : shortageobj.workcenter_name
+                workcenter_name : shortageobj.workcenter_name,
+                buyer : shortageobj.buyer,
+                carrier_arrival_text : shortageobj.carrier_arrival_text,
+                carrier_text : shortageobj.carrier_text,
+                date_received : shortageobj.date_received,
+                is_b_whs_kit : shortageobj.is_b_whs_kit,
+                is_long_term : shortageobj.is_long_term,
+                is_ship_short: shortageobj.is_ship_short,
+                remarks : shortageobj.remarks,
+                planner_code : shortageobj.planner_code,
+                shortage_cause_id : shortageobj.shortage_cause_id != null ? shortageobj.shortage_cause_id.toString() : null,
+                tracking : shortageobj.tracking,
+                vendor_name : shortageobj.vendor_name,
+                vendor_number : shortageobj.vendor_number
             };
             modifiedshortagesList.push(moddedshortage);
         }

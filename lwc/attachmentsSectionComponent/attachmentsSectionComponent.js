@@ -27,6 +27,7 @@ export default class AttachmentsSectionComponent extends LightningElement {
     @api buspartid;
     @api serialnumbertype;
     @api departmentid;
+    @api permissionset;
 
     @api
     get uniqueid() {
@@ -40,6 +41,10 @@ export default class AttachmentsSectionComponent extends LightningElement {
 
     get acceptedFormats() {
         return ['.png','.jpg','.jpeg'];
+    }
+    //enable/disable attachment btn based on role acess
+    get disableattachment() {
+        return !this.permissionset.ecard_attachments.write;
     }
 
     @track uniqueidlocal;

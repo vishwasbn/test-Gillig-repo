@@ -76,6 +76,7 @@ export default class UserManagmentComponent extends LightningElement {
   @track showTable = false; //Used to render table after we get the data from apex controller
   @track recordsToDisplay = []; //Records to be displayed on the page
   @track rowNumberOffset; //Row number
+  @track customernamelist = [];
   
 
   user = { pin: "", confirmpin: "" };
@@ -90,17 +91,33 @@ export default class UserManagmentComponent extends LightningElement {
 
   @track checkBool = true;
   @track selection = " ";
-  //finalpin = " "; //
+  //finalpin = " "; //Commented Vishwas
 
   @track departmentlistoptions;
 
   resetpinmodal = false;
   pattern = '[0-9]{4}';
   @track isselectedcustomer = false;
+  @track userroleinfo = 'Please note, If User is saved with Customer Inspector Role you can not change the Role later.';
 
   get tableheight(){
     var height = window.innerHeight*0.82 - 173.64;
     return `height: ${height}px;`;
+  }
+
+  get returnfalse() {
+    return false;
+  }
+
+  get returntrue() {
+    return true;
+  }
+
+  get disablerolechange() {
+    if (this.record != undefined) {
+      return this.record.approle_id == '8'
+    }
+    return false;
   }
   /*@track tableheight;
   renderedCallback(){
@@ -117,6 +134,7 @@ export default class UserManagmentComponent extends LightningElement {
     this.setdepartmentvalues();
     this.getrolesfromserver();
     this.getuserlistfromserver();
+    this.getcustomerlistfromserver();
   }
 
 
@@ -126,11 +144,14 @@ export default class UserManagmentComponent extends LightningElement {
     getallUsers()
       .then((data) => {
         var userdata  = JSON.parse(data.responsebody).data.user;
-        for(var i in userdata){
-          if(userdata[i].approle_id !=null)
-          {
-          userdata[i].approle_id = userdata[i].approle_id.toString();
-        }} 
+        for (var i in userdata) {
+          if (userdata[i].approle_id != null) {
+            userdata[i].approle_id = userdata[i].approle_id.toString();
+          }
+          if (userdata[i].approle_name == 'CustomerInspector') {
+            userdata[i].approle_name = 'Customer Inspector'
+          }
+        }
         this.userdataList = userdata;
         this.showTable = true;
         this.showSpinner = false;
@@ -165,6 +186,9 @@ export default class UserManagmentComponent extends LightningElement {
               label: userroles[role].approle_name,
               value: userroles[role].approle_id.toString()
             };
+            if (userrole.label == 'CustomerInspector') {
+              userrole.label = 'Customer Inspector'
+            }
             userroleoptions.push(userrole);
           }
           this.userroleslist = userroleoptions;
@@ -186,7 +210,8 @@ export default class UserManagmentComponent extends LightningElement {
 
   // To get user customers from server
   getcustomerlistfromserver(event) {
-    getallCustomers()
+    if (this.customerlist.length == 0) {
+      getallCustomers()
       .then((data) => {
         if (data.isError) {
           const alertmessage = new ShowToastEvent({
@@ -200,14 +225,17 @@ export default class UserManagmentComponent extends LightningElement {
         } else {
           var customerlist = JSON.parse(data.responsebody).data.customer;
           var customeroptions = [];
+          var customernamelist = [];
           for (var cus in customerlist) {
             var customer = {
               label: customerlist[cus].customer_name,
               value: customerlist[cus].customer_id.toString()
             };
             customeroptions.push(customer);
+            customernamelist.push(customerlist[cus].customer_name);
           }
           this.customerlist = customeroptions;
+          this.customernamelist = customernamelist;
         }
       })
       .catch((error) => {
@@ -221,6 +249,7 @@ export default class UserManagmentComponent extends LightningElement {
         this.dispatchEvent(alertmessage);
         this.showSpinner = false;
       });
+    }
   }
 
   //Capture the event fired from the paginator component
@@ -266,18 +295,45 @@ export default class UserManagmentComponent extends LightningElement {
     else{
       row.department_id = '00000';
     }
-    if(row.approle_id == '7' || row.approle_id == '6'){
+    if(row.approle_id == '7' || row.approle_id == '6' || row.approle_id == '8'){
       this.isdepartmentrequired = false;
+      row.department_id = '00000';
     } 
     else{
       this.isdepartmentrequired = true;
     }
-    if(row.customer_id != null){
-      row.customer_id = row.customer_id.toString();
+    if (row.approle_id == '6') {
       this.isselectedcustomer = true;
+      this.iscustomerinspector = false;
+      if (row.customer_id != null) {
+        row.customer_id = row.customer_id.toString();
+        for (var item in this.customerlist) {
+          if (row.customer_id == this.customerlist[item].value) {
+            row.customer_name = this.customerlist[item].label;
+          }
+        }
+      }
+    }
+    else if (row.approle_id == '8') {
+      this.iscustomerinspector = true;
+      this.isselectedcustomer = false;
+      if (row.customer_id != null && row.customer_id.length > 0) {
+        var customernamelist = [];
+        for (var entry in row.customer_id){
+          for (var item in this.customerlist) {
+            if (row.customer_id[entry].toString() == this.customerlist[item].value) {
+              customernamelist.push(this.customerlist[item]);
+            }
+          }
+        }
+        row.customer_name = customernamelist;
+      }
     }
     else{
       this.isselectedcustomer = false;
+      this.iscustomerinspector = false;
+      row.customer_id = undefined;
+      row.customer_name = undefined;
     }
     this.record = row;
     if (actionName == "Resetpin") {
@@ -309,7 +365,7 @@ export default class UserManagmentComponent extends LightningElement {
         } else {
           const alertmessage = new ShowToastEvent({
             title: " Success",
-            message: "User status change successfull.",
+            message: "User status change successful.",
             variant: "success"
           });
           this.dispatchEvent(alertmessage);
@@ -351,24 +407,60 @@ export default class UserManagmentComponent extends LightningElement {
   closeAddModal() {
     this.addmodal = false;
   }
-  updateuservalue(event)
-  {
-    this.record[event.target.name]= event.target.value;
-    if(this.record.approle_id == '7' || this.record.approle_id == '6'){
-      this.isdepartmentrequired = false;
-    } 
-    else{
-      this.isdepartmentrequired = true;
-    }
-    if(this.record.approle_id == '6'){
-      this.isselectedcustomer=true;
-      this.getcustomerlistfromserver();
-    }
-    else{
-      this.isselectedcustomer=false;
+  updateuservalue(event) {
+    this.record[event.target.name] = event.target.value;
+    if (event.target.name == "approle_id") {
+      // if (this.record.approle_id == '7' || this.record.approle_id == '6') {
+      //   this.isdepartmentrequired = false;
+      //   this.record.department_id = '00000';
+      // }
+      // else {
+      //   this.isdepartmentrequired = true;
+      // }
+      // if (this.record.approle_id == '6') {
+      //   this.isselectedcustomer = true;
+      //   this.getcustomerlistfromserver();
+      // }
+      // else {
+      //   this.isselectedcustomer = false;
+      //   this.record.customer_id = undefined;
+      //   this.record.customer_name = undefined;
+      // }
+      if (this.record.approle_id == '6') {
+        this.isselectedcustomer = true;
+        this.isdepartmentrequired = false;
+        this.iscustomerinspector = false;
+        this.record.department = '00000';
+        this.getcustomerlistfromserver();
+        this.record.customer_name = undefined;//
+        this.record.customer_id = undefined;//
+      }
+      else if (this.record.approle_id == '7') {
+        this.isdepartmentrequired = false;
+        this.isselectedcustomer = false;
+        this.iscustomerinspector = false;
+        this.record.department = '00000';
+        this.record.customer_name = undefined;
+        this.record.customer_id = undefined;
+      }
+      else if (this.record.approle_id == '8') {
+        this.isdepartmentrequired = false;
+        this.isselectedcustomer = false;
+        this.iscustomerinspector = true;
+        this.record.department = '00000';
+        this.record.customer_name = [];
+        this.record.customer_id = undefined;
+        this.getcustomerlistfromserver();
+      }
+      else {
+        this.isselectedcustomer = false;
+        this.isdepartmentrequired = true;
+        this.iscustomerinspector = false;
+        this.record.customer_name = undefined;
+        this.record.customer_id = undefined;
+      }
     }
   }
-  
   
   updateuserbutton(event){
     // Check Validations
@@ -377,7 +469,16 @@ export default class UserManagmentComponent extends LightningElement {
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
     }, true);
-    if (allValid) {
+
+    var validcustomer = true;
+    if (this.record.approle_id == '6' && this.record.customer_id == undefined) {
+      validcustomer = false;
+    }
+    if (this.record.approle_id == '8' && (this.record.customer_id == undefined || this.record.customer_id.length == 0)) {
+      validcustomer = false;
+    }
+
+    if (allValid && validcustomer) {
 
       var updateduserData={
       appuser_id:this.record.appuser_id,
@@ -390,6 +491,29 @@ export default class UserManagmentComponent extends LightningElement {
       employee_number : this.record.employee_number,
       customer_id : this.record.customer_id
       };
+
+      // if (this.record.customer_id != undefined) {
+      //   updateduserData["customer_id"] = this.record.customer_id;
+      // }
+      // else {
+      //   updateduserData["customer_id"] = null;
+      // }
+
+      if (this.record.approle_id == '6') {
+        updateduserData["customer_id"] = this.record.customer_id;
+      }
+      else if (this.record.approle_id == '8') {
+        var customeridlist = [];
+        for (var item in this.record.customer_id) {
+          var custobj = this.record.customer_id[item];
+          customeridlist.push(Number(custobj.value));
+        }
+        updateduserData["customer_id"] = customeridlist;
+      }
+      else {
+        updateduserData["customer_id"] = null;
+      }
+
       this.showSpinner = true;
       updateallUsers({ requestbody: JSON.stringify(updateduserData) })
           .then((data) => {
@@ -495,22 +619,43 @@ export default class UserManagmentComponent extends LightningElement {
   }
 
   isdepartmentrequired = true;
+  @track iscustomerinspector = false;
   updateuserfields(event) {
     this.newuser[event.target.name] = event.target.value;
-    if(this.newuser.approle_id == '6'){
-      this.isselectedcustomer = true;
-      this.isdepartmentrequired = false;
-      this.newuser.department = '00000';
-      this.getcustomerlistfromserver();
-    }
-    else if(this.newuser.approle_id == '7'){
-      this.isdepartmentrequired = false;
-      this.isselectedcustomer = false;
-      this.newuser.department = '00000';
-    }
-    else{
-      this.isselectedcustomer = false;
-      this.isdepartmentrequired = true;
+    if(event.target.name == 'approle_id'){
+      if(this.newuser.approle_id == '6'){
+        this.isselectedcustomer = true;
+        this.isdepartmentrequired = false;
+        this.iscustomerinspector = false;
+        this.newuser.department = '00000';
+        this.getcustomerlistfromserver();
+        this.newuser.customer_name = undefined;//
+        this.newuser.customername = undefined;//
+      }
+      else if(this.newuser.approle_id == '7'){
+        this.isdepartmentrequired = false;
+        this.isselectedcustomer = false;
+        this.iscustomerinspector = false;
+        this.newuser.department = '00000';
+        this.newuser.customer_name = undefined;
+        this.newuser.customername = undefined;
+      }
+      else if(this.newuser.approle_id == '8'){
+        this.isdepartmentrequired = false;
+        this.isselectedcustomer = false;
+        this.iscustomerinspector = true;
+        this.newuser.department = '00000';
+        this.newuser.customer_name = undefined;
+        this.newuser.customername = undefined;
+        this.getcustomerlistfromserver();
+      }
+      else{
+        this.isselectedcustomer = false;
+        this.isdepartmentrequired = true;
+        this.iscustomerinspector = false;
+        this.newuser.customer_name = undefined;
+        this.newuser.customername = undefined;
+      }
     }
   }
   
@@ -529,7 +674,16 @@ export default class UserManagmentComponent extends LightningElement {
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
     }, true);
-    if (allValid) {
+
+    var validcustomer = true;
+    if (this.newuser.approle_id == '6' && this.newuser.customername == undefined) {
+      validcustomer = false;
+    }
+    if (this.newuser.approle_id == '8' && (this.newuser.customername == undefined || this.newuser.customername.length == 0)) {
+      validcustomer = false;
+    }
+
+    if (allValid  && validcustomer) {
     var actualuserData = {
       is_active : true,
       employee_number : this.newuser.employee_number,
@@ -541,10 +695,24 @@ export default class UserManagmentComponent extends LightningElement {
       approle_id: this.newuser.approle_id,
       department_id :this.newuser.department=='00000'?null:this.newuser.department
     };
-    if(this.newuser.customername !=undefined){
+    // if(this.newuser.customername !=undefined){
+    //   actualuserData["customer_id"] = this.newuser.customername;
+    // }
+    // else{
+    //   actualuserData["customer_id"] = null;
+    // }
+    if (this.newuser.approle_id == '6') {
       actualuserData["customer_id"] = this.newuser.customername;
     }
-    else{
+    else if (this.newuser.approle_id == '8') {
+      var customeridlist = [];
+      for (var item in this.newuser.customername) {
+        var custobj = this.newuser.customername[item];
+        customeridlist.push(Number(custobj.value));
+      }
+      actualuserData["customer_id"] = customeridlist;
+    }
+    else {
       actualuserData["customer_id"] = null;
     }
     addnewUserManagement({ requestbody: JSON.stringify(actualuserData) })
@@ -572,7 +740,7 @@ export default class UserManagmentComponent extends LightningElement {
           }
         } else {
           const alertmessage = new ShowToastEvent({
-            title: " Succcessfull",
+            title: " Successful",
             message: "User Added successfully.",
             variant: "success"
           });
@@ -681,5 +849,44 @@ export default class UserManagmentComponent extends LightningElement {
         });
         this.dispatchEvent(alertmessage);
       });
+  }
+
+  oncustomerselect(event){
+    if (event.detail.labelvalue == "Select a Customer") {
+      var customerselected = event.detail.selectedRecord;
+      for (var item in this.customerlist) {
+        if (customerselected == this.customerlist[item].label) {
+          this.newuser.customername = this.customerlist[item].value;
+        }
+      }
+    }
+    if (event.detail.labelvalue == "Customer Name") {
+      var customerselected = event.detail.selectedRecord;
+      for (var item in this.customerlist) {
+        if (customerselected == this.customerlist[item].label) {
+          this.record.customer_id = this.customerlist[item].value;
+        }
+      }
+    }
+  }
+  onclearcustomer(event) {
+    if (event.detail.labelvalue == "Select a Customer") {
+      this.newuser.customername = undefined;
+      this.newuser.customer_name = undefined;
+    }
+    if (event.detail.labelvalue == "Customer Name") {
+      this.record.customer_id = undefined;
+      this.record.customer_name = undefined;
+    }
+  }
+  updatenewcustomerselect(event) {
+    var detail = event.detail;
+    console.log(JSON.parse(JSON.stringify(detail)));
+    this.newuser.customername = detail.userlist;
+  }
+  updatecustomerselect(event) {
+    var detail = event.detail;
+    console.log(JSON.parse(JSON.stringify(detail)));
+    this.record.customer_id = detail.userlist;
   }
 }
