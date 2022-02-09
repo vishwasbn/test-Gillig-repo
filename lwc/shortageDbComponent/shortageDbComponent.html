@@ -78,14 +78,20 @@
                 </div>
             </div>
         </div>
-        <div class="opcontentbody slds-m-top_x-small">
+        <div class="opcontentbody slds-m-top_x-small"  style="overflow-x:auto">
+        <div style="min-width: 1890px">    
             <table
                 class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered tableouterborder tablelayout"><!--added class vishwas-->
                 <thead>
                     <tr class="slds-line-height_reset slds-text-title_caps">
-                        <th class="fixedheader" scope="col" style="width:5%">
+                        <!-- <th class="fixedheader" scope="col" style="width:5%">
                             <lightning-button variant="base" data-id="buildstation_code" label="BUILD STATION" title="BUILD STATION"
                                 icon-position="right" onclick={sortdiscrepancytable} class="slds-truncate">
+                            </lightning-button>
+                        </th> -->
+                        <th class="fixedheader" scope="col" style="width:6%">
+                            <lightning-button variant="base" data-id="current_line_location_sort" label="LINE LOCATION" title="CURRENT LINE LOCATION"
+                                icon-position="right" onclick={sortdiscrepancytable} class="slds-truncate"><!--current_line_location-->
                             </lightning-button>
                         </th>
                         <th class="fixedheader" scope="col" style="width:5%">
@@ -104,8 +110,8 @@
                             </lightning-button>
                         </th>
                         <th class="fixedheader" scope="col" style="width:6.67%">
-                            <lightning-button variant="base" data-id="buspart_no" label="PART NUMBER" title="NO."
-                                icon-position="right" onclick={sortdiscrepancytable} class="slds-truncate">
+                            <lightning-button variant="base" data-id="buspart_no_sort" label="PART NUMBER" title="NO."
+                                icon-position="right" onclick={sortdiscrepancytable} class="slds-truncate"><!--buspart_no-->
                             </lightning-button>
                         </th>
                         <th class="fixedheader" scope="col" style="width:11.1%">
@@ -114,11 +120,11 @@
                             </lightning-button>
                         </th>
                         <th class="fixedheader" scope="col" style="width:6.67%">
-                            <lightning-button variant="base" data-id="vendor_name" label="VENDOR" title="VENDOR"
-                                icon-position="right" onclick={sortdiscrepancytable} class="slds-truncate">
+                            <lightning-button variant="base" data-id="vendor_name_sort" label="VENDOR" title="VENDOR"
+                                icon-position="right" onclick={sortdiscrepancytable} class="slds-truncate"><!--vendor_name-->
                             </lightning-button>
                         </th>
-                        <th class="fixedheader" scope="col" style="width:5.67%">
+                        <th class="fixedheader" scope="col" style="width:5%">
                             <lightning-button variant="base" data-id="raised_date" label="DUE DATE" title="DUE DATE"
                                 icon-position="right" class="slds-truncate"></lightning-button><!--ETA from Due Date-->
                         </th>                        
@@ -130,7 +136,11 @@
                             <lightning-button variant="base" data-id="tracking" label="TRK#" title="TRK#" icon-position="right"
                                 class="slds-truncate"></lightning-button>
                         </th>
-                        <th class="fixedheader" scope="col" style="width:10.1%">
+                        <th class="fixedheader" scope="col" style="width:5%">
+                            <lightning-button variant="base" data-id="date_received_sort" label="DATE RECIEVED" title="DATE RECIEVED" icon-position="right"
+                                class="slds-truncate" onclick={sortdiscrepancytable}></lightning-button>
+                        </th>
+                        <th class="fixedheader" scope="col" style="width:9%">
                             <lightning-button variant="base" data-id="remark" label="REMARK" title="REMARK" icon-position="right"
                                 class="slds-truncate"></lightning-button>
                         </th>
@@ -152,11 +162,17 @@
                     <!-- <template if:false={disclistempty}> -->
                     <template for:each={filteredshortages} for:item="shortg">
                         <tr key={shortg.ecard_discrepancy_log_id} class="cellfontstyle"><!--class added for reduce font size and table property-->
-                            <td if:true={shortg.disc_bsavailable} data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
+                            <!-- <td if:true={shortg.disc_bsavailable} data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
                                 <div>{shortg.buildstation_code}</div>
                             </td>
                             <td if:false={shortg.disc_bsavailable} data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
                                 <div></div>
+                            </td> -->
+                            <td if:true={shortg.currentlocation_available} data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
+                                <div>{shortg.current_line_location}</div>
+                            </td>
+                            <td if:false={shortg.currentlocation_available} data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
+                                <div>Fence</div>
                             </td>
                             <td data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
                                 <div>
@@ -228,6 +244,11 @@
                                 <div>{shortg.tracking}</div>
                             </td>
                             <td data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
+                                <div>
+                                    <lightning-formatted-date-time value={shortg.date_received} year="numeric" month="short" day="numeric"></lightning-formatted-date-time>
+                                </div>
+                            </td>
+                            <td data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
                                 <div>{shortg.remarks}</div>
                             </td>
                             <td data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
@@ -238,7 +259,7 @@
                             </td>
                             <td data-id={shortg.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
                                 <div class="slds-text-heading_small slds-align_absolute-center">
-                                    <span class="statusbadge">{shortg.discrepancy_statusdisplay}</span>
+                                    <span class="statusbadge" style={shortg.status_bgcolor}>{shortg.discrepancy_statusdisplay}</span>
                                 </div>
                             </td>
                         </tr>
@@ -260,6 +281,7 @@
             </template>
 
         </div>
+    </div>
     </section>
     <!--Show  Part Shortage Detail Modal Start-->
     <template if:true={partshortagedetailsmodal}>
@@ -310,7 +332,7 @@
                         </div>
                         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
                             <lightning-input type="number" label="Quantity Required" name="quantity"
-                                value={selectedshortage.quantity} step="0.00001" readonly></lightning-input>
+                                value={selectedshortage.quantity} step="0.00001" readonly={disableeditshortage} onchange={updateselectedshortage}></lightning-input>
                         </div>
     
                         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
@@ -365,14 +387,21 @@
                             </c-custom-search-lookup-component>
                         </div>
                         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-                            <lightning-input type="text" label="Carrier" name="carrier_text"
+                            <!-- <lightning-input type="text" label="Carrier" name="carrier_text"
                                 value={selectedshortage.carrier_text} onchange={updateselectedshortage}
-                                disabled={disableeditshortage}></lightning-input>
+                                disabled={disableeditshortage}></lightning-input> -->
+                                <lightning-combobox name="carrier_text" label="Carrier" placeholder="Select Carrier"
+                                    value={selectedshortage.carrier_text} options={carrieroptions} onchange={updateselectedshortage}
+                                    disabled={disableeditshortage}></lightning-combobox>
                         </div>
                         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-                            <lightning-input type="text" label="Carrier Arrival Time" name="carrier_arrival_text"
+                            <!-- <lightning-input type="text" label="Carrier Arrival Time" name="carrier_arrival_text"
                                 value={selectedshortage.carrier_arrival_text} onchange={updateselectedshortage}
-                                disabled={disableeditshortage}></lightning-input>
+                                disabled={disableeditshortage}></lightning-input> -->
+                                <lightning-input type="time" name="carrier_arrival_text" label="Carrier Arrival Time"
+                                    value={selectedshortage.carrier_arrival_text} min="05:00:00.000" max="22:00:00.000"
+                                    onchange={updateselectedshortage} disabled={disableeditshortage}>
+                                </lightning-input>
                         </div>
                         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
                             <lightning-combobox label="Cause" name="shortage_cause_id"

@@ -40,6 +40,10 @@ export function getmodifieddiscrepancylist(departmentdata,busname,buschasisnumbe
             moddedprod = prod_supervisor;
             isdepartmentdiscrepancy = true;
         }
+        var isdownstreamdiscrepancy = false;
+        if (discrepancylogs[disc].discrepancy_type == "downstream") {
+            isdownstreamdiscrepancy = true;
+        }
         moddedprod = updateprodlistwithforeman(assignedprod,moddedprod);
         var bsavailable=discrepancylogs[disc].buildstation_code=='9999'?false:true;
         var moddeddiscrepancy = {
@@ -50,6 +54,7 @@ export function getmodifieddiscrepancylist(departmentdata,busname,buschasisnumbe
             ecard_discrepancy_log_id : discrepancylogs[disc].ecard_discrepancy_log_id,
             ecard_discrepancy_log_number: discrepancylogs[disc].discrepancy_log_number,
             isdepartmentdiscrepancy : isdepartmentdiscrepancy,
+            isdownstreamdiscrepancy: isdownstreamdiscrepancy,
             isdeletable:is_deletable,
             created_by : created_by,
             createdbyname : createdbyname,

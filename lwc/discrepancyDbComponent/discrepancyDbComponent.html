@@ -292,7 +292,7 @@
                   <div
                     class="slds-text-heading_small slds-align_absolute-center"
                   >
-                    <span class="statusbadge">{disc.discrepancy_statusdisplay}</span>
+                    <span class="statusbadge" style={disc.status_bgcolor}>{disc.discrepancy_statusdisplay}</span>
                   </div>
                 </td>
                
@@ -674,7 +674,7 @@
                 readonly
               ></lightning-input>
             </div>
-            <div
+            <div if:false={enablediscdepartmentedit}
               class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
               title={selecteddiscrepancy.department_name}
             >
@@ -686,30 +686,50 @@
                 readonly
               ></lightning-input>
             </div>
-            <div if:true={selecteddiscrepancy.disc_bsavailable}
-              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-              title={selecteddiscrepancy.buildstation_code}
-            >
-              <lightning-input
-                type="text"
-                label="Build Station"
-                name="buildstation_code"
-                value={selecteddiscrepancy.buildstation_code}
-                readonly
-              ></lightning-input>
+            <!--New added department start-->
+            <div if:true={enablediscdepartmentedit} class="slds-col slds-size_1-of-4 slds-m-bottom_medium" title={selecteddiscrepancy.department_name}>
+              <lightning-combobox required name="department_id" class="deptchangevalidation" label="Department"
+                onchange={modifyselecteddiscrepancy} value={departmentid} placeholder="Select Department"
+                options={departmentoptions}>
+              </lightning-combobox>
             </div>
-            <div if:false={selecteddiscrepancy.disc_bsavailable}
-              class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
-              title={selecteddiscrepancy.buildstation_code}
-            >
-              <lightning-input
-                type="text"
-                label="Build Station"
-                name="buildstation_code"
-                value=""
-                readonly
-              ></lightning-input>
-            </div>
+            <!--New added End-->
+
+            <!--New added buildstation start-->
+            <template if:true={enablediscbsedit}>
+              <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium" title={selecteddiscrepancy.department_name}>
+                <lightning-combobox required={isbsrequired} name="buildstation_id" class="deptchangevalidation" label="Build Station (BS)"
+                  onchange={modifyselecteddiscrepancy} value={selecteddiscrepancy.buildstation_id} placeholder="Select BuildStation"
+                  options={buildstationoptions}></lightning-combobox>
+              </div>
+            </template>            
+            <!--New added End-->
+            <template if:false={enablediscbsedit}>
+              <div if:true={selecteddiscrepancy.disc_bsavailable}
+                class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+                title={selecteddiscrepancy.buildstation_code}
+              >
+                <lightning-input
+                  type="text"
+                  label="Build Station"
+                  name="buildstation_code"
+                  value={selecteddiscrepancy.buildstation_code}
+                  readonly
+                ></lightning-input>
+              </div>
+              <div if:false={selecteddiscrepancy.disc_bsavailable}
+                class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
+                title={selecteddiscrepancy.buildstation_code}
+              >
+                <lightning-input
+                  type="text"
+                  label="Build Station"
+                  name="buildstation_code"
+                  value=""
+                  readonly
+                ></lightning-input>
+              </div>
+            </template>
             <div if:true={selecteddiscrepancy.disc_bsavailable}
               class="slds-col slds-size_1-of-4 slds-m-bottom_medium"
               title={selecteddiscrepancy.workcenter_name}
@@ -873,6 +893,8 @@
         <!-- modal footer start-->
         <footer class="slds-modal__footer">
           <lightning-button if:true={isdeletable} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" name={selecteddiscrepancy.ecard_discrepancy_log_id} onclick={deletediscrepancy}></lightning-button>   
+          <lightning-button if:true={enablediscupdate} variant="brand" label="Update" title="Update" onclick={handlediscdeptupdateaction} class="slds-m-right_x-small">
+          </lightning-button>
           <lightning-button
             label="Cancel"
             title="Cancel"

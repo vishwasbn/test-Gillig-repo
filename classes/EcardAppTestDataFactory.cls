@@ -758,4 +758,71 @@ public class EcardAppTestDataFactory {
         deptwrap.modifiedby_id='123';
         deptwrap.createdby_id ='123';      
     } 
+    // Test Method for ShortageDatabaseController - Positive case
+    public static testmethod void ShortagesDatabaseControllerPositiveTest() {
+        SingleRequestMock logindata = new SingleRequestMock(200,'SUCCESS','{"data":{"token":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDEyODc4MjQsIm5iZiI6MTYwMTI4NzgyNCwianRpIjoiZWQ3ZWEyOTYtNDEyMS00MTAyLTg5ZTYtYWFkZGQ4ZGYxNTg5IiwiZXhwIjoxNjAxMjg5NjI0LCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjo4NzcsImFwcHJvbGVfaWQiOjEsImRlcGFydG1lbnRfY29kZSI6bnVsbCwiaXNfYWN0aXZlIjp0cnVlLCJkZXBhcnRtZW50X2lkIjpudWxsfSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.hXgIOxq2hFvFx_rrsBpql0VoWr1iqVMu1-cktHasGqY","expiry_token":1601289624,"refresh_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDEyODc4MjQsIm5iZiI6MTYwMTI4NzgyNCwianRpIjoiYjk4YjM1ZTItOTAxOC00MjUxLWIzMWQtNTYyZmFiYjQzMTBkIiwiZXhwIjoxNjAzODc5ODI0LCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjo4NzcsImFwcHJvbGVfaWQiOjEsImRlcGFydG1lbnRfY29kZSI6bnVsbCwiaXNfYWN0aXZlIjp0cnVlLCJkZXBhcnRtZW50X2lkIjpudWxsfSwidHlwZSI6InJlZnJlc2gifQ.pVmOXf3GQtSUA5VEj0kRQcFS8B5V7_PTkvUxrIiqccU"},"user":{"approle_id":1,"appuser_id":877,"department_code":null,"department_id":null,"is_active":true}}}',null);
+        SingleRequestMock getAllShortagesforEcard = new SingleRequestMock(200,'SUCCESS','{"data":{"token":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDEyODc4MjQsIm5iZiI6MTYwMTI4NzgyNCwianRpIjoiZWQ3ZWEyOTYtNDEyMS00MTAyLTg5ZTYtYWFkZGQ4ZGYxNTg5IiwiZXhwIjoxNjAxMjg5NjI0LCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjo4NzcsImFwcHJvbGVfaWQiOjEsImRlcGFydG1lbnRfY29kZSI6bnVsbCwiaXNfYWN0aXZlIjp0cnVlLCJkZXBhcnRtZW50X2lkIjpudWxsfSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.hXgIOxq2hFvFx_rrsBpql0VoWr1iqVMu1-cktHasGqY","expiry_token":1601289624,"refresh_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDEyODc4MjQsIm5iZiI6MTYwMTI4NzgyNCwianRpIjoiYjk4YjM1ZTItOTAxOC00MjUxLWIzMWQtNTYyZmFiYjQzMTBkIiwiZXhwIjoxNjAzODc5ODI0LCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjo4NzcsImFwcHJvbGVfaWQiOjEsImRlcGFydG1lbnRfY29kZSI6bnVsbCwiaXNfYWN0aXZlIjp0cnVlLCJkZXBhcnRtZW50X2lkIjpudWxsfSwidHlwZSI6InJlZnJlc2gifQ.pVmOXf3GQtSUA5VEj0kRQcFS8B5V7_PTkvUxrIiqccU"},"user":{"approle_id":1,"appuser_id":877,"department_code":null,"department_id":null,"is_active":true}}}',null);
+        SingleRequestMock getAllShortagesforPurchasing = new SingleRequestMock(200,'SUCCESS','{"data":{"authorization":{"all_access":{"access":"all"},"bus_ecard_status":{"access":"all"},"bus_information":{"access":"all"},"bus_informations_details":{"access":"all"},"bus_moreinfo":{"access":"all"},"busarea_discrepancy_new":{"access":"all"},"busarea_discrepancy_open":{"access":"all"},"busarea_discrepancy_resolve":{"access":"all"},"busarea_discrepancy_update":{"access":"all"},"dept_discrepancy_new":{"access":"all"},"dept_discrepancy_open":{"access":"all"},"dept_discrepancy_resolved":{"access":"all"},"dept_discrepancy_update":{"access":"all"},"discrepancy":{"access":"all"},"discrepancy_db":{"access":"all"},"discrepancy_new":{"access":"all"},"discrepancy_open":{"access":"read"},"discrepancy_outofstation":{"access":"all"},"discrepancy_resolved":{"access":"all"},"discrepancy_update":{"access":"all"},"ecard":{"access":"all"},"ecard_attachments":{"access":"all"},"heatmap":{"access":"all"},"help":{"access":"all"},"meeting_notes":{"access":"all"},"no_access":{"access":"none"},"operation":{"access":"all"},"operation_open":{"access":"all"},"operation_resolved":{"access":"all"},"operation_update":{"access":"read"},"partno_validation":{"access":"all"},"picvalidation_actual_add":{"access":"all"},"picvalidation_applytofleet":{"access":"all"},"qc_checklist":{"access":"all"},"schedule":{"access":"all"},"serail_no_log":{"access":"all"},"settings":{"access":"all"},"shortage":{"access":"all"},"shortage_new":{"access":"all"},"shortage_open":{"access":"all"},"shortage_resolved":{"access":"all"},"shortage_update":{"access":"all"}}}}',null);
+        Map<String, HttpCalloutMock> endpoint2TestResp = new Map<String,HttpCalloutMock>();
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/sflogin',logindata);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/ecardshortagedbsorted/',getAllShortagesforEcard);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/purchaseshortagedbsorted/',getAllShortagesforPurchasing);
+        HttpCalloutMock multiCalloutMock = new MultiRequestMock(endpoint2TestResp);
+        Test.setMock(HttpCalloutMock.class, multiCalloutMock);
+        ShortagesDatabaseController.getAllShortagesforEcard('{ "bus_status": ["WIP"], "discrepancy_status":["Open"]}');
+		ShortagesDatabaseController.getAllShortagesforPurchasing('{ "bus_status": ["WIP"], "discrepancy_status":["Open"]}');
+    }
+    // Test Method for ShortageDatabaseController - Negative case
+    public static testmethod void ShortagesDatabaseControllerNegativeTest() {
+        SingleRequestMock logindata = new SingleRequestMock(200,'SUCCESS','{"data":{"token":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDEyODc4MjQsIm5iZiI6MTYwMTI4NzgyNCwianRpIjoiZWQ3ZWEyOTYtNDEyMS00MTAyLTg5ZTYtYWFkZGQ4ZGYxNTg5IiwiZXhwIjoxNjAxMjg5NjI0LCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjo4NzcsImFwcHJvbGVfaWQiOjEsImRlcGFydG1lbnRfY29kZSI6bnVsbCwiaXNfYWN0aXZlIjp0cnVlLCJkZXBhcnRtZW50X2lkIjpudWxsfSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.hXgIOxq2hFvFx_rrsBpql0VoWr1iqVMu1-cktHasGqY","expiry_token":1601289624,"refresh_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDEyODc4MjQsIm5iZiI6MTYwMTI4NzgyNCwianRpIjoiYjk4YjM1ZTItOTAxOC00MjUxLWIzMWQtNTYyZmFiYjQzMTBkIiwiZXhwIjoxNjAzODc5ODI0LCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjo4NzcsImFwcHJvbGVfaWQiOjEsImRlcGFydG1lbnRfY29kZSI6bnVsbCwiaXNfYWN0aXZlIjp0cnVlLCJkZXBhcnRtZW50X2lkIjpudWxsfSwidHlwZSI6InJlZnJlc2gifQ.pVmOXf3GQtSUA5VEj0kRQcFS8B5V7_PTkvUxrIiqccU"},"user":{"approle_id":1,"appuser_id":877,"department_code":null,"department_id":null,"is_active":true}}}',null);
+        SingleRequestMock getAllShortagesforEcard = new SingleRequestMock(500,'ERROR','{ "status": "exception" }',null);
+        SingleRequestMock getAllShortagesforPurchasing = new SingleRequestMock(500,'ERROR','{ "status": "exception" }',null);
+        Map<String, HttpCalloutMock> endpoint2TestResp = new Map<String,HttpCalloutMock>();
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/sflogin',logindata);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/ecardshortagedbsorted/',getAllShortagesforEcard);
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/purchaseshortagedbsorted/',getAllShortagesforPurchasing);
+        HttpCalloutMock multiCalloutMock = new MultiRequestMock(endpoint2TestResp);
+        Test.setMock(HttpCalloutMock.class, multiCalloutMock);
+        ShortagesDatabaseController.getAllShortagesforEcard('{ "bus_status": ["WIP"], "discrepancy_status":["Open"]}');
+		ShortagesDatabaseController.getAllShortagesforPurchasing('{ "bus_status": ["WIP"], "discrepancy_status":["Open"]}');
+    }
+
+    // Test Method for PDF Automation login
+    public static testmethod void EcardPdfAutomationControllerTest() {
+        SingleRequestMock logindata = new SingleRequestMock(200,'SUCCESS','{"data":{"token":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTc2NDk2MDIsIm5iZiI6MTU5NzY0OTYwMiwianRpIjoiZjY5ZmVmNzUtZmExMi00NTJjLWI5YzYtNGRkNjBiMTU1MzJmIiwiZXhwIjoxNTk3NjUxNDAyLCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjoxNSwiYXBwcm9sZV9pZCI6M30sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.6-CudXdIUlCE7x08x76Cw6Udlzk-KmYHMQmqinIRoxs","expiry_token":1597651402,"refresh_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTc2NDk2MDIsIm5iZiI6MTU5NzY0OTYwMiwianRpIjoiZDNlYmQwZjYtYzYzNC00NWI1LTk1OTQtOGI3YTQ5M2Y4OGJjIiwiZXhwIjoxNjAwMjQxNjAyLCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjoxNSwiYXBwcm9sZV9pZCI6M30sInR5cGUiOiJyZWZyZXNoIn0.f4c3msgn6zb6Yz3quuYadF0CIL7yK43TWksJryPpQqk"},"user":{"approle_id":3,"appuser_id":15}}}',null);
+        Test.setMock(HttpCalloutMock.class, logindata);
+        EcardPdfAutomationController.EcardLogin();
+    }
+
+    // Test Method for PDF Automation controller
+	@isTest(SeeAllData=true)
+    public static void UploadBusPdfTest() {
+        SingleRequestMock logindata = new SingleRequestMock(200,'SUCCESS','{"data":{"token":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTc2NDk2MDIsIm5iZiI6MTU5NzY0OTYwMiwianRpIjoiZjY5ZmVmNzUtZmExMi00NTJjLWI5YzYtNGRkNjBiMTU1MzJmIiwiZXhwIjoxNTk3NjUxNDAyLCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjoxNSwiYXBwcm9sZV9pZCI6M30sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.6-CudXdIUlCE7x08x76Cw6Udlzk-KmYHMQmqinIRoxs","expiry_token":1597651402,"refresh_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTc2NDk2MDIsIm5iZiI6MTU5NzY0OTYwMiwianRpIjoiZDNlYmQwZjYtYzYzNC00NWI1LTk1OTQtOGI3YTQ5M2Y4OGJjIiwiZXhwIjoxNjAwMjQxNjAyLCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjoxNSwiYXBwcm9sZV9pZCI6M30sInR5cGUiOiJyZWZyZXNoIn0.f4c3msgn6zb6Yz3quuYadF0CIL7yK43TWksJryPpQqk"},"user":{"approle_id":3,"appuser_id":15}}}',null);
+        //SingleRequestMock uploadPdf = new SingleRequestMock(200,'SUCCESS','{"data": {"chassis_no": "197402","upload_status": "unsuccessful as corresponding Ecard_id not found" }}',null);
+        Map<String, HttpCalloutMock> endpoint2TestResp = new Map<String,HttpCalloutMock>();
+        endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/login',logindata);
+        //endpoint2TestResp.put(System.Label.EcardAppendpoint+'api/inspection_report/',uploadPdf);
+        HttpCalloutMock multiCalloutMock = new MultiRequestMock(endpoint2TestResp);
+        Test.setMock(HttpCalloutMock.class, multiCalloutMock);
+        List<Bus__c> buslist = [Select id from Bus__c LIMIT 2];
+        List<ID> busids = new List<ID>();
+        for(Bus__c bus : buslist){
+            busids.add(bus.id);
+        }
+        UploadBusPdf.getBuses(busids);
+        UploadBusPdf.uploadGeneratedBusPdf('test');
+    }
+
+    public static testmethod void UploadBusPdf2Test() {
+        SingleRequestMock logindata = new SingleRequestMock(200,'SUCCESS','{"data":{"token":{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTc2NDk2MDIsIm5iZiI6MTU5NzY0OTYwMiwianRpIjoiZjY5ZmVmNzUtZmExMi00NTJjLWI5YzYtNGRkNjBiMTU1MzJmIiwiZXhwIjoxNTk3NjUxNDAyLCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjoxNSwiYXBwcm9sZV9pZCI6M30sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.6-CudXdIUlCE7x08x76Cw6Udlzk-KmYHMQmqinIRoxs","expiry_token":1597651402,"refresh_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTc2NDk2MDIsIm5iZiI6MTU5NzY0OTYwMiwianRpIjoiZDNlYmQwZjYtYzYzNC00NWI1LTk1OTQtOGI3YTQ5M2Y4OGJjIiwiZXhwIjoxNjAwMjQxNjAyLCJpZGVudGl0eSI6eyJhcHB1c2VyX2lkIjoxNSwiYXBwcm9sZV9pZCI6M30sInR5cGUiOiJyZWZyZXNoIn0.f4c3msgn6zb6Yz3quuYadF0CIL7yK43TWksJryPpQqk"},"user":{"approle_id":3,"appuser_id":15}}}',null);
+        Test.setMock(HttpCalloutMock.class, logindata);
+        UploadBusPdf.uploadGeneratedBusPdf('test');        
+    } 
+
+    public static testmethod void InspectionResponseWrapperTest() {
+        InspectionResponseWrapper.Data datawrap=new InspectionResponseWrapper.Data();
+        datawrap.chassis_no='197402';
+        datawrap.upload_status='unsuccessful as corresponding Ecard_id not found'; 
+        //InspectionResponseWrapper.parse(JSON.serialize('{"data": {"chassis_no": "197402","upload_status": "unsuccessful as corresponding Ecard_id not found" }}')); 
+    } 
 }

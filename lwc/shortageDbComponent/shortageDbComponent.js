@@ -27,7 +27,8 @@ import getStatusPicklistOptions from "@salesforce/apex/scheduleBoardController.g
 import pubsub from 'c/pubsub' ;
 import getPartshortagecauselist from "@salesforce/apex/ecardOperationsController.getPartshortageCauses";
 
-import getAllShortageslist from "@salesforce/apex/ecardOperationsController.getAllPartshortages";//added
+//import getAllShortageslist from "@salesforce/apex/ecardOperationsController.getAllPartshortages";
+import getAllShortageslist from "@salesforce/apex/ShortagesDatabaseController.getAllShortagesforEcard";//added
 import getAllpartsVendorlist from '@salesforce/apex/ecardOperationsController.getAllpartsVendorlist';
 import getDefaultVendorandBuyer from '@salesforce/apex/ecardOperationsController.getDefaultVendorandBuyer';
 import updatePartshortage from "@salesforce/apex/ecardOperationsController.updatePartshortage";
@@ -72,8 +73,8 @@ export default class ShortageDbComponent extends LightningElement {
   @track departmentlist = [
     { label: "All Departments", value: "All Departments" }
   ];
-  @track selectedstatus = "All Status";
-  @track statuslist = [{ label: "All Shortage Status", value: "All Status" }, { label: "Open", value: "open" }, { label: "Resolved", value: "resolve" }, { label: "Verified", value: "approve" }];
+  @track selectedstatus = "Open";//"All Status";
+  @track statuslist = [{ label: "All Shortage Status", value: "All Status" }, { label: "Open", value: "Open" }, { label: "Resolved", value: "Resolve" }, { label: "Verified", value: "Approve" }];
   @track selectedbuyer = "All Buyer";
   @track buyerlist = [
     { label: "All Buyer", value: "All Buyer" }
@@ -95,8 +96,8 @@ export default class ShortageDbComponent extends LightningElement {
   @track qccapturerole=false;
   @track qccaptureaction=false;
   @track isdelenabled=false;
-  @track busstatuslist =[{'label': 'WIP', 'value' : 'WIP'}];
-  @track selectedBusStatus = 'WIP';
+  @track busstatuslist = [{ label: 'All Bus Status', value: 'All Bus Status' }];//[{'label': 'WIP', 'value' : 'WIP'}];
+  @track selectedBusStatus = 'All Bus Status';//'WIP';
   @track isbusareaarray = false;
   @track departmentIdMap = [{'bus_area_discrepancy_enabled':true,
                             'label':'All Departments',
@@ -108,7 +109,18 @@ export default class ShortageDbComponent extends LightningElement {
     "open": "Status changed to Open"
   };
   @track isupdated;
-  
+  @track carrieroptions = [
+    { "label": "UPS", "value": "UPS" },
+    { "label": "UPS 2ND DAY", "value": "UPS 2ND DAY" },
+    { "label": "UPS NDA", "value": "UPS NDA"    },
+    { "label": "UPS NDA EARLY AM", "value": "UPS NDA EARLY AM" },
+    { "label": "FEDEX", "value": "FEDEX"    },
+    { "label": "FEDEX 2ND DAY", "value": "FEDEX 2ND DAY" },
+    { "label": "FEDEX NDA", "value": "FEDEX NDA" },
+    { "label": "COURIER", "value": "COURIER" },
+    { "label": "VENDOR TRUCK", "value": "VENDOR TRUCK" },
+    { "label": "OTHER", "value": "OTHER" }
+  ];  
 
   // Use whenever a false attribute is required in Component.html
   get returnfalse() {
@@ -238,13 +250,20 @@ export default class ShortageDbComponent extends LightningElement {
   loadShortagesdata(event) {
     this.showSpinner = true;
     var statuslist = [];
+    var shortagestatus = [];
     if (this.selectedBusStatus != 'All Bus Status') {
       statuslist.push(this.selectedBusStatus.replaceAll(" ", "%20"));
     }
     else {
       statuslist = null;
     }
-    var statusparm = { bus_status: statuslist };
+    if (this.selectedstatus != 'All Status') {
+      shortagestatus.push(this.selectedstatus);
+    }
+    else {
+      shortagestatus = null;
+    }
+    var statusparm = { bus_status: statuslist, discrepancy_status: shortagestatus };
     getAllShortageslist({ ecardbusstatus: JSON.stringify(statusparm) })
       .then(data => {
         var shortageslist = [];
@@ -283,6 +302,7 @@ export default class ShortageDbComponent extends LightningElement {
               partname = shortageobj.custom_part_name;
             }
             var bsavailable = shortageobj.buildstation_code == '9999' ? false : true;
+            var currentlocationavailable = (shortageobj.current_line_location != '9999' && shortageobj.current_line_location != null) ? true : false;
             var qc_avilable = shortageobj.assigend_qc_id != null ? true : false;
             var moddedshortage = {
               index: index,
@@ -364,7 +384,15 @@ export default class ShortageDbComponent extends LightningElement {
               tracking: shortageobj.tracking,
               vendor_name: shortageobj.vendor_name,
               vendor_number: shortageobj.vendor_number,
-              bus_start_date: shortageobj.bus_start_date
+              bus_start_date: shortageobj.bus_start_date,
+              bus_seq_in_day: shortageobj.bus_seq_in_day,
+              current_line_location: shortageobj.current_line_location,
+              currentlocation_available: currentlocationavailable,
+              current_line_location_sort: (shortageobj.current_line_location == null || shortageobj.current_line_location == '9999') ? 'zzzz' : shortageobj.current_line_location,
+              buspart_no_sort: shortageobj.buspart_no == null ? "" : shortageobj.buspart_no,
+              vendor_name_sort : shortageobj.vendor_name == null ? "" : shortageobj.vendor_name,
+              date_received_sort: shortageobj.date_received == null ? "" : shortageobj.date_received,
+              status_bgcolor: this.getStatusColor(shortageobj.discrepancy_status)
             };
             if (moddedshortage.created_by.length > 0) {
               for (var i in moddedshortage.created_by) {
@@ -682,7 +710,8 @@ export default class ShortageDbComponent extends LightningElement {
   // Handle Shortage status Change
   handleshortgstatuschange(event) {
     this.selectedstatus = event.detail.value;
-    this.applyfilterchanges(event);
+    //this.applyfilterchanges(event);
+    this.loadShortagesdata(event);
   }
 
   // Handle Defect Change
@@ -741,7 +770,7 @@ export default class ShortageDbComponent extends LightningElement {
     var selecteddepartment = this.selecteddepartement;
     var selectedcustomer = this.selectedCustomer;
     var selectedbuyer = this.selectedbuyer;
-    var selectedstatus = this.selectedstatus;
+    // var selectedstatus = this.selectedstatus;
     var shipshortfilter = this.shipshortfilter;
     var selectedcreatedby = this.selectedcreatedbyuser;
     this.showSpinner = true;
@@ -778,12 +807,12 @@ export default class ShortageDbComponent extends LightningElement {
           shortage.filtered = discfilter + " invisible";
         }
       }
-      if (selectedstatus != undefined && selectedstatus != "All Status") {
-        if (shortage.discrepancy_status.toLowerCase() == selectedstatus) {
-        } else {
-          shortage.filtered = discfilter + " invisible";
-        }
-      }
+      // if (selectedstatus != undefined && selectedstatus != "All Status") {
+      //   if (shortage.discrepancy_status.toLowerCase() == selectedstatus) {
+      //   } else {
+      //     shortage.filtered = discfilter + " invisible";
+      //   }
+      // }
       if (shipshortfilter) {
         if (shortage.is_ship_short == shipshortfilter) {
         } else {
@@ -1297,7 +1326,8 @@ export default class ShortageDbComponent extends LightningElement {
       "discrepancy_type": discrepancytobeupdated.discrepancy_type,
       "discrepancy": discrepancytobeupdated.discrepancy,
       "part_shortage": part_shortage,
-      "modified_date": discrepancytobeupdated.modified_date
+      "modified_date": discrepancytobeupdated.modified_date,
+      "buildstation_id": discrepancytobeupdated.buildstation_id,
 
     };
     if (this.qccaptureaction && this.qccapturerole) {
@@ -1794,5 +1824,18 @@ modifydate(date){
     // Display the unique objects
     console.log(newArray);
     return newArray;
+  }
+
+  getStatusColor(status) {
+    //var discrepancycolor = '#ff3b30';
+    var discrepancycolor = '';
+    if (status.toLowerCase() == 'resolve') {
+      discrepancycolor = '#e8bb07';
+    }
+    if (status.toLowerCase() == 'approve') {
+      discrepancycolor = '#34c759';
+    }
+    var bgColor = `background-color: ${discrepancycolor};`;
+    return bgColor;
   }
 }

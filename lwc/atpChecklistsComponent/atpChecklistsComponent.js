@@ -46,6 +46,7 @@ export default class ATPCheckLists extends LightningElement {
     @track filterlocal;
     @track filterlabellocal;
     @track newdiscrepancymodal=false;
+    @track istabchanged = false;
     
     
     @api
@@ -220,6 +221,11 @@ export default class ATPCheckLists extends LightningElement {
                 this.availableattchmentidlist=attachmentidlist;
                 this.availabeqcforattachment=this.modifyuserlistfordisplay(attachmentdetails.qc_users);
                 this.attachmentchecklist=modifiedatpdetails;
+                if (this.istabchanged) {
+                    let attachmentElement = this.template.querySelector('.attachmentlist');
+                    attachmentElement.scrollTop = 0;
+                    this.istabchanged = false;
+                }                
                 this.showSpinner = false;
             }   
         })
@@ -237,6 +243,7 @@ export default class ATPCheckLists extends LightningElement {
         this.selectedatpview = event.currentTarget.dataset.id;
         this.buttonLabel=this.getButtonLabel(this.selectedatpview)
         this.buttonenabled=(this.buttonLabel==='New Attachment Checklist Item')?true:false;
+        this.istabchanged = true;
         const allTabs = this.template.querySelectorAll('.slds-tabs_default__item');
         allTabs.forEach((elm, idx) => {
             elm.classList.remove("slds-is-active");
@@ -485,6 +492,11 @@ export default class ATPCheckLists extends LightningElement {
                 }
                 this.availabeqcforfa=this.modifyuserlistfordisplay(fadetails.qc_users);
                 this.falist=modifiedatpdetails;
+                if (this.istabchanged) {
+                    let finalAcceptancelistElement = this.template.querySelector('.ftplist');
+                    finalAcceptancelistElement.scrollTop = 0;
+                    this.istabchanged = false;
+                }                
                 this.showSpinner = false;
             }   
         })
@@ -688,6 +700,11 @@ export default class ATPCheckLists extends LightningElement {
                 }
                 this.availabeqcforabs=this.modifyuserlistfordisplay(absdetails.qc_users);
                 this.rockwelabchecklists=modifiedatpdetails;
+                if (this.istabchanged) {
+                    let antilockElement = this.template.querySelector('.abslist');
+                    antilockElement.scrollTop = 0;
+                    this.istabchanged = false;
+                }
                 this.showSpinner = false;
             }   
         })
@@ -867,6 +884,11 @@ export default class ATPCheckLists extends LightningElement {
                 }
                 this.availabeqcforat=this.modifyuserlistfordisplay(atdetails.qc_users);
                 this.atpchecklists=modifiedatpdetails;
+                if (this.istabchanged) {
+                    let acceptancelistElement = this.template.querySelector('.atplist');
+                    acceptancelistElement.scrollTop = 0;
+                    this.istabchanged = false;
+                }                
                 this.showSpinner = false;
             }   
         })
