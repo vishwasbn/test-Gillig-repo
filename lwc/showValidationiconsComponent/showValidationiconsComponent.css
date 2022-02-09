@@ -111,3 +111,15 @@
 .zoomcheckbox{
   zoom: 200%;
 }
+
+.tabledivoverflow{
+  overflow-x: auto;
+}
+
+.setactionbtnewidth{
+  min-width: 230px;
+}
+
+.setvaluefieldwidth{
+  min-width: 170px;
+}

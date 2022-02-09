@@ -80,7 +80,15 @@
                           <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails} title={discrepancy.discrepancy} class="slds-truncate"> <!--setdescriptionwidth-->
                             <div class="slds-grid">
                               <div class="allignbadge">
-                                <span if:true={discrepancy.isdepartmentdiscrepancy} class="deptbadge">DEPT</span> <span  if:false={discrepancy.isdepartmentdiscrepancy} class="normalbadge">NOR</span>
+                                <span if:true={discrepancy.isdepartmentdiscrepancy} class="deptbadge">DEPT</span> <!--<span  if:false={discrepancy.isdepartmentdiscrepancy} class="normalbadge">NOR</span>-->
+                                <template if:false={discrepancy.isdepartmentdiscrepancy}>
+                                  <span if:true={discrepancy.isdownstreamdiscrepancy} class="normalbadge">
+                                    DOW
+                                  </span>
+                                  <span if:false={discrepancy.isdownstreamdiscrepancy} class="normalbadge">
+                                    NOR
+                                  </span>
+                                </template>
                               </div>
                               <div class="slds-col"> <!--class="slds-text-heading_small"-->
                                 <div  style="font-weight:600;width: 250px; overflow: hidden;text-overflow: ellipsis;"> {discrepancy.discrepancy} </div>
@@ -355,7 +363,7 @@
           <lightning-input type="text" label="Part Number" name="buspart_no" value={selectedshortage.buspart_no} readonly></lightning-input>
         </div>
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-          <lightning-input type="number" label="Quantity Required" name="quantity" value={selectedshortage.quantity} step="0.00001" readonly></lightning-input>
+          <lightning-input type="number" label="Quantity Required" name="quantity" value={selectedshortage.quantity} step="0.00001" readonly={disableeditshortage} onchange={updateselectedshortage}></lightning-input>
         </div>
 
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
@@ -396,10 +404,16 @@
           </c-custom-search-lookup-component>
         </div>
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-          <lightning-input type="text" label="Carrier" name="carrier_text" value={selectedshortage.carrier_text} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+          <!-- <lightning-input type="text" label="Carrier" name="carrier_text" value={selectedshortage.carrier_text} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input> -->
+          <lightning-combobox name="carrier_text" label="Carrier" placeholder="Select Carrier"
+            value={selectedshortage.carrier_text} options={carrieroptions} onchange={updateselectedshortage}
+            disabled={disableeditshortage}></lightning-combobox>
         </div>
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
-          <lightning-input type="text" label="Carrier Arrival Time" name="carrier_arrival_text" value={selectedshortage.carrier_arrival_text} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input>
+          <!-- <lightning-input type="text" label="Carrier Arrival Time" name="carrier_arrival_text" value={selectedshortage.carrier_arrival_text} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-input> -->
+          <lightning-input type="time" name="carrier_arrival_text" label="Carrier Arrival Time"
+            value={selectedshortage.carrier_arrival_text} min="05:00:00.000" max="22:00:00.000" onchange={updateselectedshortage} disabled={disableeditshortage}>
+          </lightning-input>
         </div>
         <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
           <lightning-combobox label="Cause" name="shortage_cause_id" value={selectedshortage.shortage_cause_id} options={shortgecauselist} onchange={updateselectedshortage} disabled={disableeditshortage}></lightning-combobox>

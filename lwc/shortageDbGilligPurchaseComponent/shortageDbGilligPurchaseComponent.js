@@ -25,7 +25,8 @@ import getStatusPicklistOptions from "@salesforce/apex/scheduleBoardController.g
 
 import getPartshortagecauselist from "@salesforce/apex/ecardOperationsController.getPartshortageCauses";
 import getShortageslist from "@salesforce/apex/ecardOperationsController.getShortageslist";//to-do
-import getAllShortageslist from "@salesforce/apex/ecardOperationsController.getAllPartshortages";//added
+//import getAllShortageslist from "@salesforce/apex/ecardOperationsController.getAllPartshortages";
+import getAllShortageslist from "@salesforce/apex/ShortagesDatabaseController.getAllShortagesforPurchasing";//Added
 import getAllpartsVendorlist from '@salesforce/apex/ecardOperationsController.getAllpartsVendorlist';
 import getDefaultVendorandBuyer from '@salesforce/apex/ecardOperationsController.getDefaultVendorandBuyer';
 import updatePartshortage from "@salesforce/apex/ecardOperationsController.updatePartshortage";
@@ -70,8 +71,8 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
   @track departmentlist = [
     { label: "All Departments", value: "All Departments" }
   ];
-  @track selectedstatus = "All Status";
-  @track statuslist = [{ label: "All Shortage Status", value: "All Status" }, { label: "Open", value: "open" }, { label: "Resolved", value: "resolve" }, { label: "Verified", value: "approve" }];
+  @track selectedstatus = "Open";//"All Status";
+  @track statuslist = [{ label: "All Shortage Status", value: "All Status" }, { label: "Open", value: "Open" }, { label: "Resolved", value: "Resolve" }, { label: "Verified", value: "Approve" }];
   @track selectedbuyer = "All Buyer";
   @track buyerlist = [
     { label: "All Buyer", value: "All Buyer" }
@@ -93,8 +94,8 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
   @track qccapturerole=false;
   @track qccaptureaction=false;
   @track isdelenabled=false;
-  @track busstatuslist =[{'label': 'WIP', 'value' : 'WIP'}];
-  @track selectedBusStatus = 'WIP';
+  @track busstatuslist = [{ label: 'All Bus Status', value: 'All Bus Status' }];//[{'label': 'WIP', 'value' : 'WIP'}];
+  @track selectedBusStatus = 'All Bus Status';//'WIP';
   @track isbusareaarray = false;
   @track departmentIdMap = [{'bus_area_discrepancy_enabled':true,
                             'label':'All Departments',
@@ -105,6 +106,19 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
     "approve": "Status changed to Verified",
     "open": "Status changed to Open"
   };
+  @track isupdated;
+  @track carrieroptions = [
+    { "label": "UPS", "value": "UPS" },
+    { "label": "UPS 2ND DAY", "value": "UPS 2ND DAY" },
+    { "label": "UPS NDA", "value": "UPS NDA"    },
+    { "label": "UPS NDA EARLY AM", "value": "UPS NDA EARLY AM" },
+    { "label": "FEDEX", "value": "FEDEX"    },
+    { "label": "FEDEX 2ND DAY", "value": "FEDEX 2ND DAY" },
+    { "label": "FEDEX NDA", "value": "FEDEX NDA" },
+    { "label": "COURIER", "value": "COURIER" },
+    { "label": "VENDOR TRUCK", "value": "VENDOR TRUCK" },
+    { "label": "OTHER", "value": "OTHER" }
+  ];
   
 
   // Use whenever a false attribute is required in Component.html
@@ -188,6 +202,14 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
     return true;
   }
 
+  get showmodifieduser() {
+    return this.selectedshortage.modified_by != null;
+  }
+
+  get showmodifieddate() {
+    return this.selectedshortage.modified_date != null;
+  }
+
     wiredPermissions;
     permissionset;
     getPermissionsfromserver(event){
@@ -233,13 +255,20 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
   loadShortagesdata(event) {
     this.showSpinner = true;
     var statuslist = [];
+    var shortagestatus = [];
     if (this.selectedBusStatus != 'All Bus Status') {
       statuslist.push(this.selectedBusStatus.replaceAll(" ", "%20"));
     }
     else {
       statuslist = null;
     }
-    var statusparm = { bus_status: statuslist };
+    if (this.selectedstatus != 'All Status') {
+      shortagestatus.push(this.selectedstatus);
+    }
+    else {
+      shortagestatus = null;
+    }
+    var statusparm = { bus_status: statuslist, discrepancy_status: shortagestatus };
     getAllShortageslist({ ecardbusstatus: JSON.stringify(statusparm) })
       .then(data => {
         var shortageslist = [];
@@ -278,6 +307,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
               partname = shortageobj.custom_part_name;
             }
             var bsavailable = shortageobj.buildstation_code == '9999' ? false : true;
+            var currentlocationavailable = (shortageobj.current_line_location != '9999' && shortageobj.current_line_location != null) ? true : false;
             var qc_avilable = shortageobj.assigend_qc_id != null ? true : false;
             var moddedshortage = {
               index: index,
@@ -302,7 +332,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
               defect_codename: `${shortageobj.defect_code}, ${shortageobj.defect_name}`,
               discrepancy_statusdisplay: setstatusfordisplay(shortageobj.discrepancy_status.toLowerCase()),
               discrepancy_type: this.capitalize(shortageobj.discrepancy_type),
-              cut_off_date: shortageobj.cut_off_date,
+              cut_off_date: shortageobj.cut_off_date,              
               displaycutoffdate: getmoddeddate(shortageobj.cut_off_date),
               dat_defect_code_id: shortageobj.dat_defect_code_id,
               defect_code: shortageobj.defect_code,
@@ -332,7 +362,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
               quantity: shortageobj.quantity,
               assigend_qc_id: modifieduserlist([shortageobj.assigend_qc_id]),
               qcavailable: qc_avilable,
-              raised_date: getmoddeddate(shortageobj.raised_date),
+              raised_date: shortageobj.raised_date,
               raised_date_display: getmoddeddate(shortageobj.raised_date),
               raised_status_updated_date: shortageobj.raised_status_updated_date,
               resolved_date: shortageobj.resolved_date,
@@ -346,7 +376,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
               workcenter_name: shortageobj.workcenter_name,
               filtered: "",
               created_by: created_by,
-              buyer: shortageobj.buyer,
+              buyer: shortageobj.buyer,              
               carrier_arrival_text: shortageobj.carrier_arrival_text,
               carrier_text: shortageobj.carrier_text,
               date_received: shortageobj.date_received,
@@ -356,12 +386,29 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
               planner_code: shortageobj.planner_code,
               shortage_cause_id: shortageobj.shortage_cause_id != null ? shortageobj.shortage_cause_id.toString() : null,
               tracking: shortageobj.tracking,
-              trk:(shortageobj.tracking == null || shortageobj.tracking == undefined) ? "No":"Yes",
+              // trk:(shortageobj.tracking == null || shortageobj.tracking == undefined) ? "No":"Yes",
+              trk: (shortageobj.tracking == null || shortageobj.tracking == undefined) ? "No" : shortageobj.tracking,
               vendor_name: shortageobj.vendor_name,
               vendor_number: shortageobj.vendor_number,
-              bus_start_date : getmoddeddate(shortageobj.bus_start_date),
+              // bus_start_date : getmoddeddate(shortageobj.bus_start_date),
+              bus_start_date : shortageobj.bus_start_date,
               remarks : shortageobj.remarks,
-              bus_relative_seq : shortageobj.bus_relative_seq
+              bus_relative_seq : shortageobj.bus_relative_seq,
+              cut_off_date_sort: shortageobj.cut_off_date == null ? "" : shortageobj.cut_off_date,
+              buyer_to_sort: shortageobj.buyer == null ? "" : shortageobj.buyer,
+              carrier_text_sort: shortageobj.carrier_text == null ? "" : shortageobj.carrier_text,
+              carrier_arrival_text_sort: shortageobj.carrier_arrival_text == null ? "" : shortageobj.carrier_arrival_text,
+              shortage_cause_id_sort: shortageobj.shortage_cause_id != null ? shortageobj.shortage_cause_id.toString() : '',
+              date_received_sort: shortageobj.date_received == null ? "" : shortageobj.date_received,
+              modifiedby_id: modifieduserlist([shortageobj.modifiedby_id]),
+              modified_by: shortageobj.modifiedby_id,
+              modified_date_display: getmoddeddate(shortageobj.modified_date),
+              bus_seq_in_day: shortageobj.bus_seq_in_day,
+              current_line_location: shortageobj.current_line_location,
+              currentlocation_available: currentlocationavailable,
+              current_line_location_sort: (shortageobj.current_line_location == null || shortageobj.current_line_location == '9999') ? 'zzzz' : shortageobj.current_line_location,
+              buspart_no_sort: shortageobj.buspart_no == null ? "" : shortageobj.buspart_no,
+              bus_seq_in_day_sort: (shortageobj.bus_seq_in_day == null || shortageobj.bus_seq_in_day == 9999) ? '9999' : shortageobj.bus_seq_in_day.toString()
             };
 
             if (moddedshortage.created_by.length > 0) {
@@ -457,223 +504,223 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
       });
   }
 
-  // Load Data from Server.
-  loaddataforview(event) {
-    var today = new Date();
-    var start = today;
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()+":"+today.getMilliseconds();
-    this.showSpinner = true;
-    var statuslist = [];
-    if (this.selectedBusStatus != 'All Bus Status') {
-      statuslist.push(this.selectedBusStatus.replaceAll(" ", "%20"));
-    }
-    else{
-      statuslist = null;
-    }
-    var statusparm = { bus_status: statuslist};
-    getAllDiscrepanciesfromServer({ecardbusstatus : JSON.stringify(statusparm)})
-      .then((response) => {
-        if (response.isError) {
-          const alertmessage = new ShowToastEvent({
-            title: "Failed to fetch Discrepancy List.",
-            message:
-              "Something unexpected occured. Please contact your Administrator",
-            variant: "error"
-          });
-          this.dispatchEvent(alertmessage);
-          throw "Data fetch failed";
-        } else {
-          today = new Date();
-          time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()+":"+today.getMilliseconds();
-          var elapsed = today. getTime() - start;
-          console.log('Discrepancy DB :- Time after excuting API call :', time );
-          console.log('Discrepancy DB :- Time Difference in milliseconds:', elapsed);
-          let completediscrepancydata = JSON.parse(response.responsebody).data.discrepancylog;
-          var moddeddiscrepancydata = [];
-          var customernamechasislist = [];
-          var createdbyuserslist = [];
-          var assigneduserslist=[];
-          for (var disc in completediscrepancydata) {
-            var discrepancy = completediscrepancydata[disc];
-            var isdepartmentdiscrepancy = false;
-            if (discrepancy.discrepancy_type == "department") {
-              isdepartmentdiscrepancy = true;
-            }
-            // alert(isdepartmentdiscrepancy);
-            var selectedprodlist = this.getselectedformandetails(discrepancy);
-            var allprodlist = this.modifyuserlistfordisplay(discrepancy.prod);
-            var allqclist = this.modifyuserlistfordisplay(discrepancy.qc);
-            var assigend_qc_id = this.modifyuserlistfordisplay([
-              discrepancy.assigend_qc_id
-            ]);
-            var created_by = this.modifyuserlistfordisplay([
-              discrepancy.createdby_id
-            ]);
-            var raised_date = this.getmoddeddate(discrepancy.raised_date);
-            var createdbyname;
-            var displaycreatedbyname;
-            var createdbyempid=undefined;
-            if (created_by != undefined && created_by.length != 0) {
-              if (created_by[0] != undefined) {
-                displaycreatedbyname = `${created_by[0].name} (${created_by[0].userid}) on ${raised_date}`;
-                createdbyname = `${created_by[0].name}`;
-                createdbyempid= `${created_by[0].userid}`;
-              }
-            }
+  // // Load Data from Server.
+  // loaddataforview(event) {
+  //   var today = new Date();
+  //   var start = today;
+  //   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()+":"+today.getMilliseconds();
+  //   this.showSpinner = true;
+  //   var statuslist = [];
+  //   if (this.selectedBusStatus != 'All Bus Status') {
+  //     statuslist.push(this.selectedBusStatus.replaceAll(" ", "%20"));
+  //   }
+  //   else{
+  //     statuslist = null;
+  //   }
+  //   var statusparm = { bus_status: statuslist};
+  //   getAllDiscrepanciesfromServer({ecardbusstatus : JSON.stringify(statusparm)})
+  //     .then((response) => {
+  //       if (response.isError) {
+  //         const alertmessage = new ShowToastEvent({
+  //           title: "Failed to fetch Discrepancy List.",
+  //           message:
+  //             "Something unexpected occured. Please contact your Administrator",
+  //           variant: "error"
+  //         });
+  //         this.dispatchEvent(alertmessage);
+  //         throw "Data fetch failed";
+  //       } else {
+  //         today = new Date();
+  //         time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()+":"+today.getMilliseconds();
+  //         var elapsed = today. getTime() - start;
+  //         console.log('Discrepancy DB :- Time after excuting API call :', time );
+  //         console.log('Discrepancy DB :- Time Difference in milliseconds:', elapsed);
+  //         let completediscrepancydata = JSON.parse(response.responsebody).data.discrepancylog;
+  //         var moddeddiscrepancydata = [];
+  //         var customernamechasislist = [];
+  //         var createdbyuserslist = [];
+  //         var assigneduserslist=[];
+  //         for (var disc in completediscrepancydata) {
+  //           var discrepancy = completediscrepancydata[disc];
+  //           var isdepartmentdiscrepancy = false;
+  //           if (discrepancy.discrepancy_type == "department") {
+  //             isdepartmentdiscrepancy = true;
+  //           }
+  //           // alert(isdepartmentdiscrepancy);
+  //           var selectedprodlist = this.getselectedformandetails(discrepancy);
+  //           var allprodlist = this.modifyuserlistfordisplay(discrepancy.prod);
+  //           var allqclist = this.modifyuserlistfordisplay(discrepancy.qc);
+  //           var assigend_qc_id = this.modifyuserlistfordisplay([
+  //             discrepancy.assigend_qc_id
+  //           ]);
+  //           var created_by = this.modifyuserlistfordisplay([
+  //             discrepancy.createdby_id
+  //           ]);
+  //           var raised_date = this.getmoddeddate(discrepancy.raised_date);
+  //           var createdbyname;
+  //           var displaycreatedbyname;
+  //           var createdbyempid=undefined;
+  //           if (created_by != undefined && created_by.length != 0) {
+  //             if (created_by[0] != undefined) {
+  //               displaycreatedbyname = `${created_by[0].name} (${created_by[0].userid}) on ${raised_date}`;
+  //               createdbyname = `${created_by[0].name}`;
+  //               createdbyempid= `${created_by[0].userid}`;
+  //             }
+  //           }
 
-            allprodlist = this.updateprodlistwithall(
-              selectedprodlist,
-              allprodlist
-            );
+  //           allprodlist = this.updateprodlistwithall(
+  //             selectedprodlist,
+  //             allprodlist
+  //           );
 
-            var raisedby_name;
-            var displayraisebyname;
-            if (assigend_qc_id != undefined && assigend_qc_id.length != 0) {
-              if (assigend_qc_id[0] != undefined) {
-                displayraisebyname = `${assigend_qc_id[0].name} (${assigend_qc_id[0].userid})`;
-                raisedby_name = `${assigend_qc_id[0].name} (${assigend_qc_id[0].userid})`;
-              }
-            }
-            var resolved_status_updatedby = this.modifyuserlistfordisplay([
-              discrepancy.resolved_status_updatedby_id
-            ]);
-            var verifiedby = this.modifyuserlistfordisplay([
-              discrepancy.verifiedby_id
-            ]);
-            var assigneduser = [];
-            if (discrepancy.discrepancy_status.toLowerCase() == "open") {
-              assigneduser = selectedprodlist;
-            } else if (discrepancy.discrepancy_status.toLowerCase() == "resolve") {
-              assigneduser = assigend_qc_id;
-            } else if (discrepancy.discrepancy_status.toLowerCase() == "approve") {
-              assigneduser = assigend_qc_id;
-            } else {
-              assigneduser = selectedprodlist;
-            }
-            var hasbusareapicture = false;
-            if(discrepancy.bus_area_picture_id != undefined){
-                hasbusareapicture = true;
-            }
-            var discrepancytype = discrepancy.discrepancy_type;
-                if(discrepancy.discrepancy_type == 'busarea' ){
-                    discrepancytype = 'Bus Area';
-                }
+  //           var raisedby_name;
+  //           var displayraisebyname;
+  //           if (assigend_qc_id != undefined && assigend_qc_id.length != 0) {
+  //             if (assigend_qc_id[0] != undefined) {
+  //               displayraisebyname = `${assigend_qc_id[0].name} (${assigend_qc_id[0].userid})`;
+  //               raisedby_name = `${assigend_qc_id[0].name} (${assigend_qc_id[0].userid})`;
+  //             }
+  //           }
+  //           var resolved_status_updatedby = this.modifyuserlistfordisplay([
+  //             discrepancy.resolved_status_updatedby_id
+  //           ]);
+  //           var verifiedby = this.modifyuserlistfordisplay([
+  //             discrepancy.verifiedby_id
+  //           ]);
+  //           var assigneduser = [];
+  //           if (discrepancy.discrepancy_status.toLowerCase() == "open") {
+  //             assigneduser = selectedprodlist;
+  //           } else if (discrepancy.discrepancy_status.toLowerCase() == "resolve") {
+  //             assigneduser = assigend_qc_id;
+  //           } else if (discrepancy.discrepancy_status.toLowerCase() == "approve") {
+  //             assigneduser = assigend_qc_id;
+  //           } else {
+  //             assigneduser = selectedprodlist;
+  //           }
+  //           var hasbusareapicture = false;
+  //           if(discrepancy.bus_area_picture_id != undefined){
+  //               hasbusareapicture = true;
+  //           }
+  //           var discrepancytype = discrepancy.discrepancy_type;
+  //               if(discrepancy.discrepancy_type == 'busarea' ){
+  //                   discrepancytype = 'Bus Area';
+  //               }
 
-            var bsavailable=discrepancy.buildstation_code=='9999'?false:true;
-            //alert(discrepancy.modified_date);    
-            var is_deletable=false;
-            if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancy.discrepancy_status.toLowerCase()=="open")){
-              is_deletable=true;
-            }    
-            var modeddiscrepancy = {
-              modified_date : discrepancy.modified_date,
-              hasbusareapicture : hasbusareapicture,
-              bus_area : discrepancy.bus_area,
-              bus_area_picture_id : discrepancy.bus_area_picture_id,
-              buildstation_code: discrepancy.buildstation_code,
-              buildstation_id: discrepancy.buildstation_id,
-              busstatus_id: discrepancy.busstatus_id,
-              busstatus_name: discrepancy.busstatus_name,
-              chassis_no: discrepancy.chassis_no,
-              component: discrepancy.component,
-              first_name: discrepancy.first_name,
-              last_name: discrepancy.last_name,
-              customername: `${discrepancy.customer_name}`,
-              customernamewithchasis: `${discrepancy.customer_name}, ${discrepancy.chassis_no}`,
-              cut_off_date: discrepancy.cut_off_date,
-              dat_defect_code_id: discrepancy.dat_defect_code_id,
-              defect_codename: `${discrepancy.defect_code}, ${discrepancy.defect_name}`,
-              defect_code: discrepancy.defect_code,
-              defect_name: discrepancy.defect_name,
-              defect_type: this.capitalize(discrepancy.defect_type),
-              department_id: discrepancy.department_id,
-              department_name: discrepancy.department_name,
-              description: discrepancy.discrepancy,
-              discrepancy_priority: this.capitalize(
-                discrepancy.discrepancy_priority
-              ),
-              discrepancy_statusdisplay: setstatusfordisplay(
-                discrepancy.discrepancy_status.toLowerCase()
-              ),
-              discrepancy_status: discrepancy.discrepancy_status.toLowerCase(),
-              discrepancy_type: this.capitalize(discrepancytype),
-              isdepartmentdiscrepancy: isdepartmentdiscrepancy,
-              isdeletable:is_deletable,
-              ecard_discrepancy_log_id: discrepancy.ecard_discrepancy_log_id,
-              ecard_discrepancy_log_number:discrepancy.discrepancy_log_number,
-              ecard_id: discrepancy.ecard_id,
-              ecard_operation_log_id: discrepancy.ecard_operation_log_id,
-              has_part_shortage: discrepancy.has_part_shortage,
-              resolved_date: this.getmoddeddate(discrepancy.resolved_date),
-              disc_bsavailable:bsavailable,
-              workcenter_name: discrepancy.workcenter_name,
-              workcenter_code: discrepancy.workcenter_code,
-              part_avilable: discrepancy.part_avilable,
-              raised_date_display: this.getmoddeddate(discrepancy.raised_date),
-              raised_date: discrepancy.raised_date,
-              raised_status_updated_date:
-              discrepancy.raised_status_updated_date,
-              root_cause: discrepancy.root_cause,
-              verified_date: discrepancy.verified_date,
-              verified_status_updated_date:
-                discrepancy.verified_status_updated_date,
-              selectedprodlist: selectedprodlist,
-              allprodlist: allprodlist,
-              allqclist: allqclist,
-              assigend_qc_id: assigend_qc_id,
-              resolved_status_updatedby: resolved_status_updatedby,
-              verifiedby: verifiedby,
-              assigneduser: assigneduser,
-              created_by: created_by,
-              createdbyname: createdbyname,
-              displaycreatedbyname: displaycreatedbyname,
-              filtered: "",
-              formatteddatetosearch: this.getformatedsearchformat(
-                discrepancy.raised_date
-              )
-            };
-            if (modeddiscrepancy.createdbyname != undefined) {
-              createdbyuserslist.push(modeddiscrepancy.createdbyname);
-            }
-            if (modeddiscrepancy.assigneduser.length > 0) {
-              for(var i in modeddiscrepancy.assigneduser){
-                if(modeddiscrepancy.assigneduser[i].Name != undefined){
-                  assigneduserslist.push(modeddiscrepancy.assigneduser[i].Name);
-                }
-              }
+  //           var bsavailable=discrepancy.buildstation_code=='9999'?false:true;
+  //           //alert(discrepancy.modified_date);    
+  //           var is_deletable=false;
+  //           if((createdbyempid==this.loggedinuser.appuser_id) && (discrepancy.discrepancy_status.toLowerCase()=="open")){
+  //             is_deletable=true;
+  //           }    
+  //           var modeddiscrepancy = {
+  //             modified_date : discrepancy.modified_date,
+  //             hasbusareapicture : hasbusareapicture,
+  //             bus_area : discrepancy.bus_area,
+  //             bus_area_picture_id : discrepancy.bus_area_picture_id,
+  //             buildstation_code: discrepancy.buildstation_code,
+  //             buildstation_id: discrepancy.buildstation_id,
+  //             busstatus_id: discrepancy.busstatus_id,
+  //             busstatus_name: discrepancy.busstatus_name,
+  //             chassis_no: discrepancy.chassis_no,
+  //             component: discrepancy.component,
+  //             first_name: discrepancy.first_name,
+  //             last_name: discrepancy.last_name,
+  //             customername: `${discrepancy.customer_name}`,
+  //             customernamewithchasis: `${discrepancy.customer_name}, ${discrepancy.chassis_no}`,
+  //             cut_off_date: discrepancy.cut_off_date,
+  //             dat_defect_code_id: discrepancy.dat_defect_code_id,
+  //             defect_codename: `${discrepancy.defect_code}, ${discrepancy.defect_name}`,
+  //             defect_code: discrepancy.defect_code,
+  //             defect_name: discrepancy.defect_name,
+  //             defect_type: this.capitalize(discrepancy.defect_type),
+  //             department_id: discrepancy.department_id,
+  //             department_name: discrepancy.department_name,
+  //             description: discrepancy.discrepancy,
+  //             discrepancy_priority: this.capitalize(
+  //               discrepancy.discrepancy_priority
+  //             ),
+  //             discrepancy_statusdisplay: setstatusfordisplay(
+  //               discrepancy.discrepancy_status.toLowerCase()
+  //             ),
+  //             discrepancy_status: discrepancy.discrepancy_status.toLowerCase(),
+  //             discrepancy_type: this.capitalize(discrepancytype),
+  //             isdepartmentdiscrepancy: isdepartmentdiscrepancy,
+  //             isdeletable:is_deletable,
+  //             ecard_discrepancy_log_id: discrepancy.ecard_discrepancy_log_id,
+  //             ecard_discrepancy_log_number:discrepancy.discrepancy_log_number,
+  //             ecard_id: discrepancy.ecard_id,
+  //             ecard_operation_log_id: discrepancy.ecard_operation_log_id,
+  //             has_part_shortage: discrepancy.has_part_shortage,
+  //             resolved_date: this.getmoddeddate(discrepancy.resolved_date),
+  //             disc_bsavailable:bsavailable,
+  //             workcenter_name: discrepancy.workcenter_name,
+  //             workcenter_code: discrepancy.workcenter_code,
+  //             part_avilable: discrepancy.part_avilable,
+  //             raised_date_display: this.getmoddeddate(discrepancy.raised_date),
+  //             raised_date: discrepancy.raised_date,
+  //             raised_status_updated_date:
+  //             discrepancy.raised_status_updated_date,
+  //             root_cause: discrepancy.root_cause,
+  //             verified_date: discrepancy.verified_date,
+  //             verified_status_updated_date:
+  //               discrepancy.verified_status_updated_date,
+  //             selectedprodlist: selectedprodlist,
+  //             allprodlist: allprodlist,
+  //             allqclist: allqclist,
+  //             assigend_qc_id: assigend_qc_id,
+  //             resolved_status_updatedby: resolved_status_updatedby,
+  //             verifiedby: verifiedby,
+  //             assigneduser: assigneduser,
+  //             created_by: created_by,
+  //             createdbyname: createdbyname,
+  //             displaycreatedbyname: displaycreatedbyname,
+  //             filtered: "",
+  //             formatteddatetosearch: this.getformatedsearchformat(
+  //               discrepancy.raised_date
+  //             )
+  //           };
+  //           if (modeddiscrepancy.createdbyname != undefined) {
+  //             createdbyuserslist.push(modeddiscrepancy.createdbyname);
+  //           }
+  //           if (modeddiscrepancy.assigneduser.length > 0) {
+  //             for(var i in modeddiscrepancy.assigneduser){
+  //               if(modeddiscrepancy.assigneduser[i].Name != undefined){
+  //                 assigneduserslist.push(modeddiscrepancy.assigneduser[i].Name);
+  //               }
+  //             }
 
-            }
-            customernamechasislist.push(modeddiscrepancy.customername);
-            customernamechasislist.push(modeddiscrepancy.chassis_no);
-            moddeddiscrepancydata.push(modeddiscrepancy);
-          }
-          this.createdbyuserslist = Array.from(new Set(createdbyuserslist));
-          this.assigneduserslist = Array.from(new Set(assigneduserslist));
-          this.customernamechasislist = Array.from(
-            new Set(customernamechasislist)
-          );
-          this.alldiscrepancy = moddeddiscrepancydata;
-          this.filteredshortages = moddeddiscrepancydata;
-          this.showSpinner = false;
-          var pageload = new Date();
-          time = pageload.getHours() + ":" + pageload.getMinutes() + ":" + pageload.getSeconds()+":"+pageload.getMilliseconds();
-          elapsed = pageload. getTime() - today;
-          console.log('E-Card :- Time after Page Load :', time );
-          console.log('E-Card :- Time Page Load in milliseconds:', elapsed);
-          this.applyfilterchanges();
-        }
-      })
-      .catch((error) => {
-        this.error = error;
-        const alertmessage = new ShowToastEvent({
-          title: "Failed to fetch Discrepancy List.",
-          message:
-            "Something unexpected occured. Please contact your Administrator",
-          variant: "error"
-        });
-        this.dispatchEvent(alertmessage);
-      });
-  }
+  //           }
+  //           customernamechasislist.push(modeddiscrepancy.customername);
+  //           customernamechasislist.push(modeddiscrepancy.chassis_no);
+  //           moddeddiscrepancydata.push(modeddiscrepancy);
+  //         }
+  //         this.createdbyuserslist = Array.from(new Set(createdbyuserslist));
+  //         this.assigneduserslist = Array.from(new Set(assigneduserslist));
+  //         this.customernamechasislist = Array.from(
+  //           new Set(customernamechasislist)
+  //         );
+  //         this.alldiscrepancy = moddeddiscrepancydata;
+  //         this.filteredshortages = moddeddiscrepancydata;
+  //         this.showSpinner = false;
+  //         var pageload = new Date();
+  //         time = pageload.getHours() + ":" + pageload.getMinutes() + ":" + pageload.getSeconds()+":"+pageload.getMilliseconds();
+  //         elapsed = pageload. getTime() - today;
+  //         console.log('E-Card :- Time after Page Load :', time );
+  //         console.log('E-Card :- Time Page Load in milliseconds:', elapsed);
+  //         this.applyfilterchanges();
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       this.error = error;
+  //       const alertmessage = new ShowToastEvent({
+  //         title: "Failed to fetch Discrepancy List.",
+  //         message:
+  //           "Something unexpected occured. Please contact your Administrator",
+  //         variant: "error"
+  //       });
+  //       this.dispatchEvent(alertmessage);
+  //     });
+  // }
 
   // Update PROD list with users not in scheduled
   updateprodlistwithall(selectedprod, allprod) {
@@ -899,7 +946,8 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
   // Handle Shortage status Change
   handleshortgstatuschange(event) {
     this.selectedstatus = event.detail.value;
-    this.applyfilterchanges(event);
+    //this.applyfilterchanges(event);
+    this.loadShortagesdata(event);
   }
 
   // Handle Defect Change
@@ -958,7 +1006,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
     var selecteddepartment = this.selecteddepartement;
     var selectedcustomer = this.selectedCustomer;
     var selectedbuyer = this.selectedbuyer;
-    var selectedstatus = this.selectedstatus;
+    // var selectedstatus = this.selectedstatus;
     var shipshortfilter = this.shipshortfilter;
     // var selectedcreateddate = this.selectedcreatedddate;
     var selectedcreatedby = this.selectedcreatedbyuser;
@@ -997,12 +1045,12 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
           shortage.filtered = discfilter + " invisible";
         }
       }
-      if (selectedstatus != undefined && selectedstatus != "All Status") {
-        if (shortage.discrepancy_status.toLowerCase() == selectedstatus) {
-        } else {
-          shortage.filtered = discfilter + " invisible";
-        }
-      }
+      // if (selectedstatus != undefined && selectedstatus != "All Status") {
+      //   if (shortage.discrepancy_status.toLowerCase() == selectedstatus) {
+      //   } else {
+      //     shortage.filtered = discfilter + " invisible";
+      //   }
+      // }
       if (shipshortfilter) {
         if (shortage.is_ship_short == shipshortfilter) {
         } else {
@@ -1178,6 +1226,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
   @track partshortagedetailsmodal = false;
   // To Show Part Shortage Detail
   async showpartshortagedetail(event) {
+    this.isupdated = false;
     var selectepartshortagelogid = event.currentTarget.dataset.id;
     for (var i in this.modifiedshortageslist) {
       if (this.modifiedshortageslist[i].ecard_discrepancy_log_id == selectepartshortagelogid) {
@@ -1217,6 +1266,7 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
 
   // Update selected shortage fields.
   updateselectedshortage(event) {
+    this.isupdated = true;
     var targetvalue;
     if (event.target.type == "checkbox") {
       targetvalue = event.target.checked;
@@ -1290,12 +1340,12 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
     part_shortage['carrier_text'] = discrepancytobeupdated.carrier_text == undefined ? null : discrepancytobeupdated.carrier_text;
     part_shortage['carrier_arrival_text'] = discrepancytobeupdated.carrier_arrival_text == undefined ? null : discrepancytobeupdated.carrier_arrival_text;
     part_shortage['shortage_cause_id'] = discrepancytobeupdated.shortage_cause_id == undefined ? null : discrepancytobeupdated.shortage_cause_id;
-    part_shortage['tracking'] = discrepancytobeupdated.tracking == undefined ? null : discrepancytobeupdated.tracking;
+    part_shortage['tracking'] = discrepancytobeupdated.tracking == "" ? null : discrepancytobeupdated.tracking;
     part_shortage['date_received'] = discrepancytobeupdated.date_received == undefined ? null : this.modifydate(discrepancytobeupdated.date_received);
-    part_shortage['is_b_whs_kit'] = discrepancytobeupdated.is_b_whs_kit == undefined ? null : discrepancytobeupdated.is_b_whs_kit;
-    part_shortage['is_long_term'] = discrepancytobeupdated.is_long_term == undefined ? null : discrepancytobeupdated.is_long_term;
-    part_shortage['is_ship_short'] = discrepancytobeupdated.is_ship_short == undefined ? null : discrepancytobeupdated.is_ship_short;
-    part_shortage['remarks'] = discrepancytobeupdated.remarks == undefined ? null : discrepancytobeupdated.remarks;
+    part_shortage['is_b_whs_kit'] = discrepancytobeupdated.is_b_whs_kit == undefined ? false : discrepancytobeupdated.is_b_whs_kit;
+    part_shortage['is_long_term'] = discrepancytobeupdated.is_long_term == undefined ? false : discrepancytobeupdated.is_long_term;
+    part_shortage['is_ship_short'] = discrepancytobeupdated.is_ship_short == undefined ? false : discrepancytobeupdated.is_ship_short;
+    part_shortage['remarks'] = discrepancytobeupdated.remarks == "" ? null : discrepancytobeupdated.remarks;
 
     var responsebody = {
       "ecard_discrepancy_log_id": discrepancytobeupdated.ecard_discrepancy_log_id,
@@ -1308,7 +1358,8 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
       "discrepancy_type": discrepancytobeupdated.discrepancy_type,
       "discrepancy": discrepancytobeupdated.discrepancy,
       "part_shortage": part_shortage,
-      "modified_date": discrepancytobeupdated.modified_date
+      "modified_date": discrepancytobeupdated.modified_date,
+      "buildstation_id": discrepancytobeupdated.buildstation_id
 
     };
     if (this.qccaptureaction && this.qccapturerole) {
@@ -1336,6 +1387,10 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
         }
         else {
           this.selectedshortage['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;
+          this.selectedshortage['modified_date_display'] = getmoddeddate(JSON.parse(data.operationlogresponse).data.modified_date);
+          this.selectedshortage['modifiedby_id'] = modifieduserlist([JSON.parse(data.operationlogresponse).data.modifiedby_id]);
+          this.selectedshortage['modified_by'] = JSON.parse(data.operationlogresponse).data.modifiedby_id;
+          this.isupdated = false;
           if (this.statusascomment) {
             this.statusascomment = false;
             var response = JSON.parse(data.operationlogresponse).data;
@@ -1531,165 +1586,165 @@ export default class ShortageDbGilligPurchaseComponent extends LightningElement 
     return this.selecteddiscrepancy.discrepancy_status.toLowerCase() != "open";
   }
 
-  // Handle Discrepancy Actions
-  handlediscrepancyactions(event) {
-    var action = event.detail.action;
-    var passedallvalidation = true;
-    if (action == "Reject") {
-      this.qccaptureaction=true;
-      this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-        "open"
-      ); // reject
-      this.selecteddiscrepancy.discrepancy_status = "open"; //reject
-    }
-    if (action == "Verify") {
-      this.qccaptureaction=true;
-      this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-        "approve"
-      );
-      this.selecteddiscrepancy.discrepancy_status = "approve";
-    }
-    if (action == "Mark as done") {
-      this.qccaptureaction=false;
-      // Check Validations
-      if (this.selecteddiscrepancy.defect_type == "Department") {
-        const allValid = [
-          ...this.template.querySelectorAll(".checkvalid")
-        ].reduce((validSoFar, inputCmp) => {
-          inputCmp.reportValidity();
-          return validSoFar && inputCmp.checkValidity();
-        }, true);
-        if (allValid) {
-          this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-            "resolve"
-          );
-          this.selecteddiscrepancy.discrepancy_status = "resolve";
-          this.isdelenabled=false;
-        } else {
-          passedallvalidation = false;
-          const alertmessage = new ShowToastEvent({
-            title: "Fill all required fields.",
-            message: "Please fill in all the required fields..",
-            variant: "warning"
-          });
-          this.dispatchEvent(alertmessage);
-        }
-      } else {
-        this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-          "resolve"
-        );
-        this.selecteddiscrepancy.discrepancy_status = "resolve";
-      }
-    }
-    if (action == "Cancel") {
-      this.qccaptureaction=true;
-      this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-        "open"
-      );
-      this.selecteddiscrepancy.discrepancy_status = "open";
-    }
-    if (action == "Cancel Verified") {
-      this.qccaptureaction=true;
-      this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-        "resolve"
-      );
-      this.selecteddiscrepancy.discrepancy_status = "resolve";
-    }
-    if (action == "Cancel Rejected") {
-      this.qccaptureaction=true;
-      this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
-        "resolve"
-      );
-      this.selecteddiscrepancy.discrepancy_status = "resolve";
-    }
-    if (passedallvalidation) {
-      this.statusascomment = true;
-      this.updatediscrepancytoserver();
-    }
-  }
+  // // Handle Discrepancy Actions
+  // handlediscrepancyactions(event) {
+  //   var action = event.detail.action;
+  //   var passedallvalidation = true;
+  //   if (action == "Reject") {
+  //     this.qccaptureaction=true;
+  //     this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //       "open"
+  //     ); // reject
+  //     this.selecteddiscrepancy.discrepancy_status = "open"; //reject
+  //   }
+  //   if (action == "Verify") {
+  //     this.qccaptureaction=true;
+  //     this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //       "approve"
+  //     );
+  //     this.selecteddiscrepancy.discrepancy_status = "approve";
+  //   }
+  //   if (action == "Mark as done") {
+  //     this.qccaptureaction=false;
+  //     // Check Validations
+  //     if (this.selecteddiscrepancy.defect_type == "Department") {
+  //       const allValid = [
+  //         ...this.template.querySelectorAll(".checkvalid")
+  //       ].reduce((validSoFar, inputCmp) => {
+  //         inputCmp.reportValidity();
+  //         return validSoFar && inputCmp.checkValidity();
+  //       }, true);
+  //       if (allValid) {
+  //         this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //           "resolve"
+  //         );
+  //         this.selecteddiscrepancy.discrepancy_status = "resolve";
+  //         this.isdelenabled=false;
+  //       } else {
+  //         passedallvalidation = false;
+  //         const alertmessage = new ShowToastEvent({
+  //           title: "Fill all required fields.",
+  //           message: "Please fill in all the required fields..",
+  //           variant: "warning"
+  //         });
+  //         this.dispatchEvent(alertmessage);
+  //       }
+  //     } else {
+  //       this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //         "resolve"
+  //       );
+  //       this.selecteddiscrepancy.discrepancy_status = "resolve";
+  //     }
+  //   }
+  //   if (action == "Cancel") {
+  //     this.qccaptureaction=true;
+  //     this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //       "open"
+  //     );
+  //     this.selecteddiscrepancy.discrepancy_status = "open";
+  //   }
+  //   if (action == "Cancel Verified") {
+  //     this.qccaptureaction=true;
+  //     this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //       "resolve"
+  //     );
+  //     this.selecteddiscrepancy.discrepancy_status = "resolve";
+  //   }
+  //   if (action == "Cancel Rejected") {
+  //     this.qccaptureaction=true;
+  //     this.selecteddiscrepancy.discrepancy_statusdisplay = setstatusfordisplay(
+  //       "resolve"
+  //     );
+  //     this.selecteddiscrepancy.discrepancy_status = "resolve";
+  //   }
+  //   if (passedallvalidation) {
+  //     this.statusascomment = true;
+  //     this.updatediscrepancytoserver();
+  //   }
+  // }
 
   activeSections = ["Details"];
   // For toogle sections within modal
   togglesection(event) {}
 
-  // To update the discrepancy changes to server.
-  updatediscrepancytoserver(event) {
-    //alert(JSON.stringify(this.selecteddiscrepancy));
-    var discrepancytobeupdated = this.selecteddiscrepancy;
-    var responsebody = {
-      ecard_discrepancy_log_id: discrepancytobeupdated.ecard_discrepancy_log_id,
-      ecard_id: discrepancytobeupdated.ecard_id,
-      department_id: discrepancytobeupdated.department_id,
-      component: discrepancytobeupdated.component,
-      cut_off_date: new Date(discrepancytobeupdated.cut_off_date),
-      root_cause: discrepancytobeupdated.root_cause,
-      discrepancy_status: discrepancytobeupdated.discrepancy_status,
-      discrepancy_type: discrepancytobeupdated.discrepancy_type,
-      discrepancy: discrepancytobeupdated.description,
-      modified_date : discrepancytobeupdated.modified_date
-    };
+  // // To update the discrepancy changes to server.
+  // updatediscrepancytoserver(event) {
+  //   //alert(JSON.stringify(this.selecteddiscrepancy));
+  //   var discrepancytobeupdated = this.selecteddiscrepancy;
+  //   var responsebody = {
+  //     ecard_discrepancy_log_id: discrepancytobeupdated.ecard_discrepancy_log_id,
+  //     ecard_id: discrepancytobeupdated.ecard_id,
+  //     department_id: discrepancytobeupdated.department_id,
+  //     component: discrepancytobeupdated.component,
+  //     cut_off_date: new Date(discrepancytobeupdated.cut_off_date),
+  //     root_cause: discrepancytobeupdated.root_cause,
+  //     discrepancy_status: discrepancytobeupdated.discrepancy_status,
+  //     discrepancy_type: discrepancytobeupdated.discrepancy_type,
+  //     discrepancy: discrepancytobeupdated.description,
+  //     modified_date : discrepancytobeupdated.modified_date
+  //   };
 
-    if(this.qccaptureaction && this.qccapturerole){
-      responsebody["assigend_qc_id"] =  this.loggedinuser.appuser_id;
-      this.qccaqccaptureaction = false;
-  }
-    var requestwithforman = this.updateformans(
-      JSON.stringify(responsebody),
-      discrepancytobeupdated.selectedprodlist
-    );
+  //   if(this.qccaptureaction && this.qccapturerole){
+  //     responsebody["assigend_qc_id"] =  this.loggedinuser.appuser_id;
+  //     this.qccaqccaptureaction = false;
+  // }
+  //   var requestwithforman = this.updateformans(
+  //     JSON.stringify(responsebody),
+  //     discrepancytobeupdated.selectedprodlist
+  //   );
 
-    updateDiscrepancy({ requestbody: JSON.stringify(requestwithforman) })
-      .then((data) => {
-        if (data.isError) {
-          if(data.errorMessage == 202){
-            const alertmessage = new ShowToastEvent({
-                title: "Sorry we could not complete the operation.",
-                message: JSON.parse(data.responsebody).data.validation_message,
-                variant: "error"
-              });
-              this.dispatchEvent(alertmessage);
-              this.detailsmodal = false;
-              this.loaddataforview();
-          }
-          else{
-            const alertmessage = new ShowToastEvent({
-              title: "Sorry we could not complete the operation.",
-              message:
-                "Something unexpected occured. Please contact your Administrator",
-              variant: "error"
-            });
-            this.dispatchEvent(alertmessage);
-            this.detailsmodal = false;
-            this.loaddataforview();
-          }
-        } else {
-          const alertmessage = new ShowToastEvent({
-            title: "Record Update Successful.",
-            message: "The Record was updated Successfully",
-            variant: "success"
-          });
-          this.dispatchEvent(alertmessage);
-          this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;
-          //this.detailsmodal = false;
-          if (this.statusascomment) {
-            this.statusascomment = false;
-            var response = JSON.parse(data.operationlogresponse).data;
-            this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
-          }
-          this.loaddataforview();
-        }
-      })
-      .catch((error) => {
-        this.error = error;
-        const alertmessage = new ShowToastEvent({
-          title: "Sorry we could not complete the operation.",
-          message:
-            "Something unexpected occured. Please contact your Administrator",
-          variant: "error"
-        });
-        this.dispatchEvent(alertmessage);
-      });
-  }
+  //   updateDiscrepancy({ requestbody: JSON.stringify(requestwithforman) })
+  //     .then((data) => {
+  //       if (data.isError) {
+  //         if(data.errorMessage == 202){
+  //           const alertmessage = new ShowToastEvent({
+  //               title: "Sorry we could not complete the operation.",
+  //               message: JSON.parse(data.responsebody).data.validation_message,
+  //               variant: "error"
+  //             });
+  //             this.dispatchEvent(alertmessage);
+  //             this.detailsmodal = false;
+  //             this.loaddataforview();
+  //         }
+  //         else{
+  //           const alertmessage = new ShowToastEvent({
+  //             title: "Sorry we could not complete the operation.",
+  //             message:
+  //               "Something unexpected occured. Please contact your Administrator",
+  //             variant: "error"
+  //           });
+  //           this.dispatchEvent(alertmessage);
+  //           this.detailsmodal = false;
+  //           this.loaddataforview();
+  //         }
+  //       } else {
+  //         const alertmessage = new ShowToastEvent({
+  //           title: "Record Update Successful.",
+  //           message: "The Record was updated Successfully",
+  //           variant: "success"
+  //         });
+  //         this.dispatchEvent(alertmessage);
+  //         this.selecteddiscrepancy['modified_date'] = JSON.parse(data.operationlogresponse).data.modified_date;
+  //         //this.detailsmodal = false;
+  //         if (this.statusascomment) {
+  //           this.statusascomment = false;
+  //           var response = JSON.parse(data.operationlogresponse).data;
+  //           this.addstatusasdiscrepancycomment(response.ecard_discrepancy_log_id, this.statuscommentmap[`${response.discrepancy_status.toLowerCase()}`]);
+  //         }
+  //         this.loaddataforview();
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       this.error = error;
+  //       const alertmessage = new ShowToastEvent({
+  //         title: "Sorry we could not complete the operation.",
+  //         message:
+  //           "Something unexpected occured. Please contact your Administrator",
+  //         variant: "error"
+  //       });
+  //       this.dispatchEvent(alertmessage);
+  //     });
+  // }
 
   // used to load the busStatus picklist
   loadstatuspicklistvalues(event) {

@@ -137,6 +137,18 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
   @track partsvendorslist = [];
   @track timeoutId = 0;
   @track isupdated = false;
+  @track carrieroptions = [
+    { "label": "UPS", "value": "UPS" },
+    { "label": "UPS 2ND DAY", "value": "UPS 2ND DAY" },
+    { "label": "UPS NDA", "value": "UPS NDA"    },
+    { "label": "UPS NDA EARLY AM", "value": "UPS NDA EARLY AM" },
+    { "label": "FEDEX", "value": "FEDEX"    },
+    { "label": "FEDEX 2ND DAY", "value": "FEDEX 2ND DAY" },
+    { "label": "FEDEX NDA", "value": "FEDEX NDA" },
+    { "label": "COURIER", "value": "COURIER" },
+    { "label": "VENDOR TRUCK", "value": "VENDOR TRUCK" },
+    { "label": "OTHER", "value": "OTHER" }
+  ];
     
     // To show tabs based on the operation selected from operationsComponent.
     get isdeletable(){
@@ -1605,7 +1617,8 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             "discrepancy_status" : discrepancytobeupdated.discrepancy_status,
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
             "discrepancy" : discrepancytobeupdated.discrepancy,
-            "modified_date" : discrepancytobeupdated.modified_date
+            "modified_date" : discrepancytobeupdated.modified_date,
+            "buildstation_id": discrepancytobeupdated.buildstation_id
         };
         if(this.qccaptureaction && this.qccapturerole){
             responsebody["assigend_qc_id"] =  this.loggedinuser.appuser_id;
@@ -2164,7 +2177,8 @@ export default class OperationActionsComponent extends NavigationMixin(Lightning
             "discrepancy_type" : discrepancytobeupdated.discrepancy_type,
             "discrepancy" : discrepancytobeupdated.discrepancy,
             "part_shortage" : part_shortage,
-            "modified_date" : discrepancytobeupdated.modified_date
+            "modified_date" : discrepancytobeupdated.modified_date,
+            "buildstation_id": discrepancytobeupdated.buildstation_id,
             
         };
         if(this.qccaptureaction && this.qccapturerole){
