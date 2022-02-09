@@ -1,0 +1,172 @@
+header.flexipageHeader.slds-page-header.uiBlock.oneAnchorHeader { 
+  display: none;
+}
+.main {
+  background: rgb(255, 255, 255);
+  /*border: 1px solid rgb(221, 219, 218);
+border-radius: 0.25rem;
+box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);*/
+}
+.head{
+  padding-top:1px;
+}
+/*
+.content{
+border:black 2px solid;
+display:inline-flex;
+}*/
+/*.article {
+  margin:1%;
+  padding: 0% 0% 0% 0%;
+}*/
+/*
+.articlehead{
+background-color: honeydew;
+}
+.article .articlecontent{
+border:black 1px solid;
+border-top:0px !important;
+}*/
+
+.busimage{
+  display:none;
+  width: 100%;
+  height: 35px;
+  margin-bottom: 5px;
+}
+.active .busimage{
+  display:block;
+  width: 100%;
+  height: 35px;
+  margin-bottom: 5px;
+}
+.shrinked{
+  display: block;
+}
+.active .shrinked{
+  display: none;
+}
+.expandedactive{
+  display:none;
+}
+.active .expandedactive{
+  display:block;
+}
+.active .showbus{
+  display:block;
+}
+.busimage img{
+  width: 100px;
+ 
+}
+img {
+    max-width: 100%;
+}
+.innerbusdetail{
+  height: 75px;
+  margin-bottom: 5px;
+}
+.content2 {
+  border: rgb(217, 219, 221) 1px solid;
+}
+
+/*.active .weekdate {
+  text-decoration: underline;
+  color: white;
+  background-color: #184b9b;
+  font-weight: bold;
+}*/
+.active .weekdate{
+  padding:0.6rem;
+}
+.currentday .weekdate{
+  padding:0.6rem;
+}
+.currentday{
+  background-color: #FAFCFF !important;
+  font-weight: bold;
+}
+.active {
+  background-color :  #FAF9F8;
+  font-weight: bold;
+  /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);*/
+}
+.slds-checkbox--toggle{
+  margin-top: 15px;
+}
+.slds-box {
+    border-radius: 0px !important;
+    border: 0.5px solid #EAEAEA !important;
+}
+.innerbusbox {
+  cursor: pointer;
+}
+.busbox:hover {
+  background-color: #FAFCFF;
+  /*transform: scale(1.01); 
+  box-shadow: 3px 5px 5px 0px #b8b9dc85;*/
+  font-weight: bold;
+  
+}
+
+
+.timediv {
+  margin-top: 5%;
+}
+.filterdiv{
+  width: 225px;
+  padding: 0.5%;
+} 
+.innertimebox{
+  margin-top: 40px;
+}
+
+.weekdate strong{
+  white-space: nowrap;
+}
+
+/*.calendercell{
+  background-color: white;
+}*/
+
+.makeinvisible{
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.aligntoggle{
+  padding-top:6px;
+  white-space:nowrap;
+}
+.navigallign{
+  margin-top: 0px;
+}
+.timelabel{
+  font-size: large;
+}
+.elementborder{
+  border-bottom:0.5px solid #dcd3d3;
+}
+.currentday .headerdate {
+  background: #184b9b !important;
+  border-radius: 50%;
+  color: #ffffff;
+  display: inline-block;
+  margin-left: 5px;
+  text-align: center;
+  line-height: 2rem;
+  width: 2rem;
+}
+.active .headerdate {
+  background: #606163;
+  border-radius: 50%;
+  color: #ffffff;
+  display: inline-block;
+  margin-left: 5px;
+  text-align: center;
+  line-height: 2rem;
+  width: 2rem;
+}
+.monthdiv{
+  color: #5a5a5a;
+}

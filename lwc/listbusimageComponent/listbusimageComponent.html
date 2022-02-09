@@ -1,0 +1,84 @@
+<template>
+	<!--Show spinner start-->
+    <div if:true={showSpinner}>
+        <div class="slds-spinner_container">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-fixed" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+    </div>
+    <!--Show spinner end-->
+	
+	<section class="main">
+        <!--Show EcardList start-->
+        <section class="allecards" if:true={showTable} >
+			<section class="ecardhead slds-p-bottom_x-small">
+				<div class="slds-grid slds-gutters slds-m-top_small">
+					<div class="slds-col slds-size_1-of-4">
+						<c-custom-search-component class="cs" showicon={returntrue} showlabel={returnfalse} placeholdertext="Search Fleet" -icon-name="custom:custom98" listto-search={itemstosearch} label="Fleet" onselect={handleSearch} onclear={onclearfleet}></c-custom-search-component>	
+					</div>
+				</div>
+			</section>
+			<section class="ecardcontent">
+				<div class="pageheader">
+					<table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+						<thead>
+							<tr class="slds-line-height_reset slds-text-title_caps tblheader">
+								<th class="tableheader" scope="col">
+									<lightning-button variant="base" data-id="fleet_name" label="FLEET NAME" title="Fleet Name" icon-position="right"  onclick={sort} class="slds-truncate"></lightning-button>
+								</th>
+								<th class="tableheader" scope="col">
+									<lightning-button variant="base" data-id="Curbside_image" label="CURBSIDE IMAGE" title="Curbside Image" icon-position="right"  class="slds-truncate"></lightning-button>
+								</th>
+								<th class="tableheader" scope="col">
+									<lightning-button variant="base" data-id="Curbside_image_url" label="CURBSIDE IMAGE URL" title="Curbside Image URL" icon-position="right"  class="slds-truncate"></lightning-button>
+								</th>
+								<th class="tableheader" scope="col">
+									<lightning-button variant="base" data-id="Street_side_image" label="STREETSIDE IMAGE" title="StreetSide Image" icon-position="right"  class="slds-truncate"></lightning-button>
+								</th>
+								<th class="tableheader" scope="col">
+									<lightning-button variant="base" data-id="Street_side_image_url" label="STREETSIDE IMAGE URL" title="StreetSide Image URL" icon-position="right"  class="slds-truncate"></lightning-button>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<template for:each={filteredfleets} for:item='fleet'>
+								<tr  key={fleet.fleet_id} data-label={fleet.fleet_name}  data-id={fleet.fleet_id} data-value={fleet.fleet_id} class="slds-hint-parent">
+									<td title={fleet.fleet_name} data-label="Fleet Name">
+										<div class="slds-truncate" title={fleet.fleet_name}><span class="slds-align_left">{fleet.fleet_name}</span></div>
+									</td>
+									<td title={fleet.fleet_id} data-label="Curbside Image">
+										<div class="slds-grid slds-gutters">
+											<div class="slds-col slds-size_2-of-5">
+												<div class="busimage">
+													<img class="" src={fleet.curb_side_image_url} />
+												</div>
+											</div>
+										</div>
+									</td>
+									<td title={fleet.fleet_id} data-label="Curb Side Bus Image URL">
+										<div class=""><lightning-input max-length="500" onfocus={handleCurbSideInputFocus} onblur={updatecurbsideimageurl} variant="label-hidden" type="text" data-id={fleet.fleet_id} title={fleet.curb_side_image_url} name="curb_side_image_url" value={fleet.curb_side_image_url} placeholder=""></lightning-input></div>
+									</td>
+									<td title={fleet.fleet_id} data-label="Street Side Image">
+										<div class="slds-grid slds-gutters">
+											<div class="slds-col slds-size_2-of-5">
+												<div class="busimage">
+													<img class="" src={fleet.street_side_image_url} />
+												</div>
+											</div>
+										</div>
+									</td>
+									<td title={fleet.fleet_id} data-label="Street Side Bus Image URL">
+										<div class=""><lightning-input max-length="500" onfocus={handleStreetSideInputFocus} onblur={updatestreetsideimageurl} variant="label-hidden" type="text" data-id={fleet.fleet_id} title={fleet.street_side_image_url} name="street_side_image_url" value={fleet.street_side_image_url} placeholder=""></lightning-input></div>
+									</td>
+								</tr>
+							</template>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</section>
+	</section>
+</template>

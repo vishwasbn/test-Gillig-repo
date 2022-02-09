@@ -1,0 +1,136 @@
+<template>
+   
+
+    <template if:true={showTable}>
+       <div class="slds-clearfix slds-p-bottom_x-small">
+           <div class="slds-float_left">
+            <div class="slds-m-left_x-small"> <span class="slds-page-header__title slds-truncate" title="Bus Propulsion"> <lightning-icon class="slds-m-right_x-small" icon-name="standard:work_queue" alternative-text="Bus Propulsion" title="Bus Propulsion"></lightning-icon> Bus Propulsion ({buspropulsionList.length})</span></div>
+           </div>
+           <div class="slds-float_right">
+             <!-- <lightning-button variant="brand" label="Add New Propulsion" title="Add New Bus Propulsion" onclick={addnewBusPropulsion} icon-name="utility:add" class="slds-m-left_x-small"></lightning-button> -->
+          </div>
+         </div>
+     
+          
+        <c-paginator records={buspropulsionList} 
+                    total-records={buspropulsionList.length} 
+                    show-search-box="true" 
+                    onpaginatorchange={handlePaginatorChange}>
+        </c-paginator>
+        <lightning-datatable
+          key-field="buspropulsion_id"
+          columns={columns}
+          data={recordsToDisplay}
+          hide-checkbox-column="true"
+          show-row-number-column
+          row-number-offset={rowNumberOffset}
+          suppress-bottom-bar
+          default-sort-direction={defaultSortDirection}
+          sorted-direction={sortDirection}
+          sorted-by={sortedBy}
+          onrowaction={handleRowAction}
+          onsort={onHandleSort}>
+   </lightning-datatable>
+      <!--  <lightning-datatable key-field="Id" 
+                            data={recordsToDisplay} 
+                            columns={columns}
+                            hide-checkbox-column
+                            show-row-number-column
+                            row-number-offset={rowNumberOffset}>
+        </lightning-datatable> -->
+    </template>
+    
+  
+   
+  
+   <div if:true={showSpinner}>
+     <div class="slds-spinner_container">
+         <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+             <span class="slds-assistive-text">Loading</span>
+             <div class="slds-spinner__dot-a"></div>
+             <div class="slds-spinner__dot-b"></div>
+         </div>
+     </div>
+  </div>
+  
+    <!-- Detail view modal start -->
+    <template if:true={bShowModal}>
+      <section role="dialog" tabindex="-1"
+               aria-labelledby="modal-heading-01"
+               aria-modal="true"
+               aria-describedby="modal-content-id-1"
+              class="slds-modal slds-fade-in-open">
+         <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+               <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+               </button>
+               <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Bus Propulsion Detail</h2>
+            </header>
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+              <div class="slds-grid slds-wrap slds-gutters">
+                 <div class="slds-col slds-size_1-of-2">
+                   <div class="slds-form-element slds-form-element_readonly">
+                     <span class="slds-form-element__label">Bus Propulsion Id</span>
+                     <div class="slds-form-element__control">
+                      <div class="slds-form-element__static">{record.buspropulsion_id}</div>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="slds-col slds-size_1-of-2">
+                   <lightning-input type="text" name="buspropulsion_name" value={record.buspropulsion_name}  label="Bus Propulsion" ></lightning-input>
+                 </div>
+                  
+              </div>
+            </div>
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+             <lightning-button variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left"></lightning-button>   
+             <lightning-button label="Cancel" title="Cancel" onclick={closeModal} class="slds-m-right_x-small"></lightning-button>
+             <lightning-button variant="brand" label="Update"  title="Update" icon-name="utility:record_update"></lightning-button>
+            </footer>
+         </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- Detail view modal end -->
+  
+  
+     <!-- Add new modal start -->
+     <template if:true={addmodal}>
+        <section role="dialog" tabindex="-1"
+                 aria-labelledby="modal-heading-02"
+                 aria-modal="true"
+                 aria-describedby="modal-content-id-2"
+                class="slds-modal slds-fade-in-open">
+           <div class="slds-modal__container">
+              <!-- modal header start -->
+              <header class="slds-modal__header">
+                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAddModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                 </button>
+                 <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New Bus Propulsion</h2>
+              </header>
+              <!-- modal body start -->
+              <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                <div class="slds-grid slds-wrap slds-gutters">
+                   <div class="slds-col slds-size_1-of-2">
+                      <lightning-input type="text" name="buspropulsion_name"   label="New Bus Propulsion" ></lightning-input>
+                   </div>
+                   
+                </div>
+              </div>
+              <!-- modal footer start-->
+              <footer class="slds-modal__footer">
+                <lightning-button label="Cancel" title="Cancel" onclick={closeAddModal} class="slds-m-right_x-small"></lightning-button>
+                <lightning-button variant="brand" label="Submit"  title="Submit" icon-position="right" icon-name="utility:add"></lightning-button>
+              </footer>
+           </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+     </template>
+      <!-- Add new modal end -->
+  
+  </template>

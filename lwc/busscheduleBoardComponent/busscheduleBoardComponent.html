@@ -1,0 +1,245 @@
+<template>
+  <section class="main">
+      <section class="head slds-p-bottom_x-small"> 
+          <div class="slds-grid slds-gutters slds-m-top_small">
+            <div class="slds-col">
+            <div class="slds-p-left_x-small slds-text-heading_medium slds-text-align_left aligntoggle monthdiv"><strong>{selectedMonthYear}</strong></div>
+            </div>
+            <div class="slds-col slds-grid slds-grid_align-end">
+              <div class="">
+                 <lightning-input type="date" onchange={handleDateChange} name="Date"  value={todaysDate} min={backlimit} max={frontlimit}></lightning-input>
+               </div>
+               <div class="navigallign">
+                 <lightning-button-icon onclick={onprevious} icon-name="utility:chevronleft"  size="medium"   variant="border-filled"  alternative-text="Previous Week" class="slds-m-left_xx-small slds-m-top_large"></lightning-button-icon>
+               </div>
+               <div class="navigallign">
+                 <lightning-button-icon onclick={onnext} icon-name="utility:chevronright"  size="medium"  variant="border-filled" alternative-text="Next Week" class="slds-m-right_xx-small slds-m-top_large"></lightning-button-icon>
+               </div>
+              </div>
+          </div>
+          <div class="slds-grid slds-gutters slds-m-top_small">
+            <div class="slds-col slds-size_1-of-7 ">
+              <c-custom-search-component placeholdertext="Search Customer, Chasis Number" showicon={returntrue} showlabel={returnfalse}  -icon-name="custom:custom98" listto-search={itemstosearch} label="Customer" onselect={handleFilter} onclear={onclearcustomer}></c-custom-search-component>
+            </div>
+            <div class="slds-col ">
+              <lightning-combobox variant="label-hidden" name="department"   value={selecteddepartment} placeholder="Department" options={departmentlistoptions} onchange={handledepartmentchange}></lightning-combobox>
+            </div>
+            <div class="slds-col ">   <!--onfocus={loadpicklistvalues}-->
+               <lightning-combobox onfocus={loadpicklistvalues} variant="label-hidden" name="bustype"   value={selectedBusType} placeholder="Bus Type" options={bustypelist} onchange={handlebustypechange}></lightning-combobox>
+            </div>
+            <div class="slds-col ">
+              <lightning-combobox onfocus={loadpicklistvalues} variant="label-hidden" name="buspropulsions" value={selectedBusPropulsion} placeholder="Bus Propulsion" options={buspropulsionlist} onchange={handlebuspropulsionchange}></lightning-combobox>
+           </div>
+            <div class="slds-col ">
+               <lightning-combobox onfocus={loadpicklistvalues} variant="label-hidden" name="busstatus"  value={selectedBusStatus} placeholder="Bus Status" options={busstatuslist} onchange={handlebusstatuschange}></lightning-combobox>
+            </div>
+            <div class="slds-col">
+               <lightning-input class="aligntoggle" type="toggle" label="Discrepancy" name="input2" onchange={onDiscrepancyselection} message-toggle-active="" message-toggle-inactive=""></lightning-input>
+            </div>
+            <div class="slds-col">
+               <lightning-input class="aligntoggle" type="toggle" label="Part Shortage" name="input2" onchange={onPartShortageselection} message-toggle-active="" message-toggle-inactive=""></lightning-input>
+            </div>
+          </div>
+          
+          
+        
+      </section>
+      <section>
+          <div class="slds-grid slds-wrap">
+              <!--Time Div Start
+              <div class="slds-size_1-of-8 calendercell">
+                <div class="weekdate slds-box">
+                    <div class="slds-text-body_regular slds-text-align_center"><strong>Time</strong><lightning-icon icon-name="utility:down" alternative-text="Time" size="x-small"
+                      title="x-small size"></lightning-icon></div>
+                </div>
+
+                <template for:each={scheduletimings} for:item="time">
+                    <div key={time} class="slds-box busbox">
+                        <div class="innertimebox">
+                            <div class="slds-align_absolute-center">
+                                <lightning-badge class="timelabel" label={time}></lightning-badge>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </template>
+            </div> -->
+              <!--Time Div End-->
+              <template for:each={mapData} for:item="mapKey">
+                  <div key={mapKey.key} class={mapKey.styledclass}>
+                      <div class="weekdate slds-box" data-id={mapKey.key} onclick={selectthisdate}>
+                          <div class="slds-text-body_regular slds-text-align_center"><strong>{mapKey.day}&nbsp;<span class="headerdate">{mapKey.date}</span></strong></div>
+                      </div>
+                      <template if:false={shownodatamessage}>
+                        <template for:each={mapKey.value} for:item="bus">
+                          <div key={bus.ChasisNumber} class="slds-box busbox">
+                              <div class={bus.styleClass} onclick={getbusDetails} data-id={bus.ecardid} data-value={bus.BusName}>
+                                  <!-- modification-->
+                                  <div if:true={bus.activeday}>  <!--class="expandedactive"-->
+                                    <div class="slds-grid slds-gutters">
+                                      <div class="slds-col slds-size_1-of-3">
+                                        <div  class="busimage">
+                                              <img if:true={bus.defaultimage} class="" src={busImage} />
+                                              <img if:false={bus.defaultimage} class="" src={bus.bus_image_url} />
+                                            </div>
+                                    </div>
+                                    <div class="slds-col slds-size_2-of-3">
+                                        <div class="innerbusdetail">
+                                              <div class=""><strong>{bus.ChasisNumber}</strong>, {bus.BusName}<br/><strong><lightning-formatted-date-time value={bus.ScheduledTime} hour="numeric" minute="2-digit" ></lightning-formatted-date-time></strong></div>
+                                              <div if:true={bus.busSeqavailable} class="slds-truncate slds-text-color_weak slds-text-body_regular" title={bus.busSequence}>({bus.busSequence})</div>
+                                          </div>
+                                    </div>
+                                    </div>
+                                    </div>
+                                    
+                                    <div if:false={bus.activeday} > <!--class="shrinked"-->
+                                      <div class="slds-grid slds-gutters">
+                                        <div class="slds-col slds-size_1-of-1">
+                                        <div class="innerbusdetail">
+                                              <div class=""><strong>{bus.ChasisNumber}</strong>, {bus.BusName}<br/><strong><lightning-formatted-date-time value={bus.ScheduledTime} hour="numeric" minute="2-digit"></lightning-formatted-date-time></strong></div>
+                                              <div if:true={bus.busSeqavailable} class="slds-truncate slds-text-color_weak slds-text-body_regular" title={bus.busSequence}>({bus.busSequence})</div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>	
+                                <!--end Modification-->
+                              </div>
+                          </div>
+                        </template>
+                      </template>
+                      
+                  </div>
+              </template>
+              
+
+          </div>
+          <template if:true={shownodatamessage}>
+            <div class="slds-align_absolute-center" style="margin:130px;">
+              <div class="empty-state-container slds-text-align_center">
+                <img src={noschedulesImage} aria-hidden="true" alt="Nothing due today. Be a go-getter, and check back soon.">
+                <div class="empty-state-message slds-m-top_medium">
+                  Nothing due this week matching your filters. Be a go-getter, and check back soon.
+                </div>
+              </div>
+            </div>
+          </template>
+      </section>
+
+      
+  </section>
+
+  <div if:true={showSpinner}>
+    <div class="slds-spinner_container">
+        <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+            <span class="slds-assistive-text">Loading</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+    </div>
+</div>
+
+  <!-- Detail view modal start -->
+  <template if:true={showdetail}>
+      <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+          <div class="slds-modal__container">
+              <!-- modal header start -->
+              <header class="slds-modal__header">
+                  <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                      <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                  </button>
+                  <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+          Bus Details {selectedBusDetail.busSequence}
+        </h2>
+              </header>
+              <!-- modal body start -->
+              <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+              <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Chassis Serial Number</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.ChasisNumber}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Customer Name</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.BusName}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Bus Type</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.BusType}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Propulsion</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.BusPropulsion}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Status</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.BusStatus}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Part Shortages</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.PartShortagetotal}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Discrepancies</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.Discrepancytotal}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Out of Stations</span>
+                    <div class="slds-form-element__control">
+                     <div class="slds-form-element__static">{selectedBusDetail.OutofStationtotal}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-top_small slds-m-bottom_small">
+                  <div class="slds-form-element slds-form-element_readonly">
+                    <span class="slds-form-element__label">Schedule Time</span>
+                    <div class="slds-form-element__control"> <!--time-zone="UTC"-->
+                     <div class="slds-form-element__static"><lightning-formatted-date-time  value={selectedBusDetail.ScheduledDate} year="numeric" month="short" day="2-digit" hour="numeric" minute="2-digit"
+                      weekday="long"></lightning-formatted-date-time></div>
+                    </div>
+                  </div>
+                </div>
+                  
+                  
+              </div>
+            </div>
+              
+              <!-- modal footer start-->
+              <footer class="slds-modal__footer">
+                  <lightning-button label="Cancel" title="Cancel" onclick={closeModal} class="slds-m-right_x-small"></lightning-button>
+                  <lightning-button variant="brand" label="View E Card"  onclick={navigateToEcard} title="View E Card" icon-name="utility:new_window"></lightning-button>
+              </footer>
+          </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+  <!-- Detail view modal end -->
+</template>

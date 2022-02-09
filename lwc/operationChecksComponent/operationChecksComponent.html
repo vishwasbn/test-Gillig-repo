@@ -1,0 +1,95 @@
+<template>
+	<div if:true={showSpinner}>
+        <div class="slds-spinner_container slds-is-fixed">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+    </div>
+	<section class="actionhead">
+        <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+            <div class="slds-col">
+                <div class="slds-float_none slds-p-around_x-small">
+                    <!--span class="slds-text-heading_small headstyle">All Department - Operation Checks</span-->
+                    <span class="slds-text-heading_small headstyle">{department} - Operation Checks</span>
+                    <template if:true={filterapplied}>
+                     <lightning-pill label={filterlabellocal} onremove={clearfilter} class="slds-m-left_small filterstyle">
+                       <!--<lightning-icon icon-name="utility:filter" variant="circle"  alternative-text="filter"></lightning-icon>-->
+                   </lightning-pill>
+                   </template>
+                </div>
+            </div>
+            <div class="slds-col"></div>
+            <div if:true={buttonenabled}>
+                <div class="slds-col alignbutton">
+                    <lightning-button disabled={disablenewattchmentitem} label={buttonLabel} variant="brand-outline" title="New List Item" onclick={addnewlistitem} class="slds-m-right_xxx-small"></lightning-button> 
+                </div>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div class="slds-card">
+            <table class="auto-index slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+               <thead>
+                  <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                   <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                   </th>   
+                   <th if:true={alldepts} class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="DEPARTMENT">DEPT.CODE</div>
+                   </th>
+                     <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
+                     </th>
+                     <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="BUILD STATION">BUILD STATION</div>
+                     </th>
+                     <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="VALUE">VALUE</div>
+                     </th>
+                     <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ACTION">ACTION</div>
+                     </th>
+                     <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ACTION">DISCREPANCY</div>
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <template if:true={isopckpresent}>                 
+                  <template for:each={opckdetails} for:item='dept'>   
+                     <template for:each={dept.op_check} for:item='opck'>
+                        <tr key={opck.operation_check_id}>
+                        <td></td>
+                        <td if:true={alldepts}>
+                           <div class="">{dept.department_code}</div>
+                        </td>
+                           <td>
+                              <div class="">{opck.operation_check_description}</div>
+                           </td>
+                           <td>
+                              <div class="">{opck.buildstation_code}</div>
+                           </td>
+                           <td>
+                              <div if:false={opck.value_required} class=""><lightning-input max-length="30" variant="label-hidden" type="text" title={opck.operation_check_id} name="op_check_value" placeholder="Not Required" readonly="true"></lightning-input></div>
+                              <div if:true={opck.value_required} class=""><lightning-input disabled={opck.op_check_status} max-length="30" onblur={updateopckitem} variant="label-hidden" type="text" title={opck.operation_check_id} name="op_check_value" value={opck.op_check_value} placeholder=""></lightning-input></div>
+                           </td>
+                           <td>
+                              <div class="">
+                                 <c-atp-actions disabled="false" onstatuschange={existingrowstatuschange} permitteduser={permissionset.operation_check.write} uniqueid={opck.operation_check_id} isok={opck.op_check_status}></c-atp-actions>
+                              </div>
+                           </td>
+                           <td>
+                              <lightning-button  data-id={opck.operation_check_id} name={opck.operation_check_description} value={opck.operation_check_description} onclick={creatediscrepancy} variant="border-filled" label="Add Discrepancy" title={opck.operation_check_id}  class="slds-m-left_xx-small"></lightning-button>
+                          </td>
+                        </tr>
+                     </template>
+                  </template>
+                </template>
+               </tbody>
+            </table>
+         </div>
+    </section>
+</template>

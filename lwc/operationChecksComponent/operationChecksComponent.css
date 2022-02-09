@@ -1,0 +1,114 @@
+.headstyle{
+    text-transform: uppercase;
+    font-weight: bolder;
+}
+.tblheader{
+    height:3rem;
+}
+.tblheaderth{
+    color: #005fb2 !important;
+}
+.emptyContentInner {
+    padding-top:25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    text-align: center;
+}
+.emptymessage{
+    margin : -55px 0px 55px 0px;
+}
+
+.setdescriptionwidth{
+    display: block;
+    width: 400px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.statusbadge {
+    color: rgb(32, 31, 31);
+    /*background-color: rgb(225, 230, 225);*/
+    border : 1px solid rgb(221, 219, 218); 
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: normal;
+    white-space: nowrap;
+    /*display: inline-flex; */
+    width: 70px;
+    align-items: center;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .allignbadge{
+    padding:6px 10px 6px 0px;
+  }
+
+  .deptbadge {
+    color: rgb(37, 79, 158);
+    /*background-color: rgb(225, 230, 225);*/
+    border : 1px solid rgb(37, 79, 158); 
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: normal;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    width : 48px;
+  }
+  .normalbadge{
+    color: rgb(37, 79, 158);
+    /*background-color: rgb(225, 230, 225);*/
+    border : 1px solid rgb(37, 79, 158); 
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: normal;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    width: 48px;
+  }
+
+  .descriptiondetail{
+    padding-top: 7px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: fit-content;
+    white-space: pre-line;
+}
+.tblborder{
+  border: 1px solid rgb(221, 219, 218);
+}
+
+.activetab{
+  background: rgba(24, 75, 155, 0.1);
+}
+
+.filterstyle{
+  text-transform: uppercase;
+  font-weight: bold;
+  text-align: center;
+}
+
+.bgcell{
+  width:200px;
+}
+/* Table auto serial number */
+.auto-index
+{
+    counter-reset: Serial;           /* Set the Serial counter to 0 */
+}
+
+.auto-index td:first-child:before
+{
+  counter-increment: Serial;      /* Increment the Serial counter */
+  content: counter(Serial); /* Display the counter */
+}

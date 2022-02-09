@@ -1,0 +1,1303 @@
+<template>
+
+    <!--Show spinner start-->
+    <div if:true={showSpinner}>
+        <div class="slds-spinner_container slds-is-fixed">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+     </div>
+     <!--Show spinner end-->
+
+    <!-- Operations Start-->
+    <template if:true={isSelectedOperations}>
+      
+    <section>
+        <section class="actionhead">
+            <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                <div class="slds-col">
+                    <div class="slds-float_none slds-p-around_x-small">
+                        <span class="slds-text-heading_small headstyle">{department} - {operation}</span>
+                        <template if:true={filterapplied}>
+                          <lightning-pill label={filterlabelfordisplay} onremove={clearfilter} class="slds-m-left_small filterstyle">
+                            <!--<lightning-icon icon-name="utility:filter" variant="circle"  alternative-text="filter"></lightning-icon>-->
+                        </lightning-pill>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-col">
+                  
+                </div>
+                <div class="slds-col alignbutton">
+                  <lightning-button label="Add Shortage" variant="brand-outline" title="Add Shortage" onclick={showReportShortageAdd} class="slds-m-right_xxx-small"></lightning-button> 
+                  <lightning-button label="Add Repetitive Item" variant="brand-outline" title="Add Dept.Discrepancy" onclick={showDescrepancyAdd} class="slds-m-right_xxx-small"></lightning-button>
+                  <lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button> 
+                  <lightning-button label="Meeting Notes" variant="brand-outline" title="Meeting Notes" onclick={fetchmeetingnotes} class="slds-m-right_xxx-small"></lightning-button> 
+                  <lightning-button label="Help" variant="brand-outline" title="Help" onclick={gethelpdocuments} class="slds-m-right_xxx-small"></lightning-button>
+                </div>
+              </div>
+            
+        </section>
+        <section class="actioncontent">
+            <div class="slds-card">
+                
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                    <th if:false={isalldepartment} class="tblheaderth" scope="col">
+                         <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="">{department} - {operation}</div>
+                    </th>
+                    <th if:true={isalldepartment} class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="DEPT. CODE">DEPT.CODE</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="BUILD STATION/FLAG/VALIDATION">BUILD STATION/FLAG/VALIDATION</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="DISC./SHORT.">DISC./SHORT.</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                      <div class="slds-truncate" title="ATTACHMENTS">ATTACHMENTS</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="PROD">PROD</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="QC">QC</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ACTION">ACTION</div>
+                    </th>
+                    
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={modifiedbuildstations} for:item='buildstation'>
+                            <tr key={buildstation.buildstation_id}>
+                                <td if:false={isalldepartment} style="width:10px;" title={buildstation.ecard_operation_log_id}><div class="">{buildstation.index}. </div></td>
+                                <td title={buildstation.operation}><div class="slds-text-heading_small" style="max-width: 300px;text-overflow: ellipsis;overflow: hidden;">{buildstation.operation}</div></td>
+                                <td title="DEPT.CODE" if:true={isalldepartment}><div class="">{buildstation.departmentcode}</div></td>
+                                <td><div class=""><c-show-validationicons-component onaddshortage={showReportShortageAdd} onaddopckdiscrepancy={addnewdiscrepancymodal} permissionset={permissionset} buildstationdetails={buildstation.buidstationdata} validations={buildstation.validationlist} onupdateoperationlist={loadOperationsdata}></c-show-validationicons-component></div></td>
+                                <td><div> <!---->
+                                     <lightning-button if:true={buildstation.hasdescrepancy} label="View" title="View Discrepancy" data-id={buildstation.buildstation_id} onclick={showdiscrepancylistmodal} class="slds-m-left_xx-small" ></lightning-button> <!--icon-name="utility:preview"-->
+                                     <lightning-button-icon icon-name="utility:add" data-id={buildstation.buildstation_id} variant="border-filled" alternative-text="Add Discrepancy" title="Add Discrepancy" onclick={showopdiscrepancymodal} class="slds-m-left_xx-small"></lightning-button-icon>
+                                    </div>
+                                </td>
+                                <td><div class=""> <lightning-button data-id={buildstation.buildstation_id} onclick={showattachmentsmodal} label="View/Upload" title="View" icon-name="utility:attach"></lightning-button></div> </td>
+                                <td><div class=""><c-userlist-icon-component type='PROD' buildstationid={buildstation.buildstation_id} onmodify={usermodification} onaddnew={usermodification} userlist={buildstation.selectedprod} ></c-userlist-icon-component></div> </td>
+                                <td><div if:true={buildstation.qcavailable} class=""><c-userlist-icon-component type='QC' buildstationid={buildstation.buildstation_id} onmodify={usermodification} onaddnew={usermodification} userlist={buildstation.selectedqc}></c-userlist-icon-component></div>  </td>
+                                <td title={buildstation.status}>
+                                    <div class="" title={buildstation.status}>
+                                     <c-status-operations-component permissionset={permissionset} type="operations" isoperation={returntrue} buildstationdata={buildstation.buidstationdata} islistview={returntrue} data-id={buildstation.buildstation_id} prodlist={buildstation.selectedprod} qclist={buildstation.selectedqc} buildstationid={buildstation.buildstation_id} onsubmitchange={handleopertionaction} ecardid={ecardid} status={buildstation.status}></c-status-operations-component> 
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                    </table>
+                    
+            </div>
+        </section>
+    </section>
+
+      <template if:true={operationlistempty}>
+        <div class="slds-align_absolute-center">
+            <div class="empty-state-container slds-text-align_center">
+              <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+              <div class="emptymessage">
+                No data to display.
+              </div>
+            </div>
+        </div>
+      </template>
+
+      <!--</template> -->
+    </template> 
+    <!-- Operations End-->
+
+    <!--Discrepancy Start-->
+    <template if:true={isSelectedDiscrepancies}>
+        <template if:true={isdepartmentPaint}>
+            <c-opreation-action-paint-component permissionset={permissionset} ecardid={ecardid} buschasisnumber={buschasisnumber} department={department} selecteddepartment-id={departmentId}
+            busname={busname} operation={operation} department-id-map={departmentnameidMap} onadddiscrepancy={addnewdiscrepancymodal} onaddshortage={showReportShortageAdd} onshowqccheclist={showqccheclist} ongethelpdocuments={gethelpdocuments}></c-opreation-action-paint-component>
+        </template>
+
+        <template if:false={isdepartmentPaint}>
+         <section>
+            <section class="actionhead">
+                <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                    <div class="slds-col">
+                        <div class="slds-float_none slds-p-around_x-small">
+                            <span class="slds-text-heading_small headstyle">{department} - {operation}</span>
+                            <template if:true={filterapplied}>
+                              <lightning-pill label={filterlabelfordisplay} onremove={clearfilter} class="slds-m-left_small filterstyle">
+                                <!--<lightning-icon icon-name="utility:filter" variant="circle"  alternative-text="filter"></lightning-icon>-->
+                            </lightning-pill>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-col">
+                      
+                    </div>
+                    <div class="slds-col alignbutton">
+                      <lightning-button label="Add Shortage" variant="brand-outline" title="Add Shortage" onclick={showReportShortageAdd} class="slds-m-right_xxx-small"></lightning-button> 
+                      <lightning-button label="Add Discrepancy" variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
+                      <lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button> 
+                      <lightning-button label="Meeting Notes" variant="brand-outline" title="Meeting Notes" onclick={fetchmeetingnotes} class="slds-m-right_xxx-small"></lightning-button> 
+                      <lightning-button label="Help" variant="brand-outline" title="Help" onclick={gethelpdocuments} class="slds-m-right_xxx-small"></lightning-button>
+                    </div>
+                  </div>
+                
+            </section>
+            <section class="actioncontent">
+                <div class="slds-card">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                        <thead>
+                        <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="DEFECT ID">DEFECT ID</div>
+                       </th>
+                       <th if:true={isalldepartment} class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="DEPT. CODE">DEPT.CODE</div>
+                      </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="">DESCRIPTION</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                          <div class="slds-truncate" title="DEFECT STATUS">DEFECT STATUS</div>
+                       </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="BUILD STATION">BUILD STATION</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="DEFECT CODE">DEFECT CODE</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="PROD">PROD</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="QC">QC</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="ACTION">ACTION</div>
+                        </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={modifieddiscrepancyList} for:item='discrepancy'>
+                            <tr key={discrepancy.ecard_discrepancy_log_id}>
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" style="width: 86px;">{discrepancy.ecard_discrepancy_log_number}</div></td>
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails} title="DEPT.CODE" if:true={isalldepartment}><div class="">{discrepancy.departmentcode}</div></td>
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails} title={discrepancy.discrepancy} class="slds-truncate"> <!--setdescriptionwidth-->
+                                  <div class="slds-grid">
+                                    <div class="allignbadge">
+                                      <span if:true={discrepancy.isdepartmentdiscrepancy} class="deptbadge">DEPT</span> <span  if:false={discrepancy.isdepartmentdiscrepancy} class="normalbadge">NOR</span>
+                                    </div>
+                                    <div class="slds-col"> <!--class="slds-text-heading_small"-->
+                                      <div  style="font-weight:600;width: 250px; overflow: hidden;text-overflow: ellipsis;"> {discrepancy.discrepancy} </div>
+                                      <div><lightning-formatted-date-time value={discrepancy.raised_date} year="numeric" month="short" day="numeric" hour="2-digit"
+                                        minute="2-digit"  hour12="true"></lightning-formatted-date-time></div>
+                                    </div>
+                                  </div>
+                                 
+                                </td>
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="slds-text-heading_small slds-align_absolute-center"><span class="statusbadge">{discrepancy.discrepancy_statusdisplay}</span></div></td>
+                                <td if:true={discrepancy.disc_bsavailable} data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" >{discrepancy.buildstation_code}</div></td>
+                                <td if:false={discrepancy.disc_bsavailable} data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" ></div></td>
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class="" >{discrepancy.defect_code}, {discrepancy.defect_name}</div></td> <!--.{discrepancy.defect_name}-->
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div class=""><c-userlist-icon-component type='discrepancy prod' buildstationid={discrepancy.ecard_discrepancy_log_id}  userlist={discrepancy.assignedprod} ></c-userlist-icon-component></div> </td>
+                                <td data-id={discrepancy.ecard_discrepancy_log_id} onclick={showdiscdetails}><div if:true={discrepancy.qcavailable} class=""><c-userlist-icon-component type='discrepancy qc' buildstationid={discrepancy.ecard_discrepancy_log_id} userlist={discrepancy.assigend_qc_id}></c-userlist-icon-component></div>  </td>
+                                <td style="width:210px;">
+                                    <div class="" title={discrepancy.discrepancy_status}>
+                                     <c-status-operations-component permissionset={permissionset} discrepancytype={discrepancy.discrepancy_type} type="discrepancy" islistview={returntrue} prodlist={discrepancy.assignedprod} qclist={discrepancy.assigend_qc_id} data-id={discrepancy.ecard_discrepancy_log_id} buildstationid={discrepancy.ecard_discrepancy_log_id} onsubmitchange={discrepancyactionshandler} ecardid={ecardid} status={discrepancy.discrepancy_status}></c-status-operations-component> 
+                                    </div>
+                                </td>
+                                
+                            </tr>
+                        </template>
+                        </tbody>
+                        </table>
+                </div>
+            </section>
+         </section>
+
+         <template if:true={discrepancylistempty}>
+            <div class="slds-align_absolute-center">
+                <div class="empty-state-container slds-text-align_center">
+                  <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                  <div class="emptymessage">
+                    No data to display.
+                  </div>
+                </div>
+            </div>
+          </template>
+
+       </template>
+    </template>
+    <!--Discrepancy End-->
+
+    <!--Part Shortage Start-->
+    <template if:true={isSelectedShortages}>
+        <section>
+            <section class="actionhead">
+                <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                    <div class="slds-col">
+                        <div class="slds-float_none slds-p-around_x-small">
+                            <span class="slds-text-heading_small headstyle">{department} - {operation}</span>
+                            <template if:true={filterapplied}>
+                              <lightning-pill label={filterlabelfordisplay} onremove={clearfilter} class="slds-m-left_small filterstyle">
+                                <!--<lightning-icon icon-name="utility:filter" variant="circle"  alternative-text="filter"></lightning-icon>-->
+                            </lightning-pill>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-col">
+                      
+                    </div>
+                    <div class="slds-col alignbutton">
+                      <lightning-button label="Add Shortage" variant="brand-outline" title="Add Shortage" onclick={showReportShortageAdd} class="slds-m-right_xxx-small"></lightning-button> 
+                      <lightning-button label="Add Discrepancy" variant="brand-outline" title="New Discrepancy" onclick={addnewdiscrepancymodal} class="slds-m-right_xxx-small"></lightning-button>
+                      <lightning-button label="QC Checklist" variant="brand-outline" title="QC Checklist" onclick={showqccheclist} class="slds-m-right_xxx-small"></lightning-button> 
+                      <lightning-button label="Meeting Notes" variant="brand-outline" title="Meeting Notes" onclick={fetchmeetingnotes} class="slds-m-right_xxx-small"></lightning-button> 
+                      <lightning-button label="Help" variant="brand-outline" title="Help" onclick={gethelpdocuments} class="slds-m-right_xxx-small"></lightning-button>
+                    </div>
+                  </div>
+                
+            </section>
+            <section class="actioncontent">
+                <div class="slds-card">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                        <thead>
+                        <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="SHORTAGE ID">SHORTAGE ID</div>
+                       </th>
+                       <th if:true={isalldepartment} class="tblheaderth" scope="col">
+                           <div class="slds-truncate" title="DEPT. CODE">DEPT.CODE</div>
+                       </th>
+                        <th class="tblheaderth" scope="col">
+                             <div class="slds-truncate" title="PART NUMBER">PART NUMBER</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                          <div class="slds-truncate" title="PO #">PO #</div>
+                       </th>
+                       <th class="tblheaderth" scope="col">
+                         <div class="slds-truncate" title="QTY REQD">QTY REQD</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="DUE DATE">DUE DATE</div>
+                        </th>
+                       <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="PROD">PROD</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="QC">QC</div>
+                        </th>
+                        <th class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="ACTION">ACTION</div>
+                        </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={modifiedshortageslist} for:item='partshortage'>
+                              <tr key={partshortage.ecard_discrepancy_log_id}>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div title={partshortage.ecard_discrepancy_log_id} class="">{partshortage.ecard_discrepancy_log_number}</div></td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail} title="DEPT.CODE" if:true={isalldepartment}><div class="">{partshortage.departmentcode}</div></td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div class="">{partshortage.buspart_no}</div></td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div class="">{partshortage.buspart_name}</div></td> <!--buspart_name-->
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div class="">{partshortage.po_no}</div></td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div class="">{partshortage.quantity}</div></td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}>
+                                  <div class="">
+                                    <lightning-formatted-date-time value={partshortage.cut_off_date} year="numeric" month="short" day="numeric" ></lightning-formatted-date-time>
+                                  
+                                </div>
+                                </td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div class=""><c-userlist-icon-component type='partshortage prod' buildstationid={partshortage.ecard_discrepancy_log_id}  userlist={partshortage.assignedprod} ></c-userlist-icon-component></div> </td>
+                                <td data-id={partshortage.ecard_discrepancy_log_id} onclick={showpartshortagedetail}><div if:true={partshortage.qcavailable} class=""><c-userlist-icon-component type='partshortage qc' buildstationid={partshortage.ecard_discrepancy_log_id} userlist={partshortage.assigend_qc_id}></c-userlist-icon-component></div>  </td>
+                                <td style="width:210px;">
+                                    <div class="" title={partshortage.discrepancy_status}>
+                                     <c-status-operations-component permissionset={permissionset} type="shortage" islistview={returntrue} prodlist={partshortage.assignedprod} qclist={partshortage.assigend_qc_id} data-id={partshortage.ecard_discrepancy_log_id} buildstationid={partshortage.ecard_discrepancy_log_id} onsubmitchange={partshortageactionshandler} ecardid={ecardid} status={partshortage.discrepancy_status}></c-status-operations-component> 
+                                    </div>
+                                </td>
+                                
+                            </tr>
+                            </template>
+                        </tbody>
+                        </table>
+                </div>
+            </section>
+         </section>  
+         <template if:true={shortageslistempty}>
+         <div class="slds-align_absolute-center">
+            <div class="empty-state-container slds-text-align_center">
+              <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+              <div class="emptymessage">
+                No data to display.
+              </div>
+            </div>
+        </div>
+      </template>
+    </template>
+    <!--Part Shortage End-->
+
+    <!--Serial No Logs Start-->
+    <template if:true={isSelectedSlnologs}>
+      
+      <c-serialnumber-component ecardid={ecardid} buschasisnumber={buschasisnumber} department={selecteddepartment} selecteddepartment-id={selecteddepartmentid}
+      busname={busname} operation={selectedoperation} department-id-map={departmentnameidMap} filter={filter} onadddiscrepancy={addnewdiscrepancymodal} onaddshortage={showReportShortageAdd} onshowqccheclist={showqccheclist} ongethelpdocuments={gethelpdocuments}></c-serialnumber-component>        
+         
+    </template>
+    <!--Serial No Logs End-->
+
+    <!--ATP Start-->
+    <template if:true={isSelectedATP}>
+      <c-atp-checklists-component ecardid={ecardid} buschasisnumber={buschasisnumber} department={selecteddepartment} selecteddepartment-id={selecteddepartmentid}
+      busname={busname} operation={selectedoperation} department-id-map={departmentnameidMap} permissionset={permissionset} filter={filter}></c-atp-checklists-component>    
+    </template>
+    <!--ATP End-->
+    <!--Operation Checks Start-->
+    <template if:true={isSelectedOpCk}>
+      <c-operation-checks-component class="opckcomponent" onaddopckdiscrepancy={addnewdiscrepancymodal} ecardid={ecardid} buschasisnumber={buschasisnumber} department={department} selecteddepartment-id={selecteddepartmentId}
+      busname={busname} operation={selectedoperation} department-id-map={departmentnameidMap} permissionset={permissionset} filter={filter}></c-operation-checks-component>   
+    </template>
+    <!--Operation Checks End-->
+
+
+    <!--Add Discrepancy for Discrepancy Modal Start-->
+   <template if:true={newdiscrepancymodal}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-17"
+         aria-modal="true"
+         aria-describedby="modal-content-id-17"
+        class="slds-modal slds-fade-in-open slds-modal_small vsmodal">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidenewdiscrepancymodal}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <h2 id="modal-heading-17" class="slds-text-heading_medium slds-hyphenate">New Discrepancy</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-17">
+        <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1">
+                <lightning-textarea required maxlength="2000" class="newdiscvalidation" name="description" label="Description"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.description} placeholder="Enter discrepancy details here..."></lightning-textarea>
+              </div> 
+              <div class="slds-col slds-size_1-of-1">
+                <lightning-input type="text" name="selectedbus"   label="Selected Bus"  value={newdiscrepancy.selectedbus} disabled></lightning-input>
+                <!--<c-custom-search-component isrequired={returntrue} showicon={returntrue} showlabel={returntrue} placeholdertext="Search Customer, Chasis Number" -icon-name="custom:custom98" listto-search={ecardnamechasislist} label="Select a Bus" onselect={onbusselection} onclear={onclearbus}></c-custom-search-component>-->
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="date"   label="Date"  value={newdiscrepancy.date} disabled></lightning-input> 
+             </div> 
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox required name="type" class="newdiscvalidation" label="Type"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.type}  placeholder="Discrepancy Type" options={disctype} ></lightning-combobox>
+              </div>
+            <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox required name="departmentid" class="newdiscvalidation" label="Department"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.departmentid}  placeholder="Select Department" options={departmentoptions} ></lightning-combobox>
+             </div>
+             
+             <div class="slds-col slds-size_1-of-2">
+                <div if:true={buildstationrequired}>
+                  <lightning-combobox  required name="buildstation_id" class="newdiscvalidation" label="Build Station (BS)" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.buildstation_id}  placeholder="Select BuildStation" options={buildstationoptions} ></lightning-combobox>  
+                </div> 
+                <div if:false={buildstationrequired}>
+                  <lightning-combobox name="buildstation_id" class="newdiscvalidation" label="Build Station (BS)" onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.buildstation_id}  placeholder="Select BuildStation" options={buildstationoptions} ></lightning-combobox>
+                </div>
+             </div>
+             <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox  name="priority" label="Priority" class="newdiscvalidation"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
+             </div>
+             <div class="slds-col slds-size_1-of-2"> 
+                <lightning-combobox required name="defectcode" label="Defect Code (DC)" class="newdiscvalidation"  onchange={modifynewdiscrepancyvalues} value={newdiscrepancy.defectcode} placeholder="Select a Defect Code" options={defectoptions}></lightning-combobox>
+            </div>
+            <!--div  class="slds-col slds-size_1-of-2">
+                <c-re-usable-multi-select-lookup onitemselected={updateuserselectonnewdesc} limittoone={returntrue} selectedrecords={newdiscrepancy.qclist} label="QC" -icon-name="standard:user" placeholdertext="Search for QC users"  listtosearch={newdiscrepancy.allQClist}></c-re-usable-multi-select-lookup>
+              </div-->
+              <div  class="slds-col slds-size_1-of-2">
+                <c-re-usable-multi-select-lookup onitemselected={updateuserselectonnewdesc} limittoone={returnfalse} selectedrecords={newdiscrepancy.prodlist} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users"  listtosearch={newdiscrepancy.allPRODlist}></c-re-usable-multi-select-lookup>
+              </div>
+          
+          
+           
+        </div>
+
+        <div class="slds-m-top_x-small slds-border_top">
+          <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+      </div>
+      </div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <lightning-button label="Cancel" title="Cancel" onclick={hidenewdiscrepancymodal} class="slds-m-right_x-small"></lightning-button>
+        <lightning-button variant="brand" label="Add" onclick={addnewdiscrepancytoserver} title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Add Discrepancy for Discrepancy Modal End-->
+
+<!--Add Descrepancy for Department Modal Start-->
+   <template if:true={adddescrepancymodal}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-02"
+         aria-modal="true"
+         aria-describedby="modal-content-id-2"
+        class="slds-modal slds-fade-in-open slds-modal_small">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideDescrepancyAdd}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New Repetitive Item</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+        <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1">
+                <lightning-textarea required maxlength="2000" class="validValueDepartment" name="description" label="Description"  onchange={updatedeptdiscvalues} value={newdeptdiscrepancy.description} placeholder="Enter discrepancy details here..."></lightning-textarea>
+              </div> 
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="selectedbus"   label="Selected Bus"  value={newdeptdiscrepancy.selectedbus} disabled></lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="date"   label="Date"  value={newdeptdiscrepancy.date} disabled></lightning-input> 
+             </div>  
+             
+             <!--<div class="slds-col slds-size_1-of-2">
+                 <lightning-input type="text" name="busname"   label="Bus Name"  value={newdeptdiscrepancy.busname} disabled></lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="buschasisnumber"   label="Chasis Number" value={newdeptdiscrepancy.buschasisnumber} disabled></lightning-input>
+             </div> -->
+             <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox name="departmentid" class="validValueDepartment" label="Department"  onchange={updatedeptdiscvalues} value={newdeptdiscrepancy.departmentid}  placeholder="Select Department" options={departmentoptions} ></lightning-combobox>
+             </div>
+             <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox name="buildstation_id" class="validValueDepartment" label="Build Station (BS)" onchange={updatedeptdiscvalues} value={newdeptdiscrepancy.buildstation_id}  placeholder="Select BuildStation" options={buildstationoptions} ></lightning-combobox>  
+               <!-- <lightning-input type="text" name="buildstation_id"   label="Build Station Code" value={newdeptdiscrepancy.buildstation_code} ></lightning-input> -->
+             </div>
+             <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox  name="priority" label="Priority" class="validValueDepartment"  onchange={updatedeptdiscvalues} value={newdeptdiscrepancy.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
+             </div>
+             <div class="slds-col slds-size_1-of-2"> 
+                <lightning-combobox required name="defectcode" label="Defect Code (DC)" class="validValueDepartment"  onchange={updatedeptdiscvalues} value={newdeptdiscrepancy.defectcode} placeholder="Select a Defect Code" options={defectoptions}></lightning-combobox>
+               <!-- <lightning-input required type="text" name="defectcode" onchange={updatedeptdiscvalues}  label="Defect Code (DC)" value={newdeptdiscrepancy.defectcode} placeholder="Enter a Defect Code"></lightning-input> -->
+             </div>
+             <!--div  class="slds-col slds-size_1-of-2">
+                <c-re-usable-multi-select-lookup onitemselected={updateuserselectondeptdesc} limittoone={returntrue} selectedrecords={newdeptdiscrepancy.qclist} label="QC" -icon-name="standard:user" placeholdertext="Search for QC users"  listtosearch={newdeptdiscrepancy.allQClist}></c-re-usable-multi-select-lookup>
+              </div-->
+              <div  class="slds-col slds-size_1-of-2">
+                <c-re-usable-multi-select-lookup onitemselected={updateuserselectondeptdesc} limittoone={returnfalse} selectedrecords={newdeptdiscrepancy.prodlist} label="Production Supervisor" -icon-name="standard:user" placeholdertext="Search for Production Supervisors"  listtosearch={newdeptdiscrepancy.allPRODlist}></c-re-usable-multi-select-lookup>
+              </div>
+              
+          
+           
+        </div>
+        <div class="slds-m-top_x-small slds-border_top">
+          <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+      </div>
+
+        
+      </div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <lightning-button label="Cancel" title="Cancel" onclick={hideDescrepancyAdd} class="slds-m-right_x-small"></lightning-button>
+        <lightning-button variant="brand" label="Add" onclick={addDepartmentaldiscrepancy} title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Add Descrepancy for Department Modal End-->
+
+
+ <!--Add Descrepancy for Operation Modal Start-->
+ <template if:true={addoperationaldescrepancymodal}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-05"
+         aria-modal="true"
+         aria-describedby="modal-content-id-5"
+        class="slds-modal slds-fade-in-open slds-modal_small">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header slds-modal__header_empty">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideoperationalDescrepancyAdd}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <!--<h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate">New Operation Discrepancy</h2> -->
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
+        <!--Tab for New Operational Discrepancy and New Part Shortage Start-->
+        <div class="slds-tabs_default">
+          <ul class="slds-grid slds-gutters slds-tabs_default__nav tab-container" role="tablist">
+              <li class="slds-col slds-tabs_default__item slds-is-active" title="New Operation Discrepancy" role="presentation"  data-id="discrepancy"  onclick={tabClick}>
+                  <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">NEW DISCREPANCY</a>
+              </li>
+              <template if:false={isdescripancybyrejection}>
+              <li class="slds-col slds-tabs_default__item" title="New Shortage" role="presentation"  data-id="shortage"  onclick={tabClick}>
+                  <a class="slds-align_absolute-center slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">NEW SHORTAGE</a>
+              </li>
+            </template>
+          </ul>
+          <div id="tab-default-1" class="tab-default-1 slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+            <!--Adding new Discrepancy Start-->
+            <div class="slds-grid slds-wrap slds-gutters">
+              <div class="slds-col slds-size_1-of-1">
+                 <lightning-textarea class="validValue" required maxlength="2000" name="description" label="Description" value={newoperationaldiscrepancy.description} onchange={updateoperationaldiscvalues} placeholder="Enter discrepancy details here..."></lightning-textarea>
+               </div> 
+               <div class="slds-col slds-size_1-of-2">
+                 <lightning-input type="text" name="selectedbus"   label="Selected Bus"  value={newoperationaldiscrepancy.selectedbus} disabled></lightning-input>
+              </div>
+               <div class="slds-col slds-size_1-of-2">
+                 <lightning-input type="text" name="date"   label="Date"  value={newoperationaldiscrepancy.date} disabled></lightning-input> 
+                 
+              </div>  
+             <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox name="departmentid" label="Department" onchange={updateoperationaldiscvalues} value={newoperationaldiscrepancy.departmentid}  placeholder="Select Department" options={departmentoptions} disabled></lightning-combobox>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                 <lightning-combobox name="buildstation_id" label="Build Station (BS)" onchange={updateoperationaldiscvalues} value={newoperationaldiscrepancy.buildstation_id}  placeholder="Select BuildStation Code" options={buildstationfornewdisc} disabled></lightning-combobox>
+             </div>
+              <div class="slds-col slds-size_1-of-2">
+                 <lightning-combobox class="validValue" name="priority" label="Priority" onchange={updateoperationaldiscvalues} value={newoperationaldiscrepancy.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox class="validValue" required name="defectcode" label="Defect Code (DC)"  onchange={updateoperationaldiscvalues} value={newoperationaldiscrepancy.defectcode} placeholder="Select a Defect Code" options={defectoptions}></lightning-combobox>
+              </div>
+               <div  class="slds-col slds-size_1-of-2">
+                 <c-re-usable-multi-select-lookup limittoone={returnfalse} onitemselected={updateuserselectonopdesc} selectedrecords={newoperationaldiscrepancy.prodlist} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users"  listtosearch={newoperationaldiscrepancy.allPRODlist}></c-re-usable-multi-select-lookup>
+               </div>
+              </div>
+              <div class="slds-m-top_x-small slds-border_top">
+                  <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+              </div>
+            <!--Adding new Discrepancy End-->
+          </div>
+          <div id="tab-default-2" class="tab-default-2 slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+            <!--Adding new Shortage Start-->
+            <div class="slds-grid slds-wrap slds-gutters">
+              <div class="slds-col slds-size_1-of-1">
+                <c-custom-search-component isrequired={returntrue} showicon={returntrue} showlabel={returntrue} placeholdertext="Search Part Number" -icon-name="custom:custom19" listto-search={partnumberlist} label="Part Number" onselect={onpartnumberselection} onclear={onpartnumberclear}></c-custom-search-component>
+              </div>
+             <div class="slds-col slds-size_1-of-1">
+                <lightning-textarea required class="partshortagevalidation" disabled={enableeditonpartname} onchange={updatenewpartshortage} field-level-help="Please fill part number to auto fill the description.To edit the description select 'Part No. Not Found' option."  name="buspart_name" value={newpartshortage.buspart_name} label="Description" placeholder="Please select a Part Number to fill. If Part Number not found select 'Part No. Not Found' to enable edit."></lightning-textarea>
+              </div>   
+             <div class="slds-col slds-size_1-of-2">
+                 <lightning-input required class="partshortagevalidation" type="number" name="quantity" onchange={updatenewpartshortage}  label="Quantity Required"  value={newpartshortage.quantity} min="0.00001" step="0.00001" max="1000000" formatter="0000000.00000"></lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="po_no"   label="PO Number" onchange={updatenewpartshortage} value={newpartshortage.po_no} ></lightning-input>
+             </div>
+             <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="date" name="cut_off_date" onchange={updatenewpartshortage} min={todaysdate} label="Due Date" value={newpartshortage.cut_off_date}></lightning-input>
+             </div>
+             <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox  name="priority" label="Priority" onchange={updatenewpartshortage}  value={newpartshortage.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
+           </div>
+             <div class="slds-col slds-size_1-of-2">
+              <lightning-input type="text" name="date"   label="Created Date"  value={newpartshortage.date} disabled></lightning-input> 
+             </div>  
+             <div class="slds-col slds-size_1-of-2">
+               <lightning-input type="text" name="selectedbus"   label="Selected Bus"  value={newpartshortage.selectedbus} disabled></lightning-input>
+              </div>
+              
+             <div class="slds-col slds-size_1-of-2">
+              <lightning-combobox disabled name="department_id" label="Department" onchange={updatenewpartshortage} value={newpartshortage.department_id}  placeholder="Select Department" options={departmentoptions} ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+               <lightning-combobox disabled required name="buildstation_id" class="partshortagevalidation" label="Build Station (BS)" onchange={updatenewpartshortage} value={newpartshortage.buildstation_id}  placeholder="Select BuildStation Code" options={buildstationfornewdisc} ></lightning-combobox>
+            </div>
+            <div  class="slds-col slds-size_1-of-2">
+              <c-re-usable-multi-select-lookup limittoone={returnfalse} onitemselected={updateuserselectonnewpartshortage} selectedrecords={newpartshortage.prodlist} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users"  listtosearch={newpartshortage.allPRODlist}></c-re-usable-multi-select-lookup>
+            </div>
+               
+            </div>
+            <div class="slds-m-top_x-small slds-border_top">
+              <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+            </div>
+             <!--Adding new Shortage End-->
+          </div>
+          
+      </div>
+        <!--Tab for New Operational Discrepancy and New Part Shortage End-->
+        
+      </div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <!--{isselecteddiscrepancy} -->
+        <lightning-button label="Cancel" title="Cancel" onclick={hideoperationalDescrepancyAdd} class="slds-m-right_x-small"></lightning-button>
+        <lightning-button if:true={isselecteddiscrepancy} variant="brand" label="Add" onclick={addnewopdiscrepancy} title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+        <lightning-button if:false={isselecteddiscrepancy} variant="brand" label="Add" onclick={addnewpartshortage}  title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Add Descrepancy for Operation Modal End-->
+
+
+ <!--Add Part Shortage Modal Start-->
+ <template if:true={partshortageaddmodal}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-04"
+         aria-modal="true"
+         aria-describedby="modal-content-id-4"
+        class="slds-modal slds-fade-in-open slds-modal_small vsmodal">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideReportShortageAdd}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">New Part Shortage</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+        <div class="slds-grid slds-wrap slds-gutters">
+          <div class="slds-col slds-size_1-of-1">
+            <lightning-input if:false={buildstationselectedpart} disabled required class="partshortagevalidation" type="text" name="dummy"  label="Part Number" placeholder="Please select a Build Station" ></lightning-input>
+            <c-custom-search-component selectedcustomer={newpartshortage.buspart_no} data-id="partmnumbersearch" if:true={buildstationselectedpart} isrequired={returntrue} showicon={returntrue} showlabel={returntrue} placeholdertext="Search Part Number" -icon-name="custom:custom19" listto-search={partnumberlist} label="Part Number" onselect={onpartnumberselection} onclear={onpartnumberclear}></c-custom-search-component>
+          </div>
+         <div class="slds-col slds-size_1-of-1">
+            <lightning-textarea required class="partshortagevalidation" disabled={enableeditonpartname} onchange={updatenewpartshortage} field-level-help="Please fill part number to auto fill the description.To edit the description select 'Part No. Not Found' option."  name="buspart_name" value={newpartshortage.buspart_name} label="Description" placeholder="Please select a Part Number to fill. If Part Number not found select 'Part No. Not Found' to enable edit."></lightning-textarea>
+          </div>   
+         <div class="slds-col slds-size_1-of-2">
+             <lightning-input required class="partshortagevalidation" type="number" name="quantity" onchange={updatenewpartshortage}  label="Quantity Required"  value={newpartshortage.quantity} min="0.00001" step="0.00001" max="1000000" formatter="0000000.00000"></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-2">
+            <lightning-input type="text" name="po_no"   label="PO Number" onchange={updatenewpartshortage} value={newpartshortage.po_no} ></lightning-input>
+         </div>
+         <div class="slds-col slds-size_1-of-2">
+            <lightning-input type="date" name="cut_off_date" min={todaysdate} onchange={updatenewpartshortage}  label="Due Date" value={newpartshortage.cut_off_date}></lightning-input>
+         </div>
+         <div class="slds-col slds-size_1-of-2">
+          <lightning-input type="text" name="date"   label="Created Date"  value={newpartshortage.date} disabled></lightning-input> 
+         </div>  
+         <div class="slds-col slds-size_1-of-2">
+           <lightning-input type="text" name="selectedbus"   label="Selected Bus"  value={newpartshortage.selectedbus} disabled></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-2">
+            <lightning-combobox  name="priority" label="Priority" onchange={updatenewpartshortage}  value={newpartshortage.priority} placeholder="Select Priority" options={priorityoptions}></lightning-combobox>
+         </div>
+         <div class="slds-col slds-size_1-of-2">
+          <lightning-combobox name="department_id" label="Department" onchange={updatenewpartshortage} value={newpartshortage.department_id}  placeholder="Select Department" options={departmentoptions} ></lightning-combobox>
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+           <lightning-combobox required name="buildstation_id" class="partshortagevalidation" label="Build Station (BS)" onchange={updatenewpartshortage} value={newpartshortage.buildstation_id}  placeholder="Select BuildStation Code" options={buildstationoptions} ></lightning-combobox>
+        </div>
+        <!--div  class="slds-col slds-size_1-of-2">
+          <c-re-usable-multi-select-lookup limittoone={returntrue} onitemselected={updateuserselectonnewpartshortage} selectedrecords={newpartshortage.qclist} label="QC" -icon-name="standard:user" placeholdertext="Search for QC users"  listtosearch={newpartshortage.allQClist}></c-re-usable-multi-select-lookup>
+        </div-->
+        <div  class="slds-col slds-size_1-of-2">
+          <c-re-usable-multi-select-lookup limittoone={returnfalse} onitemselected={updateuserselectonnewpartshortage} selectedrecords={newpartshortage.prodlist} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users"  listtosearch={newpartshortage.allPRODlist}></c-re-usable-multi-select-lookup>
+        </div>
+           
+        </div>
+        <div class="slds-m-top_x-small slds-border_top">
+          <c-attachmenttemp-component onnewfileupload={gets3tempurls}></c-attachmenttemp-component>
+      </div>
+      </div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <lightning-button label="Cancel" title="Cancel" onclick={hideReportShortageAdd} class="slds-m-right_x-small"></lightning-button>
+        <lightning-button variant="brand" label="Add" onclick={addnewpartshortage}  title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Add Part Shortage Modal End-->
+
+<!--Add User Modal Start-->
+<template if:true={showuserlist}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-03"
+         aria-modal="true"
+         aria-describedby="modal-content-id-3"
+        class="slds-modal slds-fade-in-open slds-modal_small">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideuserlist}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">Select Users</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+        <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1">
+                <c-re-usable-multi-select-lookup disablecomponent={disableuserselection} limittoone={setuserlimit} onitemselected={updateselecteduser} selectedrecords={selectedusersList} label="SELECT USERS" -icon-name="standard:user" placeholdertext="Search for users"  listtosearch={completesearchlistUsers}></c-re-usable-multi-select-lookup>
+            </div>
+            <div class="slds-col slds-size_1-of-1" style="height:200px;">
+                
+            </div>
+        </div>
+         
+      </div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <lightning-button label="Cancel" title="Cancel" onclick={hideuserlist} class="slds-m-right_x-small"></lightning-button>
+        <lightning-button variant="brand" label="Update" onclick={updatebuidstationusers} title="Update" icon-position="right" icon-name="utility:edit" disabled={disableuserselection}></lightning-button>
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!--Add User Modal End-->
+
+ <!-- Discrepancy List  modal start -->
+ <template if:true={discrepancylistmodal}>
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-08" aria-modal="true" aria-describedby="modal-content-id-8" class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={canceldiscrepancylistmodal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                </button>
+                <h2 id="modal-heading-08" class="slds-text-heading_medium slds-hyphenate">
+                 Operational Discrepancies List
+                </h2>
+            </header>
+            <!-- modal body start -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-8">
+                <div class="slds-card">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                    <th class="" scope="col">
+                         <div class="slds-align_absolute-center slds-truncate" title="STATUS">STATUS</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-align_absolute-center slds-truncate" title="">DISCREPANCIES</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-align_absolute-center slds-truncate" title="PROD">PROD</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-align_absolute-center slds-truncate" title="ACTION">ACTION</div>
+                    </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <!--<tr>
+                            <td><div class="slds-align_absolute-center">OPEN</div></td>
+                            <td><div class="slds-align_absolute-center" >Radiator leak</div></td>
+                            <td><div class="slds-align_absolute-center" >Joseph Pauly</div></td>
+                            <td><div class="slds-align_absolute-center" ></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="slds-align_absolute-center">OPEN</div></td>
+                            <td><div class="slds-align_absolute-center" >Fire Suppression</div></td>
+                            <td><div class="slds-align_absolute-center" >Ajay Krishna R</div></td>
+                            <td><div class="slds-align_absolute-center" ></div></td>
+                        </tr> -->
+                      </tbody> 
+                    </table>
+            </div>
+            <div class="slds-align_absolute-center">
+                <div class="empty-state-container slds-text-align_center">
+                  <img src={nodatadessert} aria-hidden="true" alt="No data to display.">
+                  <div class="empty-state-message slds-m-top_medium">
+                    No data to display.
+                  </div>
+                </div>
+              </div>
+              </div>
+            
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                <lightning-button label="Cancel" title="Cancel" onclick={canceldiscrepancylistmodal} class="slds-m-right_x-small"></lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Discrepancy list modal end -->  
+
+
+  <!--Show  Descrepancy Detail Modal Start-->
+  <template if:true={discdetailsmodal}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-01"
+         aria-modal="true"
+         aria-describedby="modal-content-id-1"
+        class="slds-modal slds-fade-in-open slds-modal_medium">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidediscrepancydetail}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Defect Id: {selecteddiscrepancy.ecard_discrepancy_log_number}</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+        
+        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
+
+          <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label">Description</label>
+              <div title={selecteddiscrepancy.discrepancy} class="slds-form-element__static descriptiondetail">{selecteddiscrepancy.discrepancy}</div>
+            </div>
+          </div>
+          
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label">Created By</label>
+              <div title="created by" class="slds-form-element__static"><c-userlist-icon-component  type='Created User' userlist={selecteddiscrepancy.created_by} ></c-userlist-icon-component></div></div>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Created On" name="raised_date_display" value={selecteddiscrepancy.raised_date_display} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Customer Name" name="customername" value={selecteddiscrepancy.customername} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Chassis Sl No" value={selecteddiscrepancy.chassis_no} readonly></lightning-input>
+          </div> 
+          
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Bus Status" name="busstatus_name" value={selecteddiscrepancy.busstatus_name} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Department" name="department_name" value={selecteddiscrepancy.department_name} readonly></lightning-input>
+          </div>
+          <div if:true={selecteddiscrepancy.disc_bsavailable} class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Build Station" name="buildstation_code" value={selecteddiscrepancy.buildstation_code} readonly></lightning-input>
+          </div>
+          <div if:false={selecteddiscrepancy.disc_bsavailable} class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Build Station" name="buildstation_code" value='' readonly></lightning-input>
+          </div>
+          <div if:true={selecteddiscrepancy.disc_bsavailable} class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Work Centre" name="workcenter_name"  value={selecteddiscrepancy.workcenter_name} readonly></lightning-input>
+          </div>
+          <div if:false={selecteddiscrepancy.disc_bsavailable} class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Work Centre" name="workcenter_name"  value='' readonly></lightning-input>
+          </div>
+          
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium"> 
+            <lightning-input type="text" label="Defect Type" name="discrepancy_type" value={selecteddiscrepancy.discrepancy_type} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Defect Code" name="defect_codename" value={selecteddiscrepancy.defect_codename} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Priority" name="discrepancy_priority" value={selecteddiscrepancy.discrepancy_priority} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Defect Status" name="discrepancy_statusdisplay" value={selecteddiscrepancy.discrepancy_statusdisplay} onchange={updateselecteddiscrepancy} readonly></lightning-input>
+          </div>
+        </div>
+
+        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
+          <template if:true={selecteddiscrepancy.isdepartmentdiscrepancy}>
+          <div class="slds-col slds-size_1-of-1">
+            <lightning-textarea disabled={disablecomponentdates} required class="checkvalid" name="root_cause"  field-level-help="Please fill when resolving a Discrepancy"  value={selecteddiscrepancy.root_cause} label="Root Cause" onchange={updateselecteddiscrepancy}></lightning-textarea> 
+          </div>
+          <div class="slds-col slds-size_1-of-2">
+            <lightning-input disabled={disablecomponentdates} required class="checkvalid" type="text" label="Component" name="component" field-level-help="Please fill when resolving a Discrepancy" value={selecteddiscrepancy.component} onchange={updateselecteddiscrepancy}></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-2">
+            <lightning-input disabled={disablecomponentdates} required class="checkvalid" type="date" label="Cut In Date" name="cut_off_date" field-level-help="Please fill when resolving a Discrepancy" value={selecteddiscrepancy.cut_off_date} onchange={updateselecteddiscrepancy}></lightning-input>
+          </div>
+        </template>
+          <div  class="slds-col slds-size_1-of-2"> 
+            <c-re-usable-multi-select-lookup  disablecomponent="true" limittoone={returntrue} selectedrecords={selecteddiscrepancy.assigend_qc_id} label="QC" -icon-name="standard:user" placeholdertext="" onitemselected={updateuserselection} listtosearch={selecteddiscrepancy.qc}></c-re-usable-multi-select-lookup>
+          </div>
+          <div  class="slds-col slds-size_1-of-2">
+            <c-re-usable-multi-select-lookup disablecomponent={disableprodforselecteddiscrepancy}  limittoone={returnfalse} selectedrecords={selecteddiscrepancy.assignedprod} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users" onitemselected={updateuserselection} listtosearch={selecteddiscrepancy.prod}></c-re-usable-multi-select-lookup>
+          </div>
+        </div>
+        <div class="slds-grid slds-wrap slds-gutters">
+          <div class="slds-col slds-size_1-of-1">
+            <c-attachments-section-component uniqueid={selecteddiscrepancy.ecard_discrepancy_log_id}  type="discrepancy" ></c-attachments-section-component>
+          </div>
+          <div class="slds-col slds-size_1-of-1">
+            <c-comments-section-component unique-id={selecteddiscrepancy.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
+          </div>
+         </div>
+        
+      
+</div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <!--lightning-button if:true={selecteddiscrepancy.deletepermission} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left"></lightning-button-->   
+        <lightning-button if:true={isdeletable} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" name={selecteddiscrepancy.ecard_discrepancy_log_id} onclick={deletediscshortage}></lightning-button>   
+        <lightning-button label="Cancel" title="Cancel" onclick={hidediscrepancydetail} class="slds-m-right_x-small"></lightning-button>
+        <c-status-operations-component permissionset={permissionset} discrepancytype={selecteddiscrepancy.discrepancy_type} type="discrepancy" prodlist={selecteddiscrepancy.assignedprod} qclist={selecteddiscrepancy.assigend_qc_id} data-id={selecteddiscrepancy.ecard_discrepancy_log_id} buildstationid={selecteddiscrepancy.ecard_discrepancy_log_id} ecardid={selecteddiscrepancy.ecard_id} status={selecteddiscrepancy.discrepancy_status} onsubmitchange={handlediscrepancyactions}></c-status-operations-component> 
+        <!--onsubmitchange={discrepancyactionshandler} -->
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!--Show Descrepancy for Department Modal End-->
+
+     <!--Show  Part Shortage Detail Modal Start-->
+  <template if:true={partshortagedetailsmodal}>
+    <section role="dialog" tabindex="-1"
+         aria-labelledby="modal-heading-16"
+         aria-modal="true"
+         aria-describedby="modal-content-id-16"
+        class="slds-modal slds-fade-in-open slds-modal_medium">
+   <div class="slds-modal__container">
+      <!-- modal header start -->
+      <header class="slds-modal__header">
+         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidepartshortagedetail}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+         </button>
+         <h2 id="modal-heading-16" class="slds-text-heading_medium slds-hyphenate" title={selectedshortage.ecard_discrepancy_log_id}>Shortage Id: {selectedshortage.ecard_discrepancy_log_number}</h2>
+      </header>
+      <!-- modal body start -->
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-16">
+        
+        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
+
+          <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label">Description</label>
+              <div title={selectedshortage.buspart_name} class="slds-form-element__static descriptiondetail">{selectedshortage.buspart_name}</div>
+            </div>
+          </div>
+          
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <div class="slds-form-element">
+              <label class="slds-form-element__label">Created By</label>
+              <div title="created by" class="slds-form-element__static"><c-userlist-icon-component  type='Created User' userlist={selectedshortage.createdby_id} ></c-userlist-icon-component></div></div>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Created On" name="raised_date_display" value={selectedshortage.raised_date_display} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium"> 
+            <lightning-input type="text" label="Part Number" name="buspart_no" value={selectedshortage.buspart_no} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="number" label="Quantity Required" name="quantity" value={selectedshortage.quantity} step="0.00001" readonly></lightning-input>
+          </div>
+
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Customer Name" name="customername" value={selectedshortage.customername} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Chassis Sl No" value={selectedshortage.chassis_no} readonly></lightning-input>
+          </div> 
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Bus Status" name="busstatus_name" value={selectedshortage.busstatus_name} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Department" name="department_name" value={selectedshortage.department_name} readonly></lightning-input>
+          </div>
+
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Build Station" name="buildstation_code" value={selectedshortage.buildstation_code} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Work Centre" name="workcenter_name"  value={selectedshortage.workcenter_name} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Priority" name="discrepancy_priority" value={selectedshortage.discrepancy_priority} readonly></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-4 slds-m-bottom_medium">
+            <lightning-input type="text" label="Shortage Status" name="discrepancy_statusdisplay" value={selectedshortage.discrepancy_statusdisplay} readonly></lightning-input>
+          </div>
+        </div>
+
+        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small slds-border_bottom">
+          <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+            <lightning-input disabled={disableqcforselectedshortage} type="text" label="PO Number" name="po_no" value={selectedshortage.po_no} onchange={updateselectedshortage}></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+            <lightning-input disabled={disableqcforselectedshortage} type="date" min={todaysdate} label="Due Date" name="cut_off_date" value={selectedshortage.cut_off_date} onchange={updateselectedshortage}></lightning-input>
+          </div>
+          <div  class="slds-col slds-size_1-of-2"> 
+            <c-re-usable-multi-select-lookup disablecomponent="true" limittoone={returntrue} selectedrecords={selectedshortage.assigend_qc_id} label="QC" -icon-name="standard:user" placeholdertext="" onitemselected={updateuserpartshortage} listtosearch={selectedshortage.allqclist}></c-re-usable-multi-select-lookup>
+          </div>
+          <div  class="slds-col slds-size_1-of-2">
+            <c-re-usable-multi-select-lookup disablecomponent={disableprodforselectedshortage} limittoone={returnfalse} selectedrecords={selectedshortage.assignedprod} label="PROD" -icon-name="standard:user" placeholdertext="Search for PROD users" onitemselected={updateuserpartshortage} listtosearch={selectedshortage.allprodlist}></c-re-usable-multi-select-lookup>
+          </div>
+        </div>
+        <div class="slds-grid slds-wrap slds-gutters">
+          <div class="slds-col slds-size_1-of-1">
+            <c-attachments-section-component uniqueid={selectedshortage.ecard_discrepancy_log_id}  type="discrepancy" ></c-attachments-section-component>
+          </div>
+          <div class="slds-col slds-size_1-of-1">
+             <c-comments-section-component unique-id={selectedshortage.ecard_discrepancy_log_id} loggedinuserid={currentuserid} commentlist={selecteddiscrepancycomments} onaddcomment={addnewdiscrepancycomment}></c-comments-section-component>
+          </div>
+         </div>
+</div>
+      <!-- modal footer start-->
+      <footer class="slds-modal__footer">
+        <lightning-button if:true={isdeletable} variant="destructive" label="Delete" title="Delete action" icon-name="utility:delete" icon-position="right" class="slds-float_left" name={selectedshortage.ecard_discrepancy_log_id} onclick={deletediscshortage}></lightning-button>   
+        <lightning-button label="Cancel" title="Cancel" onclick={hidepartshortagedetail} class="slds-m-right_x-small"></lightning-button>
+        <c-status-operations-component permissionset={permissionset} type="shortage" prodlist={selectedshortage.assignedprod} qclist={selectedshortage.assigend_qc_id} data-id={selectedshortage.ecard_discrepancy_log_id} buildstationid={selectedshortage.ecard_discrepancy_log_id} ecardid={selectedshortage.ecard_id} status={selectedshortage.discrepancy_status} onsubmitchange={handlepartshortageactions}></c-status-operations-component> 
+        <!--onsubmitchange={discrepancyactionshandler} -->
+      </footer>
+   </div>
+    </section>
+ <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!--Show Part Shortage for Department Modal End-->
+
+<!-- QC Check List  modal start -->
+<template if:true={showqcchecklist}>
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-81" aria-modal="true" aria-describedby="modal-content-id-81" class="slds-modal slds-fade-in-open slds-modal_medium">
+      <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideqcchecklist}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+              </button>
+              <h2 id="modal-heading-81" class="slds-text-heading_medium slds-hyphenate">
+               QC Check List
+              </h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-81">
+            <div class="slds-m-bottom_small">
+              <lightning-combobox label="Department"  name="department"  value={selecteddeptformodals}  placeholder="Departments" options={departmentoptions} onchange={handleDepartmentchange}></lightning-combobox>
+           </div>
+           <template if:false={isqcchecklistpresent}>
+              <div class="slds-grid slds-wrap slds-gutters">
+                 <template for:each={qcchecklists} for:item='checklist'>
+                 <div key={checklist.qc_check_list_id} class="slds-col slds-size_1-of-3">
+                    <div class="slds-file slds-file_card slds-has-title">
+                       <figure>
+                          <!--a target="_blank" href={checklist.qc_check_list_url} class="slds-file__crop"-->
+                          <a onclick={openfile} name={checklist.qc_check_list_url} class="slds-file__crop">
+                             <span class="slds-assistive-text">Preview:</span>
+                             <span class="slds-file__icon slds-icon_container" title="pdf">
+                                <lightning-icon icon-name="doctype:pdf" size="large" alternative-text="PDF file" title="PDF"></lightning-icon>
+                                <span class="slds-assistive-text">{checklist.filename}</span>
+                             </span>
+                          </a>
+                          <figcaption class="slds-file__title slds-file__title_card">
+                             <div class="slds-media slds-media_small slds-media_center">
+                                <div class="slds-media__figure slds-line-height_reset">
+                                   <span class="slds-icon_container" title="pdf">
+                                      <lightning-icon icon-name="doctype:pdf" size="x-small" alternative-text="PDF file" title="PDF"></lightning-icon>
+                                      <span class="slds-assistive-text">pdf</span>
+                                   </span>
+                                </div>
+                                <div class="slds-media__body">
+                                   <span class="slds-file__text slds-truncate" title={checklist.filename}>{checklist.filename}</span>
+                                </div>
+                             </div>
+                          </figcaption>
+                       </figure>
+                    </div>
+                 </div>
+              </template>
+              </div>
+           </template>
+           <template if:true={isqcchecklistpresent}>
+              <div class="slds-align_absolute-center">
+                  <div class="empty-state-container slds-text-align_center">
+                    <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                    <div class="emptymessage">
+                      No QC Checklist yet.
+                    </div>
+                  </div>
+              </div>
+            </template>
+            </div>
+          
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+              <lightning-button label="Cancel" title="Cancel" onclick={hideqcchecklist} class="slds-m-right_x-small"></lightning-button>
+          </footer>
+      </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Discrepancy list modal end -->  
+
+<!-- Help Documents List  modal start -->
+<template if:true={showhelpdocuments}>
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-82" aria-modal="true" aria-describedby="modal-content-id-81" class="slds-modal slds-fade-in-open slds-modal_medium">
+      <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidehelpdocument}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+              </button>
+              <h2 id="modal-heading-82" class="slds-text-heading_medium slds-hyphenate">
+               Help Documents
+              </h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-82">
+            <div class="slds-m-bottom_small">
+              <lightning-combobox label="Department"  name="department"  value={selecteddeptformodals}  placeholder="Departments" options={departmentoptions} onchange={handleDepartmentchange}></lightning-combobox>
+           </div>
+           <template if:false={ishelpdocpresent}>
+              <div class="slds-grid slds-wrap slds-gutters">
+                 <template for:each={helpdocumntslist} for:item='helpdoc'>
+                 <div key={helpdoc.help_document_id} class="slds-col slds-size_1-of-3">
+                    <div class="slds-file slds-file_card slds-has-title">
+                       <figure>
+                          <!--a target="_blank" href={helpdoc.help_document_url} class="slds-file__crop"-->
+                          <a onclick={openfile} name={helpdoc.help_document_url} class="slds-file__crop">
+                             <span class="slds-assistive-text">Preview:</span>
+                             <span class="slds-file__icon slds-icon_container" title="pdf">
+                                <lightning-icon icon-name="doctype:pdf" size="large" alternative-text="PDF file" title="PDF"></lightning-icon>
+                                <span class="slds-assistive-text">{helpdoc.filename}</span>
+                             </span>
+                          </a>
+                          <figcaption class="slds-file__title slds-file__title_card">
+                             <div class="slds-media slds-media_small slds-media_center">
+                                <div class="slds-media__figure slds-line-height_reset">
+                                   <span class="slds-icon_container" title="pdf">
+                                      <lightning-icon icon-name="doctype:pdf" size="x-small" alternative-text="PDF file" title="PDF"></lightning-icon>
+                                      <span class="slds-assistive-text">pdf</span>
+                                   </span>
+                                </div>
+                                <div class="slds-media__body">
+                                   <span class="slds-file__text slds-truncate" title={helpdoc.filename}>{helpdoc.filename}</span>
+                                </div>
+                             </div>
+                          </figcaption>
+                       </figure>
+                    </div>
+                 </div>
+              </template>
+              </div>
+           </template>
+           <template if:true={ishelpdocpresent}>
+              <div class="slds-align_absolute-center">
+                  <div class="empty-state-container slds-text-align_center">
+                    <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                    <div class="emptymessage">
+                      No help documents yet.
+                    </div>
+                  </div>
+              </div>
+            </template>
+            </div>
+          
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+              <lightning-button label="Cancel" title="Cancel" onclick={hidehelpdocument} class="slds-m-right_x-small"></lightning-button>
+          </footer>
+      </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Help Documents list modal end -->  
+   
+<!-- Attachment List  modal start -->
+<template if:true={showattachments}>
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-83" aria-modal="true" aria-describedby="modal-content-id-81" class="slds-modal slds-fade-in-open slds-modal_medium">
+      <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideattachmentsmodal}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+              </button>
+              <h2 id="modal-heading-83" class="slds-text-heading_medium slds-hyphenate">
+               Attachments - {attachmentrequireddetails.buildstation_code}
+              </h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-83">
+            <c-attachments-section-component uniqueid={attachmentrequireddetails.operationlog_id}  type="operationlog" ecardid={attachmentrequireddetails.ecard_id} buildstationid={attachmentrequireddetails.buildstation_id} departmentid={attachmentrequireddetails.department_id} onnewadded={reloadlist}></c-attachments-section-component>
+          </div>
+          
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+              <lightning-button label="Cancel" title="Cancel" onclick={hideattachmentsmodal} class="slds-m-right_x-small"></lightning-button>
+          </footer>
+      </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+<!-- Help Documents list modal end --> 
+<!-- Meeting Notes modal Start --> 
+<template if:true={showmeetingnotes}>
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-84" aria-modal="true" aria-describedby="modal-content-id-81" class="slds-modal slds-fade-in-open slds-modal_medium">
+      <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+              <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidemeetingnotes}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+              </button>
+              <h2 id="modal-heading-84" class="slds-text-heading_medium slds-hyphenate">
+               Meeting Notes
+              </h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-84">
+            <div class="slds-m-bottom_small">
+              <lightning-combobox label="Department"  name="department"  value={selecteddeptformodals}  placeholder="Departments" options={departmentoptions} onchange={handleDepartmentchange}></lightning-combobox>
+           </div>
+           <template if:false={ismeetingnotespresent}>
+              <div class="slds-grid slds-wrap slds-gutters">
+                 <template for:each={meetingnotes} for:item='meetingnote'>
+                 <div key={meetingnote.meeting_note_id} class="slds-col slds-size_1-of-3">
+                    <div class="slds-file slds-file_card slds-has-title">
+                       <figure>
+                          <!--a target="_blank" href={meetingnote.meeting_note_url} class="slds-file__crop"-->
+                          <a onclick={openfile} name={meetingnote.meeting_note_url} class="slds-file__crop">
+                             <span class="slds-assistive-text">Preview:</span>
+                             <span class="slds-file__icon slds-icon_container" title="pdf">
+                                <lightning-icon icon-name="doctype:pdf" size="large" alternative-text="PDF file" title="PDF"></lightning-icon>
+                                <span class="slds-assistive-text">{meetingnote.filename}</span>
+                             </span>
+                          </a>
+                          <figcaption class="slds-file__title slds-file__title_card">
+                             <div class="slds-media slds-media_small slds-media_center">
+                                <div class="slds-media__figure slds-line-height_reset">
+                                   <span class="slds-icon_container" title="pdf">
+                                      <lightning-icon icon-name="doctype:pdf" size="x-small" alternative-text="PDF file" title="PDF"></lightning-icon>
+                                      <span class="slds-assistive-text">pdf</span>
+                                   </span>
+                                </div>
+                                <div class="slds-media__body">
+                                   <span class="slds-file__text slds-truncate" title={meetingnote.filename}>{meetingnote.filename}</span>
+                                </div>
+                             </div>
+                          </figcaption>
+                       </figure>
+                    </div>
+                 </div>
+              </template>
+              </div>
+           </template>
+           <template if:true={ismeetingnotespresent}>
+              <div class="slds-align_absolute-center">
+                  <div class="empty-state-container slds-text-align_center">
+                    <img src={nodatadessert} width="500px" aria-hidden="true" alt="No data to display.">
+                    <div class="emptymessage">
+                      No Meeting Notes yet.
+                    </div>
+                  </div>
+              </div>
+            </template>
+            </div>
+          
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+              <lightning-button label="Cancel" title="Cancel" onclick={hidemeetingnotes} class="slds-m-right_x-small"></lightning-button>
+          </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+<!-- Meeting Notes modal End --> 
+
+</template>

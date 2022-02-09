@@ -1,0 +1,17 @@
+.crewschedulemain{
+    background: rgb(255, 255, 255);
+    padding: 0px 10px 0px 10px;
+    border: 1px solid rgb(221, 219, 218);
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);
+}
+.headstyle{
+    text-transform: uppercase;
+    font-weight: bolder;
+}
+.tblheaderth{
+    color: #005fb2 !important;
+}
+.tblheader{
+    height: 3rem;
+}

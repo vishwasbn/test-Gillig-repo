@@ -1,0 +1,184 @@
+<template>
+  <!--Show spinner start-->
+  <div if:true={showSpinner}>
+    <div class="slds-spinner_container slds-is-fixed">
+        <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative" role="alert">
+            <span class="slds-assistive-text">Loading</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+    </div>
+ </div>
+ <!--Show spinner end-->
+    <section class="main">
+        <section class="ophead">
+          <div class="slds-grid slds-grid_align-spread slds-m-top_small">
+            <div class="slds-col">
+              <!--<template if:true={isdepartmentcommon}>
+                <lightning-combobox   class="slds-m-left_x-small departmentwidth" name="department"  value='ALL DEPARTMENTS'  placeholder="Departments" options={onlyalldepartment} disabled></lightning-combobox>
+              </template> -->
+              <template if:false={isdepartmentcommon}>
+                <lightning-combobox variant="label-hidden"  class="slds-m-left_x-small departmentwidth" name="department"  value={selecteddepartmentid}  placeholder="Departments" options={departmentlistoptions} onchange={handleDepartmentchange}></lightning-combobox>
+              </template>
+
+            </div>
+            <div class="slds-col">
+              
+            </div>
+            <div class="slds-col"> <!--onclick={} -->
+              
+            </div>
+          </div>
+        </section>
+        <section class="opbody slds-p-top_small__x">
+            <template if:true={showoperations}> 
+            <c-operation-actions-component ecardid={ecardid} seq={bseqence} buschasisnumber={buschasisnumber} department={selecteddepartment} selecteddepartment-id={selecteddepartmentid}
+            busname={busname} operation={selectedoperation} department-id-map={departmentnameidMap} permissionset={permissionset} ></c-operation-actions-component>    
+            </template>   
+            
+             <div class="slds-m-top_small">
+             <div class="slds-grid slds-grid_align-spread">
+              <!--<template if:true={isdepartmentcommon}>
+                <div class="slds-col">
+                  <lightning-button disabled onclick={gopreviousdept} class="" label="Previous Department"  title="Previous Department" icon-position="left" icon-name="utility:chevronleft"></lightning-button>
+                </div>
+                <div class="slds-col">
+                  <lightning-button disabled onclick={gonextdept} class="" label="Next Department"  title="Next Department" icon-position="right" icon-name="utility:chevronright"></lightning-button>
+                </div>
+              </template> -->
+              <template if:false={isdepartmentcommon}>
+                <div class="slds-col">
+                  <lightning-button disabled={disableprev} onclick={gopreviousdept} class="" label="Previous Department"  title="Previous Department" icon-position="left" icon-name="utility:chevronleft"></lightning-button>
+                </div>
+                <div class="slds-col">
+                  <lightning-button disabled={disablenext} onclick={gonextdept} class="" label="Next Department"  title="Next Department" icon-position="right" icon-name="utility:chevronright"></lightning-button>
+                </div>
+              </template> 
+              
+             </div>
+            </div>
+                 
+        </section>
+
+    </section>
+
+    <!--Bus Overview Modal Start-->
+    <template if:true={showbusoverview}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <!-- modal header start -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hidebusDetails}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+            Bus Detail
+          </h2>
+                </header>
+                <!-- modal body start -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-form-element slds-form-element_readonly">
+                          <span class="slds-form-element__label">Chasis Number</span>
+                          <div class="slds-form-element__control">
+                           <div class="slds-form-element__static">{buschasisnumber}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-form-element slds-form-element_readonly">
+                          <span class="slds-form-element__label">Name</span>
+                          <div class="slds-form-element__control">
+                           <div class="slds-form-element__static">{busname}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-form-element slds-form-element_readonly">
+                          <span class="slds-form-element__label">Coach Model Number</span>
+                          <div class="slds-form-element__control">
+                           <div class="slds-form-element__static">233</div>
+                          </div>
+                        </div>
+                      </div>
+                    <div class="slds-col slds-size_1-of-3">
+                        <div class="slds-form-element slds-form-element_readonly">
+                          <span class="slds-form-element__label">Date Completed</span>
+                          <div class="slds-form-element__control">
+                           <div class="slds-form-element__static">12/JUN/2020</div>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3">
+                      <div class="slds-form-element slds-form-element_readonly">
+                        <span class="slds-form-element__label">Bus Type</span>
+                        <div class="slds-form-element__control">
+                         <div class="slds-form-element__static">Diesel</div>
+                        </div>
+                      </div>
+                  </div>
+                    <div class="slds-col slds-size_1-of-3">
+                      <div class="slds-form-element slds-form-element_readonly">
+                        <span class="slds-form-element__label">Length</span>
+                        <div class="slds-form-element__control">
+                         <div class="slds-form-element__static">35</div>
+                        </div>
+                      </div>
+                  </div> 
+                </div>
+              </div>
+                
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" title="Cancel" onclick={hidebusDetails} class="slds-m-right_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!--Bus Overview Modal End  -->
+
+    <!--Add Descrepancy Modal Start-->
+    <template if:true={adddescrepancymodal}>
+        <section role="dialog" tabindex="-1"
+             aria-labelledby="modal-heading-02"
+             aria-modal="true"
+             aria-describedby="modal-content-id-2"
+            class="slds-modal slds-fade-in-open">
+       <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+             <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={hideDescrepancyAdd}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+             </button>
+             <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Add New Discrepancy</h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+            <div class="slds-grid slds-wrap slds-gutters">
+             <div class="slds-col slds-size_1-of-1">
+                <lightning-textarea name="discrepancy" label="Discrepancy" placeholder="Enter your discrepancy here..."></lightning-textarea>
+              </div>   
+             <div class="slds-col slds-size_1-of-2">
+                 <lightning-input type="text" name="bus_name"   label="Bus Name"  value={busname} disabled></lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="chasis"   label="Chasis Number" value={buschasisnumber} disabled></lightning-input>
+             </div>
+             <div class="slds-col slds-size_1-of-2">
+                <lightning-input type="text" name="department"   label="Department" value={selecteddepartment}></lightning-input>
+             </div>
+            </div>
+          </div>
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+            <lightning-button label="Cancel" title="Cancel" onclick={hideDescrepancyAdd} class="slds-m-right_x-small"></lightning-button>
+            <lightning-button variant="brand" label="Add"  title="Add" icon-position="right" icon-name="utility:add"></lightning-button>
+          </footer>
+       </div>
+        </section>
+     <div class="slds-backdrop slds-backdrop_open"></div>
+ </template>
+ <!--Add Descrepancy Modal End-->
+</template>

@@ -1,0 +1,28 @@
+<template>
+    <div if:false={permitteduser}>
+        <div if:false={isoklocal}>
+            <lightning-button-group>
+                <lightning-button icon-name="utility:dislike" icon-position="right" variant="destructive" label="NOT OK"></lightning-button>
+            </lightning-button-group>
+        </div>
+        <div if:true={isoklocal}>
+            <lightning-button-group>
+                <lightning-button icon-name="utility:like" icon-position="right" variant="success" label="OK"></lightning-button>
+            </lightning-button-group>
+        </div>
+    </div>
+    <div if:true={permitteduser}>
+        <div if:false={isoklocal}>
+            <lightning-button-group>
+                <lightning-button disabled={disabled} icon-name="utility:like" icon-position="right" name="ok" label="OK" onclick={actiontriggered}></lightning-button>
+                <lightning-button disabled={disabled} icon-name="utility:dislike" icon-position="right" name="notok" variant="destructive" onclick={actiontriggered} label="NOT OK"></lightning-button>
+            </lightning-button-group>
+        </div>
+        <div if:true={isoklocal}>
+            <lightning-button-group>
+                <lightning-button disabled={disabled} icon-name="utility:like" icon-position="right" name="ok" variant="success" label="OK" onclick={actiontriggered}></lightning-button>
+                <lightning-button disabled={disabled} icon-name="utility:dislike" icon-position="right" name="notok" label="NOT OK" onclick={actiontriggered}></lightning-button>
+            </lightning-button-group>
+        </div>
+    </div>
+</template>

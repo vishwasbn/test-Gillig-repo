@@ -1,0 +1,9 @@
+.setwidth{
+    width:100%;
+}
+.disablepill{
+        background: rgb(236, 235, 234);
+        border-color : rgb(201, 199, 197);
+        pointer-events: none;
+        cursor: not-allowed !important;
+    }

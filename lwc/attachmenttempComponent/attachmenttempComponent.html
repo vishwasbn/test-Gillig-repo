@@ -1,0 +1,53 @@
+<template>
+  <!--Show spinner start-->
+  <div if:true={showSpinner}>
+    <!--  <div class="slds-align_absolute-center">
+        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+    </div>-->
+    <div class="slds-align_absolute-center">
+        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+         <span class="slds-assistive-text">Loading</span>
+         <div class="slds-spinner__dot-a"></div>
+        <div class="slds-spinner__dot-b"></div>
+    </div>
+    </div> 
+ </div>
+ <!--Show spinner end-->
+    <section class="attachmentsmain">
+        <div class="slds-float_none slds-p-around_x-small">
+            <span class="slds-text-heading_medium headstyle">Attachments ({attachmentsize})</span>
+        </div>
+       <div class="slds-align_absolute-center slds-truncate">
+        <lightning-input type="file"
+            label="Upload New File"
+            accept={acceptedFormats}
+            onchange={handleupload}
+         >
+        </lightning-input>
+       </div>
+
+       <div class="slds-grid slds-wrap slds-gutters slds-m-top_medium">
+        <template for:each={attachmentlist}  for:item='attachment'>
+        <div key={attachment.index} class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+            <div class="slds-file slds-file_card">
+                <figure>
+                  <a href={attachment.url} target="_blank" class="slds-file__crop">
+                    <span class="slds-assistive-text">Preview:</span>
+                    <img src={attachment.url} alt="Description of the image" />
+                  </a>
+                </figure>
+                <div class="slds-file__title slds-file__title_scrim">
+                  <div class="slds-file__actions-menu">
+                    <div class="slds-button-group" role="group">
+                        <a href="javascript:void(0);">
+                            <lightning-button-icon icon-name="utility:delete" data-id={attachment.s3tempurl} onclick={deleteattachment} alternative-text="Download"   variant="bare-inverse" class="slds-m-left_xx-small" title="Download"></lightning-button-icon>
+                        </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </template>
+       </div>
+    </section>
+</template>

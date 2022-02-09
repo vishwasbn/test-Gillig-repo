@@ -1,0 +1,237 @@
+<template>
+      <!--Show spinner start-->
+      <div if:true={showSpinner}>
+        <div class="slds-spinner_container">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-fixed" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+     </div>
+     <!--Show spinner end-->
+
+    <!--Content Crewing Schedule Start--> 
+    <section class="crewschedulemain">
+        <div class="crewschedulehead">
+        <div class="slds-grid">
+            <div class="slds-col slds-size_1-of-1 slds-p-top_x-small">
+                <div class="slds-align_absolute-center">
+                    <lightning-button-group>
+                        <template if:true={issuperuser}>
+                            <lightning-button if:true={iselecteddeptmapping} variant="brand" data-label="deptmapping" label="Department Mapping" onclick={changeview}></lightning-button>
+                            <lightning-button if:false={iselecteddeptmapping}  data-label="deptmapping" label="Department Mapping" onclick={changeview}></lightning-button>    
+                        </template>
+                        <lightning-button if:true={isselectedworkcentremapping} variant="brand" data-label="workmapping" label="Build Station Mapping" onclick={changeview}></lightning-button>
+                        <lightning-button if:false={isselectedworkcentremapping} data-label="workmapping" label="Build Station Mapping" onclick={changeview}></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </div>
+       </div>
+      </div>
+      <div class="crewschedulebody slds-m-top_x-small slds-border_top">
+        <template if:true={iselecteddeptmapping}>
+            <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                <div class="slds-col">
+                    <lightning-combobox class="slds-m-bottom_small"  label="Labour Pool Departments"  name="department"  value={selectednonassemblydepartment}  placeholder="Departments" options={departmentlistnonassembly} onchange={onpooldepartmentchange}></lightning-combobox>
+                    <div class="slds-float_none slds-p-around_x-small">
+                        <span class="slds-text-heading_small headstyle">Department Mapping for Labour Pool - {selectedpooldeptname}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-card">
+               <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                    <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                    <th  class="tblheaderth" scope="col">
+                            <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                    </th>    
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="DEPARTMENT NAME">DEPARTMENT NAME</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ASSIGNED USERS">ASSIGNED USERS</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="ACTION">ACTION</div>
+                    </th>
+                    
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={deptmappingdata} for:item='data'>
+                            <tr key={data.dept_id}>
+                                <td title={data.dept_id}><div class="">{data.index}. </div></td>
+                                <td title={data.dept_id}><div class="slds-text-heading_small">{data.dept_name}</div></td>
+                                <td title="Assigned Users"><div if:true={data.isusersavailable} class=""><c-userlist-icon-component type='Department' buildstationid={data.dept_id}  userlist={data.assigned_emp} ></c-userlist-icon-component></div> </td>
+                                <td title="Modify Users">
+                                 <div class="">
+                                    <lightning-button disabled={isDepButtonDisabled} data-id={data.dept_id} label="Modify Assignments" variant="brand-outline" title="Modify Assignments" onclick={modifyassignments}></lightning-button>
+                                 </div>
+                                </td>
+                                
+                            </tr>
+                        </template>
+                    </tbody>
+                    </table>
+            </div>
+                
+        </template>
+        <template if:true={isselectedworkcentremapping}>
+            <div class="slds-grid slds-grid_align-spread slds-m-top_small slds-m-bottom_small">
+                <div class="slds-col"> <!--variant="label-hidden"-->
+                    <lightning-combobox class="slds-m-bottom_small"  label="Department"  name="department"  value={selecteddepartment}  placeholder="Departments" options={departmentlistoptions} onchange={ondepartmentchange}></lightning-combobox>
+                    <div class="slds-float_none slds-p-around_x-small">
+                        <span class="slds-text-heading_small headstyle">Build Station Mapping - {selecteddepartmentname}</span> 
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-card">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                     <thead>
+                     <tr class="slds-line-height_reset slds-text-title_caps tblheader">
+                     <th  class="tblheaderth" scope="col">
+                             <div class="slds-truncate" title="SL NO.">SL NO.</div>
+                     </th>    
+                     <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="BUILD STATION">BUILD STATION CODE</div>
+                    </th>
+                    <th class="tblheaderth" scope="col">
+                        <div class="slds-truncate" title="OPERATION">OPERATION</div>
+                    </th>
+                     <th class="tblheaderth" scope="col">
+                         <div class="slds-truncate" title="ASSIGNED USERS">ASSIGNED USERS</div>
+                     </th>
+                     <th class="tblheaderth" scope="col">
+                         <div class="slds-truncate" title="ACTION">ACTION</div>
+                     </th>
+                     
+                     </tr>
+                     </thead>
+                     <tbody>
+                         <template for:each={moddedbuildstationcrewdata} for:item='data'>
+                             <tr key={data.buildstation_id}>
+                                 <td title={data.buildstation_id}><div class="">{data.index}. </div></td>
+                                 <td title={data.buildstation_code}><div class="slds-text-heading_small">{data.buildstation_code}</div></td>
+                                 <td title={data.operation}><div class="slds-text-heading_small">{data.operation}</div></td>
+                                 <td title="Assigned Users"><div if:true={data.isusersavailable} class=""><c-userlist-icon-component type='Buildstation' buildstationid={data.buildstation_id}  userlist={data.assinged_emp} ></c-userlist-icon-component></div> </td>
+                                 <td>
+                                  <div class="">
+                                     <lightning-button disabled={isBldstnButtonDisabled} data-id={data.buildstation_id} label="Modify Assignments" variant="brand-outline" title="Modify Assignments" onclick={modifybuildstationassignment}></lightning-button>
+                                  </div>
+                                 </td>
+                                 
+                             </tr>
+                         </template>
+                     </tbody>
+                     </table>
+             </div>
+        </template>
+      </div>
+    </section>
+    <!--Content Crewing Schedule Start--> 
+    <!-- Modify Department Crew Schedule modal start -->
+    <template if:true={editdeptmapping}>
+    <section role="dialog" tabindex="-1"
+             aria-labelledby="modal-heading-01"
+             aria-modal="true"
+             aria-describedby="modal-content-id-1"
+            class="slds-modal slds-fade-in-open">
+       <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+             <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closedeptmapmodal}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+             </button>
+             <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Crew Assignments - {selecteddeptforpoolcrew.dept_name}</h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <div class="slds-grid slds-wrap slds-gutters">
+               <!--<div class="slds-col slds-size_1-of-1">
+                <lightning-combobox disabled label="Selected Department"  name="department"  value={selecteddeptforpoolcrew.dept_id}  placeholder="Departments" options={departmentlistoptions} ></lightning-combobox>
+               </div> -->
+               <div class="slds-col slds-size_1-of-1">
+                <lightning-dual-listbox name="users"
+                    label="Select Users to Assign "
+                    source-label="Available Users"
+                    selected-label="Selected Users"
+                    field-level-help="Select the Users to Assign to Department."
+                    options={availableusersforassignmentdept}
+                    onchange={updateuserassignmentsdeptmapping}
+                    required-options={selecteddeptforpoolcrew.lockedusers}
+                    value={selecteddeptforpoolcrew.selectedusers}>
+                    </lightning-dual-listbox> 
+                </div>
+            </div>
+                <div if:true={selecteddeptforpoolcrew.lockedusersavailable} class="slds-p-around_medium">
+                        <h3>The <lightning-icon icon-name="utility:lock" alternative-text="Lock" variant="brand" size="xx-small" ></lightning-icon> symbol with the selected user indicates that the user assigned to a build station.</h3>
+                        <h3>Please co-ordinate with the respective department supervisor to unlock the user.</h3>
+                </div>
+
+          </div>
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+           <lightning-button label="Cancel" title="Cancel" onclick={closedeptmapmodal} class="slds-m-right_x-small"></lightning-button>
+           <lightning-button variant="brand" label="Update" onclick={updatedeptmapping}  title="Update" icon-name="utility:record_update"></lightning-button>
+           </footer>
+       </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- Modify Department Crew Schedule modal end -->
+
+
+ <!-- Modify Workcentre Crew Schedule modal start -->
+ <template if:true={editbuildstationmapping}>
+    <section role="dialog" tabindex="-1"
+             aria-labelledby="modal-heading-02"
+             aria-modal="true"
+             aria-describedby="modal-content-id-2"
+            class="slds-modal slds-fade-in-open">
+       <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+             <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={cancelbuildstationassignmentmodal}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+             </button>
+             <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Crew Assignments - Build Station </h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+            <div class="slds-grid slds-wrap slds-gutters">
+               <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox disabled label="Selected Department"  name="department"  value={selecteddepartment}  placeholder="Departments" options={departmentlistoptions} ></lightning-combobox>
+               </div>
+               <div class="slds-col slds-size_1-of-2">
+                <lightning-input disabled type="text" label="Build Station Code" name="buildstation_code" value={selectedbsdata.buildstation_code} ></lightning-input>
+               </div>
+               <div class="slds-col slds-size_1-of-1">
+                <lightning-input disabled type="text" label="Operation" name="operation" value={selectedbsdata.operation} ></lightning-input>
+               </div>
+               <div class="slds-col slds-size_1-of-1">
+                <lightning-dual-listbox name="users"
+                    label="Select Users to Assign "
+                    source-label="Available Users"
+                    selected-label="Selected Users"
+                    field-level-help="Select the Users to Assign to Build Station."
+                    options={availableusersforassignmentbs}
+                    onchange={updatebsusers}
+                    value={selectedbsdata.selectedusers}>
+                    </lightning-dual-listbox>   
+                </div>
+            </div>
+          </div>
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+           <lightning-button label="Cancel" title="Cancel" onclick={cancelbuildstationassignmentmodal} class="slds-m-right_x-small"></lightning-button>
+           <lightning-button variant="brand" label="Update" onclick={updatebscrewmapping}  title="Update" icon-name="utility:record_update"></lightning-button>
+           </footer>
+       </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+   <!-- Modify Workcentre Crew Schedule modal end -->
+
+</template>
